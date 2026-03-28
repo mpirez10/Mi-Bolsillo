@@ -1,0 +1,27 @@
+===========================================================
+           ¡BIENVENIDO A MIBOLSILLO v1.0!
+===========================================================
+
+Gracias por elegir MiBolsillo para potenciar tu negocio o 
+gestión personal. Este software fue diseñado para ser 
+liviano, seguro y fácil de usar.
+
+PASOS PARA ARRANCAR:
+1. Extraé todos los archivos de la carpeta ZIP.
+2. Hacé doble clic en "MiBolsillo.exe".
+3. CONFIGURACIÓN INICIAL: La primera vez, el sistema te 
+   llevará a una pantalla de registro. Creá tu cuenta de 
+   Administrador. ¡Anotá bien tu contraseña!
+
+AVISO IMPORTANTE DE SEGURIDAD:
+Tus datos se guardan LOCALMENTE en el archivo "finanzas.db".
+- NO borres ese archivo.
+- NO muevas el .exe fuera de esta carpeta (creá un acceso 
+  directo en su lugar).
+
+-----------------------------------------------------------
+SOPORTE TÉCNICO
+Desarrollado por: TutuCode
+Contacto: TutuCode29@gmail.com
+Uruguay - 2026
+===========================================================

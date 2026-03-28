@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 0 auto;">
+    <h2><i class="fas fa-plus"></i> Nueva Deuda</h2>
+    <form method="post">
+        <div style="margin-bottom: 15px;">
+            <label>¿Quién debe?</label>
+            <input type="text" name="deudor" placeholder="Ej: YO, o nombre del amigo" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label>¿A quién le debe?</label>
+            <input type="text" name="acreedor" placeholder="Ej: YO, o nombre del acreedor" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label>Monto ($):</label>
+            <input type="number" name="monto" step="0.01" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label>Motivo:</label>
+            <input type="text" name="motivo" placeholder="Ej: Asado, Préstamo..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
+        </div>
+        <div style="margin-bottom: 20px;">
+            <label>Fecha (DDMMYY):</label>
+            <input type="text" name="fecha" maxlength="6" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
+        </div>
+        <button type="submit" class="btn btn-blue" style="width: 100%;">Guardar Deuda</button>
+    </form>
+</div>
+{% endblock %}

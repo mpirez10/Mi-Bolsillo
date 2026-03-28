@@ -1,0 +1,134 @@
+===========================================================
+                MANUAL DE USUARIO - MIBOLSILLO
+===========================================================
+
+Gracias por elegir MiBolsillo para potenciar la gestión de 
+tus finanzas y tu negocio. Este software fue diseñado para 
+ser liviano, seguro y fácil de usar. A continuación, te 
+explicamos todas sus funcionalidades basándonos en la 
+interfaz que verás en pantalla.
+
+-----------------------------------------------------------
+1. PRIMEROS PASOS Y CONFIGURACIÓN INICIAL
+-----------------------------------------------------------
+
+1.1 INSTALACIÓN RÁPIDA:
+Para que la app funcione, debes ejecutarla siempre desde su 
+carpeta original. Si quieres un ícono en tu Escritorio:
+- Clic derecho en "MiBolsillo.exe".
+- Selecciona "Enviar a" > "Escritorio (crear acceso directo)".
+¡AVISO IMPORTANTE!: No borres el archivo "finanzas.db", ya 
+que allí se guardan todos tus datos.
+
+1.2 SETUP INICIAL (BIENVENIDA):
+Al abrir la app por primera vez, verás el logo y un 
+formulario de registro. Debes crear una CUENTA DE 
+ADMINISTRADOR.
+- Completa tu Nombre, Correo, Fecha de Nacimiento y una 
+  contraseña segura (mínimo 6 caracteres).
+- Haz clic en [CREAR MI CUENTA].
+Esta cuenta es la que protegerá tu información de intrusos.
+
+1.3 INICIAR SESIÓN (LOGIN):
+Cada vez que abras la app, deberás ingresar tu Correo y 
+Contraseña. ¡Anótala en un lugar seguro!
+
+-----------------------------------------------------------
+2. GESTIÓN DE FINANZAS PERSONALES (PANEL PRINCIPAL)
+-----------------------------------------------------------
+
+Al iniciar, verás el Panel General de tus Finanzas Personales.
+
+2.1 SALDO GENERAL TOTAL:
+Una tarjeta azul grande muestra tu saldo actual. Se calcula 
+automáticamente: tus Ingresos menos tus Gastos.
+
+2.2 MIS CUENTAS:
+Puedes separar tu dinero en diferentes "bolsillos".
+- Haz clic en [+ Agregar Cuenta] para crear cuentas como: 
+  "BROU", "Efectivo Galpón", "Caja Chica", etc.
+
+2.3 CONTROL DE DEUDAS (REGISTRO):
+- El botón [+ Registrar Nueva Deuda] te permite anotar: 
+  ¿Quién debe?, ¿A quién le debe?, Monto, Motivo y Fecha.
+- En la sección "Deudas Pendientes", verás una lista con las 
+  fechas, los involucrados, el monto y el estado. 
+- Puedes editar o eliminar deudas. Al pagarse, el sistema 
+  te permite cambiar el estado a "Pagada" para que salga de 
+  la lista de pendientes.
+
+2.4 MOVIMIENTOS RECIENTES:
+- Verás la lista de tus Ingresos y Gastos con fecha y monto.
+- El botón [+ Registrar Nuevo] abre un formulario rápido 
+  donde seleccionas el Tipo (Ingreso/Gasto), Monto, Cuenta 
+  Origen/Destino, Detalle y Fecha (en formato DDMMyy, ej: 240326).
+- ¡TOQUE DE INGENIERO!: El botón [Descargar Reporte Excel] 
+  exporta todos tus movimientos con fechas personalizadas 
+  para un análisis más profundo.
+
+-----------------------------------------------------------
+3. GESTIÓN DE TU NEGOCIO (MI EMPRENDIMIENTO)
+-----------------------------------------------------------
+
+Si tienes un negocio o emprendimiento (como una carpintería, 
+taller o almacén), esta sección es crucial.
+
+3.1 MIS EMPRENDIMIENTOS:
+Accede desde la barra de navegación superior haciendo clic 
+en [Mi Negocio]. Aquí verás la lista de tus proyectos.
+- [+ Crear Nuevo]: Para añadir un emprendimiento (ej: "Mueblería").
+- [Ingresar]: Te lleva al panel específico de ese negocio.
+- Ícono del Tacho de Basura: Borra el emprendimiento.
+
+3.2 PANEL GENERAL DEL NEGOCIO (DASHBOARD):
+Encontrarás tres tarjetas principales:
+- SALDO DISPONIBLE: El dinero líquido del negocio.
+- INGRESOS TOTALES: Todo lo recaudado por ventas.
+- GASTOS TOTALES: Todo lo gastado en materiales/costos.
+El gráfico inferior muestra la "Evolución de Ingresos 
+Diarios" para visualizar cómo va tu negocio semana a semana.
+
+3.3 CONTROL DE INVENTARIO Y STOCK:
+¡LA FUNCIONALIDAD ESTRELLA!: Haz clic en [GESTIONAR STOCK].
+- [+ AGREGAR PRODUCTO]: Abre el formulario para registrar un 
+  artículo. Completa Nombre (ej: Camiseta Peñarol), Detalle, 
+  Talle, Precio de Venta y Cantidad Inicial.
+- LISTA DE STOCK: Verás tus productos, precios y el stock.
+  * Si queda 1 unidad: El aviso cambia a color amarillo 
+    [ÚLTIMA UNIDAD].
+  * Si quedan 0 unidades: El aviso cambia a color rojo 
+    [AGOTADO].
+
+3.4 MOVIMIENTOS CON STOCK VINCULADO:
+Al registrar un [+ NUEVO MOVIMIENTO] dentro del negocio:
+1. Selecciona Operación: VENTA (Ingreso) o GASTO (Egreso).
+2. ¡IMPORTANTE!: En "Vincular Producto", el menú te 
+   mostrará tus productos cargados y la cantidad en stock.
+3. Si seleccionas un producto (ej: Camiseta) al hacer una 
+   VENTA, MiBolsillo descontará automáticamente una unidad 
+   del Inventario al guardar el movimiento.
+4. Esto se en MOVIMIENTOS RECIENTES y tendrás un grafica para controlar EVOLUCIÓN DE INGRESOS
+5. Puedes descargar REPORTE DE EXCEL de todos tus movimientos o filtralos.
+
+-----------------------------------------------------------
+4. TU PERFIL Y CERRAR SESIÓN
+-----------------------------------------------------------
+
+En la parte superior derecha, haz clic en tu nombre de 
+usuario para abrir el menú de usuario.
+
+4.1 MI PERFIL (EDITAR):
+- Puedes editar tu Nombre Completo y Fecha de Nacimiento.
+- El Correo Electrónico NO es editable por seguridad.
+- Si quieres cambiar tu clave, escribe la nueva en "Nueva 
+  Contraseña". Déjala en blanco si no quieres cambiarla.
+- Haz clic en [Guardar Cambios] para actualizar.
+
+4.2 CERRAR SESIÓN:
+Siempre cierra tu sesión al terminar de usar la app para 
+proteger tu información.
+
+-----------------------------------------------------------
+¡Gracias por confiar en herramientas desarrolladas en Uruguay!
+TutuCode - 2026
+===========================================================

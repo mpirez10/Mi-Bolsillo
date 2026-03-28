@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 0 auto;">
+    <h2><i class="fas fa-edit"></i> Editar Fecha</h2>
+    <p>Movimiento: <strong>{{ mov.motivo }}</strong> ({{ mov.monto }})</p>
+    
+    <form method="post">
+        <div style="margin-bottom: 20px;">
+            <label>Nueva Fecha (DDMMYY):</label>
+            <input type="text" name="fecha" value="{{ mov.fecha.replace('/', '') }}" 
+                   maxlength="6" required class="form-control"
+                   style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
+            <small style="color: #64748b;">Formato actual: {{ mov.fecha }}</small>
+        </div>
+        <button type="submit" class="btn btn-blue" style="width: 100%;">Actualizar Fecha</button>
+    </form>
+    <br>
+    <a href="/" style="text-decoration: none; color: #64748b;">Cancelar</a>
+</div>
+{% endblock %}

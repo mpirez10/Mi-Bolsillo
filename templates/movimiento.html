@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <h2><i class="fas fa-exchange-alt"></i> Registrar Movimiento</h2>
+    
+    <form method="post">
+        <div style="margin-bottom: 15px;">
+            <label>Tipo de Movimiento:</label>
+            <select name="tipo" id="tipo" required onchange="toggleDestino()" 
+                    style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
+                <option value="Ingreso">↑ Ingreso</option>
+                <option value="Egreso">↓ Egreso</option>
+                <option value="Transferencia">⇄ Transferencia</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label>Monto ($):</label>
+            <input type="number" name="monto" step="0.01" required placeholder="0.00"
+                   style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label>Cuenta Origen:</label>
+            <select name="cuenta_origen" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
+                {% for c in cuentas %}
+                    <option value="{{c.nombre}}">{{c.nombre}}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div id="div_destino" style="margin-bottom: 15px; display: none;">
+            <label>Cuenta Destino:</label>
+            <select name="cuenta_destino" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
+                <option value="">-- Seleccionar destino --</option>
+                {% for c in cuentas %}
+                    <option value="{{c.nombre}}">{{c.nombre}}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label>Motivo / Detalle:</label>
+            <input type="text" name="motivo" placeholder="Ej: Compra de materiales, Venta..."
+                   style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label>Fecha (DDMMYY):</label>
+            <input type="text" name="fecha" maxlength="6" required placeholder="Ej: 240326"
+                   style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
+        </div>
+
+        <button type="submit" class="btn btn-blue" style="width: 100%; font-size: 1.1em;">
+            <i class="fas fa-save"></i> Guardar Movimiento
+        </button>
+    </form>
+</div>
+
+<script>
+function toggleDestino() {
+    var tipo = document.getElementById("tipo").value;
+    var divDestino = document.getElementById("div_destino");
+    if (tipo === "Transferencia") {
+        divDestino.style.display = "block";
+    } else {
+        divDestino.style.display = "none";
+    }
+}
+</script>
+{% endblock %}
