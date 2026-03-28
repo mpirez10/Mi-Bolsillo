@@ -1,6 +1,5 @@
 __pycache__/
 *.pyc
-build/
+*.db
 dist/
-*.spec
-finanzas.db
+build/
