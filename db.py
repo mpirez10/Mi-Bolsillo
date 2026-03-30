@@ -1,22 +1,33 @@
-import sqlite3
 import os
 import sys
 
 def get_db():
-    if getattr(sys, 'frozen', False):
-        base_dir = os.path.dirname(sys.executable)
+    database_url = os.getenv("DATABASE_URL")
+
+    # 🔥 PRODUCCIÓN (Render con Postgres)
+    if database_url:
+        import psycopg2
+        conn = psycopg2.connect(database_url)
+        return conn
+
+    # 💻 LOCAL (tu PC con SQLite)
     else:
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-    
-    db_path = os.path.join(base_dir, "finanzas.db")
-    
-    conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row
+        import sqlite3
 
-    # 🔥 IMPORTANTE: activar claves foráneas
-    conn.execute("PRAGMA foreign_keys = ON")
+        if getattr(sys, 'frozen', False):
+            base_dir = os.path.dirname(sys.executable)
+        else:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
 
-    return conn
+        db_path = os.path.join(base_dir, "finanzas.db")
+
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+
+        # 🔥 activar claves foráneas
+        conn.execute("PRAGMA foreign_keys = ON")
+
+        return conn
 
 
 def init_db():
