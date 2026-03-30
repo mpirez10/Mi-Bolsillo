@@ -14,20 +14,22 @@ def agregar_cuenta():
             return "Error: El nombre de la cuenta no puede estar vacío."
 
         conn = get_db()
+        cursor = conn.cursor()
 
         # Verificamos si ya existe
-        existe = conn.execute(
-            "SELECT id FROM cuentas WHERE nombre = ? AND usuario_id = ?",
+        cursor.execute(
+            "SELECT id FROM cuentas WHERE nombre = %s AND usuario_id = %s",
             (nombre, current_user.id)
-        ).fetchone()
+        )
+        existe = cursor.fetchone()
 
         if existe:
             return "Error: Ya tenés una cuenta con ese nombre."
 
         try:
-            conn.execute("""
+            cursor.execute("""
                 INSERT INTO cuentas (nombre, saldo, usuario_id) 
-                VALUES (?, ?, ?)
+                VALUES (%s, %s, %s)
             """, (nombre, 0, current_user.id))
 
             conn.commit()
@@ -35,6 +37,9 @@ def agregar_cuenta():
         except Exception as e:
             conn.rollback()
             return f"Error al crear la cuenta: {e}"
+
+        cursor.close()
+        conn.close()
 
         return redirect(url_for('home.index'))
     
@@ -45,29 +50,31 @@ def agregar_cuenta():
 @login_required
 def eliminar_cuenta(id):
     conn = get_db()
+    cursor = conn.cursor()
     
-    cuenta = conn.execute(
-        "SELECT nombre FROM cuentas WHERE id=? AND usuario_id=?", 
+    cursor.execute(
+        "SELECT nombre FROM cuentas WHERE id=%s AND usuario_id=%s", 
         (id, current_user.id)
-    ).fetchone()
+    )
+    cuenta = cursor.fetchone()
     
     if cuenta:
-        nombre_cuenta = cuenta['nombre']
+        nombre_cuenta = cuenta[0]  # PostgreSQL devuelve tupla
         
         try:
-            conn.execute("""
+            cursor.execute("""
                 UPDATE movimientos 
-                SET cuenta_origen = 'ELIMINADA (' || ? || ')',
+                SET cuenta_origen = 'ELIMINADA (' || %s || ')',
                     cuenta_destino = CASE 
-                        WHEN cuenta_destino = ? THEN 'ELIMINADA' 
+                        WHEN cuenta_destino = %s THEN 'ELIMINADA' 
                         ELSE cuenta_destino 
                     END
-                WHERE (cuenta_origen = ? OR cuenta_destino = ?) 
-                AND usuario_id = ?
+                WHERE (cuenta_origen = %s OR cuenta_destino = %s) 
+                AND usuario_id = %s
             """, (nombre_cuenta, nombre_cuenta, nombre_cuenta, nombre_cuenta, current_user.id))
             
-            conn.execute(
-                "DELETE FROM cuentas WHERE id=? AND usuario_id=?", 
+            cursor.execute(
+                "DELETE FROM cuentas WHERE id=%s AND usuario_id=%s", 
                 (id, current_user.id)
             )
 
@@ -76,5 +83,8 @@ def eliminar_cuenta(id):
         except Exception as e:
             conn.rollback()
             return f"Error al eliminar la cuenta: {e}"
+
+    cursor.close()
+    conn.close()
 
     return redirect(url_for('home.index'))
