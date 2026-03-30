@@ -12,9 +12,16 @@ from db import init_db
 
 app = Flask(__name__)
 def hay_usuarios():
-    db = get_db()
-    usuario = db.execute('SELECT COUNT(*) as total FROM usuarios').fetchone()
-    return usuario['total'] > 0
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT COUNT(*) FROM usuarios")
+    total = cursor.fetchone()[0]
+
+    cursor.close()
+    conn.close()
+
+    return total > 0
 
 # --- CONFIGURACIÓN DE RUTAS PARA EL EXE ---
 if getattr(sys, 'frozen', False):
