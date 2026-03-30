@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request
+from flask import Blueprint, render_template, redirect, url_for
 from flask_login import login_required, current_user
 from db import get_db
 
@@ -8,90 +8,127 @@ bp = Blueprint("home", __name__)
 @login_required
 def index():
     conn = get_db()
+    cursor = conn.cursor()
     
-    # 1. Traemos SOLO tus cuentas y calculamos el Saldo General
-    cuentas = conn.execute("SELECT id, nombre, saldo FROM cuentas WHERE usuario_id = ?", (current_user.id,)).fetchall()
-    saldo_general = round(sum(c['saldo'] for c in cuentas), 2)
-    
-    # 2. Movimientos y deudas filtrados por tu usuario
-    movimientos = conn.execute("""
+    # 1. Cuentas
+    cursor.execute(
+        "SELECT id, nombre, saldo FROM cuentas WHERE usuario_id = %s",
+        (current_user.id,)
+    )
+    cuentas = cursor.fetchall()
+
+    saldo_general = round(sum(c[2] for c in cuentas), 2)
+
+    # 2. Movimientos
+    cursor.execute("""
         SELECT * FROM movimientos 
-        WHERE usuario_id = ? 
+        WHERE usuario_id = %s 
         ORDER BY fecha DESC, id DESC
-    """, (current_user.id,)).fetchall()
-    
-    deudas_list = conn.execute("""
+    """, (current_user.id,))
+    movimientos = cursor.fetchall()
+
+    # 3. Deudas
+    cursor.execute("""
         SELECT * FROM deudas 
-        WHERE usuario_id = ? AND estado = 'pendiente' 
+        WHERE usuario_id = %s AND estado = 'pendiente' 
         ORDER BY id DESC LIMIT 5
-    """, (current_user.id,)).fetchall()
+    """, (current_user.id,))
+    deudas_list = cursor.fetchall()
 
-    # --- 3. DATOS PARA LOS GRÁFICOS (Sincronización con JS) ---
-    
-    # Totales para el gráfico de Balance (Torta)
-    # Usamos LOWER(tipo) para evitar problemas si escribiste 'Ingreso' o 'ingreso'
-    res_ingresos = conn.execute("""
+    # --- 4. TOTALES ---
+    cursor.execute("""
         SELECT SUM(monto) FROM movimientos 
-        WHERE usuario_id = ? AND LOWER(tipo) = 'ingreso'
-    """, (current_user.id,)).fetchone()
-    ingresos_total = res_ingresos[0] if res_ingresos[0] else 0
+        WHERE usuario_id = %s AND LOWER(tipo) = 'ingreso'
+    """, (current_user.id,))
+    ingresos_total = cursor.fetchone()[0] or 0
 
-    res_egresos = conn.execute("""
+    cursor.execute("""
         SELECT SUM(monto) FROM movimientos 
-        WHERE usuario_id = ? AND LOWER(tipo) = 'egreso'
-    """, (current_user.id,)).fetchone()
-    egresos_total = res_egresos[0] if res_egresos[0] else 0
+        WHERE usuario_id = %s AND LOWER(tipo) = 'egreso'
+    """, (current_user.id,))
+    egresos_total = cursor.fetchone()[0] or 0
 
-    res_deudas = conn.execute("""
+    cursor.execute("""
         SELECT SUM(monto) FROM deudas 
-        WHERE usuario_id = ? AND estado = 'pendiente'
-    """, (current_user.id,)).fetchone()
-    deudas_total = res_deudas[0] if res_deudas[0] else 0
+        WHERE usuario_id = %s AND estado = 'pendiente'
+    """, (current_user.id,))
+    deudas_total = cursor.fetchone()[0] or 0
 
-    # Estadísticas para el gráfico de Emprendimiento (Dashboard rápido)
-    res_ganancia = conn.execute("SELECT SUM(precio_total) FROM ventas WHERE usuario_id = ?", (current_user.id,)).fetchone()
-    ganancia_mes = res_ganancia[0] if res_ganancia[0] else 0
-    
-    res_gasto = conn.execute("SELECT SUM(monto) FROM gastos WHERE usuario_id = ?", (current_user.id,)).fetchone()
-    gasto_mes = res_gasto[0] if res_gasto[0] else 0
-    
+    cursor.execute(
+        "SELECT SUM(precio_total) FROM ventas WHERE usuario_id = %s",
+        (current_user.id,)
+    )
+    ganancia_mes = cursor.fetchone()[0] or 0
+
+    cursor.execute(
+        "SELECT SUM(monto) FROM gastos WHERE usuario_id = %s",
+        (current_user.id,)
+    )
+    gasto_mes = cursor.fetchone()[0] or 0
+
+    cursor.close()
     conn.close()
 
-    return render_template("index.html", 
-                           cuentas=cuentas, 
-                           saldo_general=saldo_general,
-                           movimientos=movimientos, 
-                           deudas=deudas_list,
-                           ingresos_total=ingresos_total,
-                           egresos_total=egresos_total,
-                           deudas_total=deudas_total,
-                           ganancia_mes=ganancia_mes, 
-                           gasto_mes=gasto_mes)
+    return render_template(
+        "index.html", 
+        cuentas=cuentas, 
+        saldo_general=saldo_general,
+        movimientos=movimientos, 
+        deudas=deudas_list,
+        ingresos_total=ingresos_total,
+        egresos_total=egresos_total,
+        deudas_total=deudas_total,
+        ganancia_mes=ganancia_mes, 
+        gasto_mes=gasto_mes
+    )
 
 
 @bp.route("/eliminar_movimiento/<int:mid>")
 @login_required
 def eliminar_movimiento(mid):
     conn = get_db()
+    cursor = conn.cursor()
     
-    # Verificamos que el movimiento sea tuyo antes de hacer nada
-    movimiento = conn.execute("SELECT * FROM movimientos WHERE id=? AND usuario_id=?", (mid, current_user.id)).fetchone()
+    # Verificar que el movimiento sea del usuario
+    cursor.execute(
+        "SELECT * FROM movimientos WHERE id=%s AND usuario_id=%s",
+        (mid, current_user.id)
+    )
+    movimiento = cursor.fetchone()
     
     if movimiento:
-        monto = movimiento['monto']
-        tipo = movimiento['tipo'].lower()
-        cuenta = movimiento['cuenta_origen']
-        
+        monto = movimiento[3]   # monto
+        tipo = movimiento[2].lower()  # tipo
+        cuenta = movimiento[4]  # cuenta_origen
+
         if tipo == 'ingreso':
-            conn.execute("UPDATE cuentas SET saldo = saldo - ? WHERE nombre = ? AND usuario_id = ?", (monto, cuenta, current_user.id))
+            cursor.execute(
+                "UPDATE cuentas SET saldo = saldo - %s WHERE nombre = %s AND usuario_id = %s",
+                (monto, cuenta, current_user.id)
+            )
         elif tipo == 'egreso':
-            conn.execute("UPDATE cuentas SET saldo = saldo + ? WHERE nombre = ? AND usuario_id = ?", (monto, cuenta, current_user.id))
+            cursor.execute(
+                "UPDATE cuentas SET saldo = saldo + %s WHERE nombre = %s AND usuario_id = %s",
+                (monto, cuenta, current_user.id)
+            )
         elif tipo == 'transferencia':
-            conn.execute("UPDATE cuentas SET saldo = saldo + ? WHERE nombre = ? AND usuario_id = ?", (monto, cuenta, current_user.id))
-            conn.execute("UPDATE cuentas SET saldo = saldo - ? WHERE nombre = ? AND usuario_id = ?", (monto, movimiento['cuenta_destino'], current_user.id))
-            
-        conn.execute("DELETE FROM movimientos WHERE id=?", (mid,))
+            cursor.execute(
+                "UPDATE cuentas SET saldo = saldo + %s WHERE nombre = %s AND usuario_id = %s",
+                (monto, cuenta, current_user.id)
+            )
+            cursor.execute(
+                "UPDATE cuentas SET saldo = saldo - %s WHERE nombre = %s AND usuario_id = %s",
+                (monto, movimiento[5], current_user.id)  # cuenta_destino
+            )
+
+        cursor.execute(
+            "DELETE FROM movimientos WHERE id=%s",
+            (mid,)
+        )
+
         conn.commit()
-        
+
+    cursor.close()
     conn.close()
+
     return redirect(url_for("home.index"))
