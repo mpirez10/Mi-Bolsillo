@@ -3,7 +3,6 @@ import sys
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, send_file
 from flask_login import LoginManager, UserMixin
-from flaskwebgui import FlaskUI
 from werkzeug.security import generate_password_hash
 from db import get_db, init_db
 import webbrowser
