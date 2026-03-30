@@ -14,7 +14,6 @@ def registro():
         fecha_nac = request.form.get("fecha_nacimiento")
         password = request.form.get("password")
 
-        # --- VALIDACIONES ---
         if not nombre or not correo or not password:
             flash("Todos los campos obligatorios deben completarse.")
             return redirect(url_for('auth.registro'))
@@ -24,29 +23,39 @@ def registro():
             return redirect(url_for('auth.registro'))
 
         conn = get_db()
-        existe = conn.execute(
-            "SELECT id FROM usuarios WHERE correo = ?", 
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "SELECT id FROM usuarios WHERE correo = %s",
             (correo,)
-        ).fetchone()
+        )
+        existe = cursor.fetchone()
 
         if existe:
+            cursor.close()
+            conn.close()
             flash("Ese correo ya está registrado, bo.")
             return redirect(url_for('auth.registro'))
 
         password_hash = generate_password_hash(password)
 
         try:
-            conn.execute("""
+            cursor.execute("""
                 INSERT INTO usuarios (nombre_completo, correo, fecha_nacimiento, password) 
-                VALUES (?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s)
             """, (nombre, correo, fecha_nac, password_hash))
+
             conn.commit()
+            cursor.close()
+            conn.close()
 
             flash("¡Cuenta creada! Ya podés entrar.", "success")
             return redirect(url_for('auth.login'))
 
         except Exception as e:
             conn.rollback()
+            cursor.close()
+            conn.close()
             flash(f"Error: {e}", "danger")
 
     return render_template("registro.html")
@@ -64,25 +73,38 @@ def login():
             return redirect(url_for('auth.login'))
 
         conn = get_db()
-        user = conn.execute(
-            "SELECT * FROM usuarios WHERE correo = ?", 
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "SELECT id, nombre_completo, correo, fecha_nacimiento, password FROM usuarios WHERE correo = %s",
             (correo,)
-        ).fetchone()
+        )
+        user = cursor.fetchone()
 
-        if user and check_password_hash(user['password'], password):
-            from app import Usuario
+        cursor.close()
+        conn.close()
 
-            usuario_obj = Usuario(
-                user['id'], 
-                user['nombre_completo'], 
-                user['correo'], 
-                user['fecha_nacimiento']
-            )
+        if user:
+            id_usuario = user[0]
+            nombre = user[1]
+            correo_db = user[2]
+            fecha_nac = user[3]
+            password_hash = user[4]
 
-            login_user(usuario_obj)
-            return redirect(url_for('home.index'))
-        else:
-            flash("Correo o contraseña incorrectos.")
+            if check_password_hash(password_hash, password):
+                from app import Usuario
+
+                usuario_obj = Usuario(
+                    id_usuario,
+                    nombre,
+                    correo_db,
+                    fecha_nac
+                )
+
+                login_user(usuario_obj)
+                return redirect(url_for('home.index'))
+
+        flash("Correo o contraseña incorrectos.")
 
     return render_template("login.html")
 
@@ -100,6 +122,7 @@ def logout():
 @login_required
 def perfil():
     conn = get_db()
+    cursor = conn.cursor()
 
     if request.method == "POST":
         nuevo_nombre = request.form.get("nombre_completo")
@@ -111,10 +134,10 @@ def perfil():
             return redirect(url_for('auth.perfil'))
 
         try:
-            conn.execute("""
+            cursor.execute("""
                 UPDATE usuarios 
-                SET nombre_completo = ?, fecha_nacimiento = ? 
-                WHERE id = ?
+                SET nombre_completo = %s, fecha_nacimiento = %s 
+                WHERE id = %s
             """, (nuevo_nombre, nueva_fecha, current_user.id))
 
             if nueva_pass and nueva_pass.strip():
@@ -123,8 +146,8 @@ def perfil():
                     return redirect(url_for('auth.perfil'))
 
                 hash_pw = generate_password_hash(nueva_pass)
-                conn.execute(
-                    "UPDATE usuarios SET password = ? WHERE id = ?", 
+                cursor.execute(
+                    "UPDATE usuarios SET password = %s WHERE id = %s",
                     (hash_pw, current_user.id)
                 )
 
@@ -139,11 +162,18 @@ def perfil():
             conn.rollback()
             flash(f"Error al actualizar: {e}", "danger")
 
+        cursor.close()
+        conn.close()
+
         return redirect(url_for('auth.perfil'))
 
-    user = conn.execute(
-        "SELECT * FROM usuarios WHERE id = ?", 
+    cursor.execute(
+        "SELECT id, nombre_completo, correo, fecha_nacimiento FROM usuarios WHERE id = %s",
         (current_user.id,)
-    ).fetchone()
+    )
+    user = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
 
     return render_template("perfil.html", user=user)
