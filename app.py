@@ -1,16 +1,22 @@
 import os
 import sys
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, send_file
+from flask import Flask, render_template, request, redirect, url_for, send_file, session, flash
 from flask_login import LoginManager, UserMixin
 from werkzeug.security import generate_password_hash
 from db import get_db, init_db
-import webbrowser
-from threading import Timer
-from flask import Flask
-from db import init_db
 
-app = Flask(__name__)
+# --- CONFIGURACIÓN DE APP (SOLO UNA VEZ) ---
+if getattr(sys, 'frozen', False):
+    template_folder = os.path.join(sys._MEIPASS, 'templates')
+    static_folder = os.path.join(sys._MEIPASS, 'static')
+    app = Flask(__name__, template_folder=template_folder, static_folder=static_folder)
+else:
+    app = Flask(__name__, template_folder='templates', static_folder='static')
+
+app.secret_key = os.getenv("SECRET_KEY", "dev_key")
+
+# --- FUNCIÓN: VERIFICAR SI HAY USUARIOS ---
 def hay_usuarios():
     conn = get_db()
     cursor = conn.cursor()
@@ -22,16 +28,6 @@ def hay_usuarios():
     conn.close()
 
     return total > 0
-
-# --- CONFIGURACIÓN DE RUTAS PARA EL EXE ---
-if getattr(sys, 'frozen', False):
-    template_folder = os.path.join(sys._MEIPASS, 'templates')
-    static_folder = os.path.join(sys._MEIPASS, 'static')
-    app = Flask(__name__, template_folder=template_folder, static_folder=static_folder)
-else:
-    app = Flask(__name__, template_folder='templates', static_folder='static')
-
-app.secret_key = os.getenv("SECRET_KEY", "dev_key")
 
 # --- REDIRECCIÓN AUTOMÁTICA ---
 @app.before_request
@@ -45,6 +41,7 @@ def verificar_primer_uso():
     if not hay_usuarios() and request.endpoint != 'setup':
         return redirect(url_for('setup'))
 
+# --- SETUP INICIAL ---
 @app.route('/setup', methods=['GET', 'POST'])
 def setup():
     if hay_usuarios():
@@ -61,22 +58,29 @@ def setup():
 
         hashed_pw = generate_password_hash(pass_raw)
 
-        db = get_db()
-        db.execute(
-            'INSERT INTO usuarios (nombre_completo, correo, fecha_nacimiento, password) VALUES (?, ?, ?, ?)',
+        conn = get_db()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "INSERT INTO usuarios (nombre_completo, correo, fecha_nacimiento, password) VALUES (%s, %s, %s, %s)",
             (nombre, correo, fecha_nac, hashed_pw)
         )
-        db.commit()
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
         return redirect(url_for('auth.login'))
 
     return render_template('setup.html')
 
-# --- CONFIGURACIÓN DE LOGIN ---
+# --- LOGIN MANAGER ---
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'auth.login'
 login_manager.login_message = "Tienes que iniciar sesión."
 
+# --- MODELO USUARIO ---
 class Usuario(UserMixin):
     def __init__(self, id, nombre_completo, correo, fecha_nacimiento=None):
         self.id = id
@@ -84,20 +88,32 @@ class Usuario(UserMixin):
         self.correo = correo
         self.fecha_nacimiento = fecha_nacimiento
 
+# --- CARGAR USUARIO (IMPORTANTE PARA LOGIN) ---
 @login_manager.user_loader
 def load_user(user_id):
     conn = get_db()
-    user = conn.execute("SELECT * FROM usuarios WHERE id = ?", (user_id,)).fetchone()
-    
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT id, nombre_completo, correo, fecha_nacimiento FROM usuarios WHERE id = %s",
+        (user_id,)
+    )
+
+    user = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+
     if user:
         return Usuario(
-            user['id'], 
-            user['nombre_completo'], 
-            user['correo'], 
-            user['fecha_nacimiento']
+            user[0],
+            user[1],
+            user[2],
+            user[3]
         )
     return None
 
+# --- RESPALDO (SOLO LOCAL SQLITE) ---
 @app.route('/respaldo')
 def descargar_respaldo():
     try:
@@ -112,11 +128,11 @@ def descargar_respaldo():
                 download_name=nombre_descarga
             )
         else:
-            return "Error: No se encontró la base de datos, bo.", 404
+            return "Respaldo no disponible en producción", 404
     except Exception as e:
         return f"Error al generar el respaldo: {str(e)}", 500
 
-# --- IMPORTACIÓN Y REGISTRO DE BLUEPRINTS ---
+# --- IMPORTACIÓN DE RUTAS ---
 from routes import home, cuentas, movimientos, deudas, auth
 from routes.finanzas import finanzas_bp
 from routes.emprendimiento import emprendimiento_bp
@@ -129,23 +145,10 @@ app.register_blueprint(auth.auth_bp)
 app.register_blueprint(finanzas_bp)
 app.register_blueprint(emprendimiento_bp)
 
+# --- INICIALIZAR DB ---
 init_db()
+
+# --- RUN LOCAL (NO AFECTA RENDER) ---
 if __name__ == "__main__":
     init_db()
-
-    def abrir_ventana_profesional():
-        url = "http://127.0.0.1:5000"
-        try:
-            os.system(f'start chrome --app={url} --window-size=1200,800')
-        except:
-            webbrowser.open_new(url)
-
-    Timer(1.5, abrir_ventana_profesional).start()
-
-    print("-----------------------------------------")
-    print("🚀 MIBOLSILLO v1.2 - MODO SEGURO")
-    print("🖥️  PC: Abriendo ventana de App...")
-    print("📱 Celular: http://192.168.1.2:5000")
-    print("-----------------------------------------")
-
     app.run(host='0.0.0.0', port=5000, debug=False)
