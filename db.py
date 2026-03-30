@@ -32,107 +32,107 @@ def get_db():
 
 def init_db():
     conn = get_db()
-    
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS cuentas (
-            id INTEGER PRIMARY KEY AUTOINCREMENT, 
-            nombre TEXT NOT NULL, 
-            saldo REAL NOT NULL DEFAULT 0,
-            usuario_id INTEGER
-        )
-    """)
-    
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS movimientos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT, 
-            fecha TEXT, 
-            tipo TEXT, 
-            monto REAL, 
-            cuenta_origen TEXT, 
-            cuenta_destino TEXT, 
-            motivo TEXT,
-            usuario_id INTEGER
-        )
-    """)
-    
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS deudas (
-            id INTEGER PRIMARY KEY AUTOINCREMENT, 
-            deudor TEXT, 
-            acreedor TEXT, 
-            monto REAL, 
-            estado TEXT, 
-            motivo TEXT,
-            usuario_id INTEGER
-        )
-    """)
-    
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS emprendimientos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT, 
-            nombre TEXT, 
-            tabla_stock TEXT,
-            usuario_id INTEGER
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS usuarios (
+            id SERIAL PRIMARY KEY,
+            nombre_completo TEXT NOT NULL,
+            correo TEXT UNIQUE NOT NULL,
+            fecha_nacimiento DATE NOT NULL,
+            password TEXT NOT NULL
         )
     """)
 
-    conn.execute("""
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS cuentas (
+            id SERIAL PRIMARY KEY,
+            nombre TEXT NOT NULL,
+            saldo REAL NOT NULL DEFAULT 0,
+            usuario_id INTEGER REFERENCES usuarios(id)
+        )
+    """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS movimientos (
+            id SERIAL PRIMARY KEY,
+            fecha DATE,
+            tipo TEXT,
+            monto REAL,
+            cuenta_origen TEXT,
+            cuenta_destino TEXT,
+            motivo TEXT,
+            usuario_id INTEGER REFERENCES usuarios(id)
+        )
+    """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS deudas (
+            id SERIAL PRIMARY KEY,
+            deudor TEXT,
+            acreedor TEXT,
+            monto REAL,
+            estado TEXT,
+            motivo TEXT,
+            usuario_id INTEGER REFERENCES usuarios(id)
+        )
+    """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS emprendimientos (
+            id SERIAL PRIMARY KEY,
+            nombre TEXT,
+            tabla_stock TEXT,
+            usuario_id INTEGER REFERENCES usuarios(id)
+        )
+    """)
+
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS productos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            emprendimiento_id INTEGER,
+            id SERIAL PRIMARY KEY,
+            emprendimiento_id INTEGER REFERENCES emprendimientos(id),
             nombre TEXT NOT NULL,
             stock INTEGER DEFAULT 0,
             precio_costo REAL DEFAULT 0,
             precio_venta REAL DEFAULT 0,
-            usuario_id INTEGER,
-            FOREIGN KEY (emprendimiento_id) REFERENCES emprendimientos(id)
-        )
-    """)
-    
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS movimientos_emprendimiento (
-            id INTEGER PRIMARY KEY AUTOINCREMENT, 
-            emprendimiento_id INTEGER, 
-            fecha TEXT, 
-            concepto TEXT, 
-            detalle TEXT, 
-            monto REAL,
-            usuario_id INTEGER
-        )
-    """)
-    
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS ventas (
-            id INTEGER PRIMARY KEY AUTOINCREMENT, 
-            producto_id INTEGER, 
-            fecha TEXT, 
-            cantidad INTEGER, 
-            precio_total REAL,
-            usuario_id INTEGER,
-            FOREIGN KEY (producto_id) REFERENCES productos(id)
-        )
-    """)
-    
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS gastos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT, 
-            emprendimiento_id INTEGER, 
-            fecha TEXT, 
-            concepto TEXT, 
-            monto REAL,
-            usuario_id INTEGER
+            usuario_id INTEGER REFERENCES usuarios(id)
         )
     """)
 
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS usuarios (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombre_completo TEXT NOT NULL,
-            correo TEXT UNIQUE NOT NULL,
-            fecha_nacimiento TEXT NOT NULL,
-            password TEXT NOT NULL
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS movimientos_emprendimiento (
+            id SERIAL PRIMARY KEY,
+            emprendimiento_id INTEGER REFERENCES emprendimientos(id),
+            fecha DATE,
+            concepto TEXT,
+            detalle TEXT,
+            monto REAL,
+            usuario_id INTEGER REFERENCES usuarios(id)
         )
     """)
-    
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS ventas (
+            id SERIAL PRIMARY KEY,
+            producto_id INTEGER REFERENCES productos(id),
+            fecha DATE,
+            cantidad INTEGER,
+            precio_total REAL,
+            usuario_id INTEGER REFERENCES usuarios(id)
+        )
+    """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS gastos (
+            id SERIAL PRIMARY KEY,
+            emprendimiento_id INTEGER REFERENCES emprendimientos(id),
+            fecha DATE,
+            concepto TEXT,
+            monto REAL,
+            usuario_id INTEGER REFERENCES usuarios(id)
+        )
+    """)
+
     conn.commit()
+    cursor.close()
     conn.close()
