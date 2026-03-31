@@ -18,7 +18,6 @@ def get_db():
     )
     return conn
 
-
 def init_db():
     conn = get_db()
     cursor = conn.cursor()
