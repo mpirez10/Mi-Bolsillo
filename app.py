@@ -19,14 +19,17 @@ app.secret_key = os.getenv("SECRET_KEY", "dev_key")
 # --- FUNCIÓN: VERIFICAR SI HAY USUARIOS ---
 def hay_usuarios():
     conn = get_db()
-    cursor = conn.cursor()
+    cursor = conn.execute("SELECT COUNT(*) as total FROM usuarios")
 
-    cursor.execute("SELECT COUNT(*) FROM usuarios")
-    total = cursor.fetchone()[0]
+    result = cursor.fetchone()
 
-    cursor.close()
+    # 🔥 Compatible con ambos (SQLite y Postgres)
+    if isinstance(result, dict):
+        total = result['total']
+    else:
+        total = result[0]
+
     conn.close()
-
     return total > 0
 
 # --- REDIRECCIÓN AUTOMÁTICA ---
