@@ -12,10 +12,13 @@ def lista_deudas():
     conn = get_db()
     cursor = conn.cursor()
 
-    cursor.execute(
-        "SELECT id, deudor, acreedor, monto, estado, motivo, fecha FROM deudas WHERE usuario_id = %s ORDER BY id DESC",
-        (current_user.id,)
-    )
+    cursor.execute("""
+        SELECT id, deudor, acreedor, monto, estado, motivo, fecha 
+        FROM deudas 
+        WHERE usuario_id = %s 
+        ORDER BY id DESC
+    """, (current_user.id,))
+    
     deudas = cursor.fetchall()
 
     cursor.execute(
@@ -35,14 +38,19 @@ def lista_deudas():
 @login_required
 def nueva_deuda():
     if request.method == "POST":
-        deudor = request.form["deudor"].upper()
-        acreedor = request.form["acreedor"].upper()
+        deudor = request.form.get("deudor", "").upper()
+        acreedor = request.form.get("acreedor", "").upper()
         monto_raw = request.form.get("monto", "0")
-        motivo = request.form["motivo"]
-        fecha_cruda = request.form["fecha"]
+        motivo = request.form.get("motivo", "")
+        fecha_cruda = request.form.get("fecha")
+
+        if not deudor or not acreedor or not motivo or not fecha_cruda:
+            return "Error: Faltan datos."
 
         try:
             monto = round(float(monto_raw.replace(',', '.').strip()), 2)
+            if monto <= 0:
+                return "Error: Monto inválido."
         except:
             return "Error: Monto inválido."
 
@@ -114,56 +122,58 @@ def pagar_deuda(id):
     conn = get_db()
     cursor = conn.cursor()
 
-    # Buscar deuda
-    cursor.execute(
-        "SELECT id, deudor, acreedor, monto, motivo FROM deudas WHERE id = %s AND usuario_id = %s",
-        (id, current_user.id)
-    )
+    cursor.execute("""
+        SELECT id, deudor, acreedor, monto, motivo 
+        FROM deudas 
+        WHERE id = %s AND usuario_id = %s
+    """, (id, current_user.id))
+
     deuda = cursor.fetchone()
 
-    if deuda:
-        monto = deuda[3]
-        deudor = deuda[1]
-        acreedor = deuda[2]
-        motivo = deuda[4]
+    if not deuda:
+        cursor.close()
+        conn.close()
+        return redirect(url_for('deudas.lista_deudas'))
 
-        soy_yo = deudor in ['YO', 'MAIKOL', 'MAIKOL PIREZ']
-        tipo_mov = "Egreso" if soy_yo else "Ingreso"
+    monto = deuda[3]
+    deudor = deuda[1]
+    acreedor = deuda[2]
+    motivo = deuda[4]
 
-        try:
-            # Actualizar saldo
-            if soy_yo:
-                cursor.execute(
-                    "UPDATE cuentas SET saldo = saldo - %s WHERE nombre = %s AND usuario_id = %s",
-                    (monto, cuenta_nombre, current_user.id)
-                )
-            else:
-                cursor.execute(
-                    "UPDATE cuentas SET saldo = saldo + %s WHERE nombre = %s AND usuario_id = %s",
-                    (monto, cuenta_nombre, current_user.id)
-                )
+    soy_yo = deudor in ['YO', 'MAIKOL', 'MAIKOL PIREZ']
+    tipo_mov = "Egreso" if soy_yo else "Ingreso"
 
-            # Registrar movimiento
-            motivo_historial = f"PAGO DEUDA: {motivo} ({acreedor if soy_yo else deudor})"
-
-            cursor.execute("""
-                INSERT INTO movimientos (tipo, monto, cuenta_origen, motivo, fecha, usuario_id) 
-                VALUES (%s, %s, %s, %s, CURRENT_DATE, %s)
-            """, (tipo_mov, monto, cuenta_nombre, motivo_historial, current_user.id))
-
-            # Marcar como pagada
+    try:
+        if soy_yo:
             cursor.execute(
-                "UPDATE deudas SET estado = %s WHERE id = %s AND usuario_id = %s",
-                ('pagado', id, current_user.id)
+                "UPDATE cuentas SET saldo = saldo - %s WHERE nombre = %s AND usuario_id = %s",
+                (monto, cuenta_nombre, current_user.id)
+            )
+        else:
+            cursor.execute(
+                "UPDATE cuentas SET saldo = saldo + %s WHERE nombre = %s AND usuario_id = %s",
+                (monto, cuenta_nombre, current_user.id)
             )
 
-            conn.commit()
+        motivo_historial = f"PAGO DEUDA: {motivo} ({acreedor if soy_yo else deudor})"
 
-        except Exception as e:
-            conn.rollback()
-            cursor.close()
-            conn.close()
-            return f"Error al procesar el pago: {e}"
+        cursor.execute("""
+            INSERT INTO movimientos (tipo, monto, cuenta_origen, motivo, fecha, usuario_id) 
+            VALUES (%s, %s, %s, %s, CURRENT_DATE, %s)
+        """, (tipo_mov, monto, cuenta_nombre, motivo_historial, current_user.id))
+
+        cursor.execute(
+            "UPDATE deudas SET estado = %s WHERE id = %s AND usuario_id = %s",
+            ('pagado', id, current_user.id)
+        )
+
+        conn.commit()
+
+    except Exception as e:
+        conn.rollback()
+        cursor.close()
+        conn.close()
+        return f"Error al procesar el pago: {e}"
 
     cursor.close()
     conn.close()
