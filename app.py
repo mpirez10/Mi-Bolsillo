@@ -98,11 +98,7 @@ def load_user(user_id):
     cursor = conn.cursor()
 
     cursor.execute(
-        """
-        SELECT id, nombre_completo, correo, fecha_nacimiento 
-        FROM usuarios 
-        WHERE id = %s
-        """,
+        "SELECT id, nombre_completo, correo, fecha_nacimiento FROM usuarios WHERE id = %s",
         (user_id,)
     )
 
@@ -112,20 +108,21 @@ def load_user(user_id):
     conn.close()
 
     if user:
-    try:
-        return Usuario(
-            user["id"],
-            user["nombre_completo"],
-            user["correo"],
-            user["fecha_nacimiento"]
-        )
-    except:
-        return Usuario(
-            user[0],
-            user[1],
-            user[2],
-            user[3]
-        )
+        # 🔥 COMPATIBLE con dict y tuple (PostgreSQL / SQLite)
+        try:
+            return Usuario(
+                user["id"],
+                user["nombre_completo"],
+                user["correo"],
+                user["fecha_nacimiento"]
+            )
+        except:
+            return Usuario(
+                user[0],
+                user[1],
+                user[2],
+                user[3]
+            )
 
     return None
 
