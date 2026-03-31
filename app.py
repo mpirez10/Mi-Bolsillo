@@ -17,12 +17,16 @@ def hay_usuarios():
     cursor = conn.cursor()
 
     cursor.execute("SELECT COUNT(*) FROM usuarios")
-    total = cursor.fetchone()[0]
+    result = cursor.fetchone()
 
     cursor.close()
     conn.close()
 
-    return total > 0
+    # 🔥 COMPATIBLE
+    try:
+        return result[0] > 0
+    except:
+        return result["count"] > 0
 
 
 # --- REDIRECCIÓN AUTOMÁTICA ---
