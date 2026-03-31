@@ -22,11 +22,7 @@ def hay_usuarios():
     cursor.close()
     conn.close()
 
-    # 🔥 COMPATIBLE
-    try:
-        return result[0] > 0
-    except:
-        return result["count"] > 0
+    return result["count"] > 0
 
 
 # --- REDIRECCIÓN AUTOMÁTICA ---
@@ -112,21 +108,12 @@ def load_user(user_id):
     conn.close()
 
     if user:
-        # 🔥 COMPATIBLE con dict y tuple (PostgreSQL / SQLite)
-        try:
-            return Usuario(
-                user["id"],
-                user["nombre_completo"],
-                user["correo"],
-                user["fecha_nacimiento"]
-            )
-        except:
-            return Usuario(
-                user[0],
-                user[1],
-                user[2],
-                user[3]
-            )
+        return Usuario(
+            user["id"],
+            user["nombre_completo"],
+            user["correo"],
+            user["fecha_nacimiento"]
+        )
 
     return None
 
