@@ -10,17 +10,21 @@ bp = Blueprint("deudas", __name__)
 @login_required
 def lista_deudas():
     conn = get_db()
+    cursor = conn.cursor()
 
-    deudas = conn.execute(
+    cursor.execute(
         "SELECT id, deudor, acreedor, monto, estado, motivo, fecha FROM deudas WHERE usuario_id = %s ORDER BY id DESC",
         (current_user.id,)
-    ).fetchall()
+    )
+    deudas = cursor.fetchall()
 
-    cuentas = conn.execute(
+    cursor.execute(
         "SELECT nombre FROM cuentas WHERE usuario_id = %s",
         (current_user.id,)
-    ).fetchall()
+    )
+    cuentas = cursor.fetchall()
 
+    cursor.close()
     conn.close()
 
     return render_template("deudas.html", deudas=deudas, cuentas=cuentas)
@@ -48,9 +52,10 @@ def nueva_deuda():
             return "Error: Fecha inválida."
 
         conn = get_db()
+        cursor = conn.cursor()
 
         try:
-            conn.execute("""
+            cursor.execute("""
                 INSERT INTO deudas (deudor, acreedor, monto, motivo, fecha, estado, usuario_id) 
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (deudor, acreedor, monto, motivo, fecha, 'pendiente', current_user.id))
@@ -59,9 +64,11 @@ def nueva_deuda():
 
         except Exception as e:
             conn.rollback()
+            cursor.close()
             conn.close()
             return f"Error al crear la deuda: {e}"
 
+        cursor.close()
         conn.close()
         return redirect(url_for('deudas.lista_deudas'))
 
@@ -73,9 +80,10 @@ def nueva_deuda():
 @login_required
 def eliminar_deuda(id):
     conn = get_db()
+    cursor = conn.cursor()
 
     try:
-        conn.execute(
+        cursor.execute(
             "DELETE FROM deudas WHERE id = %s AND usuario_id = %s",
             (id, current_user.id)
         )
@@ -83,9 +91,11 @@ def eliminar_deuda(id):
 
     except Exception as e:
         conn.rollback()
+        cursor.close()
         conn.close()
         return f"Error al eliminar la deuda: {e}"
 
+    cursor.close()
     conn.close()
     return redirect(url_for('deudas.lista_deudas'))
 
@@ -100,14 +110,15 @@ def pagar_deuda(id):
         return "Error: Debes seleccionar una cuenta para pagar."
 
     conn = get_db()
+    cursor = conn.cursor()
 
-    deuda = conn.execute(
+    cursor.execute(
         "SELECT id, deudor, acreedor, monto, motivo FROM deudas WHERE id = %s AND usuario_id = %s",
         (id, current_user.id)
-    ).fetchone()
+    )
+    deuda = cursor.fetchone()
 
     if deuda:
-        # 🔥 ACCESO POR NOMBRE (CLAVE)
         monto = deuda["monto"]
         deudor = deuda["deudor"]
         acreedor = deuda["acreedor"]
@@ -118,24 +129,24 @@ def pagar_deuda(id):
 
         try:
             if soy_yo:
-                conn.execute(
+                cursor.execute(
                     "UPDATE cuentas SET saldo = saldo - %s WHERE nombre = %s AND usuario_id = %s",
                     (monto, cuenta_nombre, current_user.id)
                 )
             else:
-                conn.execute(
+                cursor.execute(
                     "UPDATE cuentas SET saldo = saldo + %s WHERE nombre = %s AND usuario_id = %s",
                     (monto, cuenta_nombre, current_user.id)
                 )
 
             motivo_historial = f"PAGO DEUDA: {motivo} ({acreedor if soy_yo else deudor})"
 
-            conn.execute("""
+            cursor.execute("""
                 INSERT INTO movimientos (tipo, monto, cuenta_origen, motivo, fecha, usuario_id) 
                 VALUES (%s, %s, %s, %s, CURRENT_DATE, %s)
             """, (tipo_mov, monto, cuenta_nombre, motivo_historial, current_user.id))
 
-            conn.execute(
+            cursor.execute(
                 "UPDATE deudas SET estado = %s WHERE id = %s AND usuario_id = %s",
                 ('pagado', id, current_user.id)
             )
@@ -144,8 +155,10 @@ def pagar_deuda(id):
 
         except Exception as e:
             conn.rollback()
+            cursor.close()
             conn.close()
             return f"Error al procesar el pago: {e}"
 
+    cursor.close()
     conn.close()
     return redirect(url_for('deudas.lista_deudas'))
