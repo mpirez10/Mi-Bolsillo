@@ -5,7 +5,6 @@ from db import get_db
 emprendimiento_bp = Blueprint('emprendimiento', __name__)
 
 def _get_value(row, key, index=0):
-    """Helper: devuelve valor desde dict o tupla."""
     if row is None:
         return None
     try:
