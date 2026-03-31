@@ -46,7 +46,7 @@ def movimiento():
             if not cuenta:
                 return "Error: Cuenta origen no válida."
 
-            saldo_actual = cuenta[0]
+            saldo_actual = cuenta["saldo"]
 
             # --- LÓGICA ---
             if tipo == "Ingreso":
@@ -103,6 +103,8 @@ def movimiento():
 
         except Exception as e:
             conn.rollback()
+            cursor.close()
+            conn.close()
             return f"Error crítico al procesar el movimiento: {e}"
 
         cursor.close()
@@ -110,7 +112,7 @@ def movimiento():
 
         return redirect(url_for('home.index'))
 
-    # GET
+    # --- GET ---
     cursor.execute(
         "SELECT nombre FROM cuentas WHERE usuario_id = %s",
         (current_user.id,)
