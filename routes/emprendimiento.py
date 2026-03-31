@@ -4,6 +4,18 @@ from db import get_db
 
 emprendimiento_bp = Blueprint('emprendimiento', __name__)
 
+def _get_value(row, key, index=0):
+    """Helper: devuelve valor desde dict o tupla."""
+    if row is None:
+        return None
+    try:
+        return row[key]
+    except Exception:
+        try:
+            return row[index]
+        except Exception:
+            return None
+
 # --- HOME ---
 @emprendimiento_bp.route('/emprendimiento')
 @login_required
@@ -68,7 +80,7 @@ def resumen(eid):
         conn.close()
         return "No autorizado"
 
-    nombre_emprendimiento = res[0]
+    nombre_emprendimiento = _get_value(res, "nombre", 0)
 
     # --- POST MOVIMIENTO ---
     if request.method == 'POST' and 'concepto' in request.form:
@@ -79,8 +91,12 @@ def resumen(eid):
         try:
             monto = float(request.form.get('monto', 0))
             if monto <= 0:
+                cursor.close()
+                conn.close()
                 return "Monto inválido"
         except:
+            cursor.close()
+            conn.close()
             return "Monto inválido"
 
         producto_id = request.form.get('producto_id') or None
@@ -103,9 +119,10 @@ def resumen(eid):
                         "SELECT stock FROM productos WHERE id=%s AND usuario_id=%s",
                         (producto_id, current_user.id)
                     )
-                    stock = cursor.fetchone()
+                    stock_row = cursor.fetchone()
+                    stock_val = _get_value(stock_row, "stock", 0)
 
-                    if not stock or stock[0] <= 0:
+                    if stock_val is None or int(stock_val) <= 0:
                         conn.rollback()
                         cursor.close()
                         conn.close()
@@ -144,18 +161,20 @@ def resumen(eid):
     productos_lista = cursor.fetchall()
 
     cursor.execute("""
-        SELECT COALESCE(SUM(monto),0)
+        SELECT COALESCE(SUM(monto),0) AS total
         FROM movimientos_emprendimiento
         WHERE emprendimiento_id=%s AND usuario_id=%s AND concepto='INGRESO'
     """, (eid, current_user.id))
-    ingresos = cursor.fetchone()[0]
+    ingresos_row = cursor.fetchone()
+    ingresos = _get_value(ingresos_row, "total", 0) or 0
 
     cursor.execute("""
-        SELECT COALESCE(SUM(monto),0)
+        SELECT COALESCE(SUM(monto),0) AS total
         FROM movimientos_emprendimiento
         WHERE emprendimiento_id=%s AND usuario_id=%s AND concepto='EGRESO'
     """, (eid, current_user.id))
-    gastos = cursor.fetchone()[0]
+    gastos_row = cursor.fetchone()
+    gastos = _get_value(gastos_row, "total", 0) or 0
 
     cursor.execute("""
         SELECT id, fecha, concepto, detalle, monto, producto_id
@@ -172,7 +191,7 @@ def resumen(eid):
         'emprendimiento/resumen.html',
         nombre=nombre_emprendimiento,
         eid=eid,
-        saldo=ingresos - gastos,
+        saldo=(float(ingresos) - float(gastos)),
         ingresos=ingresos,
         gastos=gastos,
         movimientos=movimientos,
@@ -198,6 +217,8 @@ def stock(eid):
         conn.close()
         return "Acceso denegado"
 
+    nombre_empr = _get_value(res, "nombre", 0)
+
     if request.method == 'POST':
         nombre = request.form.get('nombre_prod', '').strip()
 
@@ -206,8 +227,15 @@ def stock(eid):
             conn.close()
             return "Nombre inválido"
 
-        precio = float(request.form.get('precio_prod', 0))
-        stock_val = int(request.form.get('stock_prod', 0))
+        try:
+            precio = float(request.form.get('precio_prod', 0))
+        except:
+            precio = 0.0
+
+        try:
+            stock_val = int(request.form.get('stock_prod', 0))
+        except:
+            stock_val = 0
 
         cursor.execute("""
             INSERT INTO productos
@@ -234,7 +262,7 @@ def stock(eid):
     cursor.close()
     conn.close()
 
-    return render_template('emprendimiento/stock.html', nombre=res[0], eid=eid, productos=productos)
+    return render_template('emprendimiento/stock.html', nombre=nombre_empr, eid=eid, productos=productos)
 
 
 # --- ELIMINAR PRODUCTO ---
@@ -293,4 +321,12 @@ def actualizar_precio(pid):
     cursor = conn.cursor()
 
     cursor.execute(
-        "UPDATE productos SET precio=%s WHERE id
+        "UPDATE productos SET precio=%s WHERE id=%s AND usuario_id=%s",
+        (nuevo_precio, pid, current_user.id)
+    )
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+    return jsonify({"ok": True})
