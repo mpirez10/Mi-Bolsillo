@@ -9,17 +9,20 @@ bp = Blueprint("home", __name__)
 def index():
     conn = get_db()
     cursor = conn.cursor()
-    
-    # 1. Cuentas
+
+    # --- 1. CUENTAS ---
     cursor.execute(
         "SELECT id, nombre, saldo FROM cuentas WHERE usuario_id = %s",
         (current_user.id,)
     )
     cuentas = cursor.fetchall()
 
-    saldo_general = round(sum(c[2] for c in cuentas), 2)
+    # 🔥 Compatible dict o tuple
+    saldo_general = round(sum(
+        (c['saldo'] if isinstance(c, dict) else c[2]) for c in cuentas
+    ), 2)
 
-    # 2. Movimientos
+    # --- 2. MOVIMIENTOS ---
     cursor.execute("""
         SELECT * FROM movimientos 
         WHERE usuario_id = %s 
@@ -27,7 +30,7 @@ def index():
     """, (current_user.id,))
     movimientos = cursor.fetchall()
 
-    # 3. Deudas
+    # --- 3. DEUDAS ---
     cursor.execute("""
         SELECT * FROM deudas 
         WHERE usuario_id = %s AND estado = 'pendiente' 
@@ -35,36 +38,41 @@ def index():
     """, (current_user.id,))
     deudas_list = cursor.fetchall()
 
-    # --- 4. TOTALES ---
+    # --- 4. TOTALES (🔥 FIX KEYERROR) ---
+    def get_value(row):
+        if not row:
+            return 0
+        return row[0] if not isinstance(row, dict) else list(row.values())[0]
+
     cursor.execute("""
         SELECT SUM(monto) FROM movimientos 
         WHERE usuario_id = %s AND LOWER(tipo) = 'ingreso'
     """, (current_user.id,))
-    ingresos_total = cursor.fetchone()[0] or 0
+    ingresos_total = get_value(cursor.fetchone()) or 0
 
     cursor.execute("""
         SELECT SUM(monto) FROM movimientos 
         WHERE usuario_id = %s AND LOWER(tipo) = 'egreso'
     """, (current_user.id,))
-    egresos_total = cursor.fetchone()[0] or 0
+    egresos_total = get_value(cursor.fetchone()) or 0
 
     cursor.execute("""
         SELECT SUM(monto) FROM deudas 
         WHERE usuario_id = %s AND estado = 'pendiente'
     """, (current_user.id,))
-    deudas_total = cursor.fetchone()[0] or 0
+    deudas_total = get_value(cursor.fetchone()) or 0
 
     cursor.execute(
         "SELECT SUM(precio_total) FROM ventas WHERE usuario_id = %s",
         (current_user.id,)
     )
-    ganancia_mes = cursor.fetchone()[0] or 0
+    ganancia_mes = get_value(cursor.fetchone()) or 0
 
     cursor.execute(
         "SELECT SUM(monto) FROM gastos WHERE usuario_id = %s",
         (current_user.id,)
     )
-    gasto_mes = cursor.fetchone()[0] or 0
+    gasto_mes = get_value(cursor.fetchone()) or 0
 
     cursor.close()
     conn.close()
@@ -88,18 +96,25 @@ def index():
 def eliminar_movimiento(mid):
     conn = get_db()
     cursor = conn.cursor()
-    
-    # Verificar que el movimiento sea del usuario
+
     cursor.execute(
         "SELECT * FROM movimientos WHERE id=%s AND usuario_id=%s",
         (mid, current_user.id)
     )
     movimiento = cursor.fetchone()
-    
+
     if movimiento:
-        monto = movimiento[3]   # monto
-        tipo = movimiento[2].lower()  # tipo
-        cuenta = movimiento[4]  # cuenta_origen
+        # 🔥 Compatibilidad dict/tuple
+        if isinstance(movimiento, dict):
+            monto = movimiento['monto']
+            tipo = movimiento['tipo'].lower()
+            cuenta = movimiento['cuenta_origen']
+            cuenta_destino = movimiento.get('cuenta_destino')
+        else:
+            monto = movimiento[3]
+            tipo = movimiento[2].lower()
+            cuenta = movimiento[4]
+            cuenta_destino = movimiento[5]
 
         if tipo == 'ingreso':
             cursor.execute(
@@ -118,7 +133,7 @@ def eliminar_movimiento(mid):
             )
             cursor.execute(
                 "UPDATE cuentas SET saldo = saldo - %s WHERE nombre = %s AND usuario_id = %s",
-                (monto, movimiento[5], current_user.id)  # cuenta_destino
+                (monto, cuenta_destino, current_user.id)
             )
 
         cursor.execute(
