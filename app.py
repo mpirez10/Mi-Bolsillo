@@ -16,10 +16,8 @@ def hay_usuarios():
     conn = get_db()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT COUNT(*) AS total FROM usuarios")
-    result = cursor.fetchone()
-
-    total = result['total']
+    cursor.execute("SELECT COUNT(*) FROM usuarios")
+    total = cursor.fetchone()[0]
 
     cursor.close()
     conn.close()
