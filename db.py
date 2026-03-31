@@ -89,6 +89,40 @@ def init_db():
         )
     """)
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS emprendimientos (
+            id SERIAL PRIMARY KEY,
+            nombre TEXT NOT NULL,
+            usuario_id INTEGER
+        )
+    """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS productos (
+            id SERIAL PRIMARY KEY,
+            emprendimiento_id INTEGER,
+            nombre TEXT,
+            detalle TEXT,
+            talle TEXT,
+            precio REAL,
+            stock INTEGER,
+            usuario_id INTEGER
+        )
+    """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS movimientos_emprendimiento (
+            id SERIAL PRIMARY KEY,
+            emprendimiento_id INTEGER,
+            fecha TEXT,
+            concepto TEXT,
+            detalle TEXT,
+            monto REAL,
+            usuario_id INTEGER,
+            producto_id INTEGER
+        )
+    """)
+
     conn.commit()
     cursor.close()
     conn.close()
