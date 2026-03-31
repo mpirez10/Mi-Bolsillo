@@ -1,12 +1,12 @@
 import os
 import sys
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, send_file, session, flash
+from flask import Flask, render_template, request, redirect, url_for, send_file
 from flask_login import LoginManager, UserMixin
 from werkzeug.security import generate_password_hash
 from db import get_db, init_db
 
-# --- CONFIGURACIÓN DE APP (SOLO UNA VEZ) ---
+# --- CONFIGURACIÓN DE APP ---
 if getattr(sys, 'frozen', False):
     template_folder = os.path.join(sys._MEIPASS, 'templates')
     static_folder = os.path.join(sys._MEIPASS, 'static')
@@ -16,20 +16,34 @@ else:
 
 app.secret_key = os.getenv("SECRET_KEY", "dev_key")
 
-# --- FUNCIÓN: VERIFICAR SI HAY USUARIOS ---
+# --- FUNCIÓN AUXILIAR COMPATIBLE ---
+def get_value(row, key_or_index):
+    try:
+        return row[key_or_index]
+    except:
+        return row[0]
+
+# --- VERIFICAR SI HAY USUARIOS ---
 def hay_usuarios():
     conn = get_db()
-    cursor = conn.execute("SELECT COUNT(*) as total FROM usuarios")
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("SELECT COUNT(*) as total FROM usuarios")
+    except:
+        cursor.execute("SELECT COUNT(*) FROM usuarios")
 
     result = cursor.fetchone()
 
-    # 🔥 Compatible con ambos (SQLite y Postgres)
-    if isinstance(result, dict):
+    # Compatible con ambos
+    try:
         total = result['total']
-    else:
+    except:
         total = result[0]
 
+    cursor.close()
     conn.close()
+
     return total > 0
 
 # --- REDIRECCIÓN AUTOMÁTICA ---
@@ -44,7 +58,7 @@ def verificar_primer_uso():
     if not hay_usuarios() and request.endpoint != 'setup':
         return redirect(url_for('setup'))
 
-# --- SETUP INICIAL ---
+# --- SETUP ---
 @app.route('/setup', methods=['GET', 'POST'])
 def setup():
     if hay_usuarios():
@@ -53,13 +67,13 @@ def setup():
     if request.method == 'POST':
         nombre = request.form.get('nombre')
         correo = request.form.get('correo')
-        pass_raw = request.form.get('password')
+        password = request.form.get('password')
         fecha_nac = request.form.get('fecha_nacimiento')
 
-        if not nombre or not correo or not pass_raw:
-            return "Faltan datos obligatorios", 400
+        if not nombre or not correo or not password:
+            return "Faltan datos", 400
 
-        hashed_pw = generate_password_hash(pass_raw)
+        hashed_pw = generate_password_hash(password)
 
         conn = get_db()
         cursor = conn.cursor()
@@ -91,7 +105,7 @@ class Usuario(UserMixin):
         self.correo = correo
         self.fecha_nacimiento = fecha_nacimiento
 
-# --- CARGAR USUARIO (IMPORTANTE PARA LOGIN) ---
+# --- CARGAR USUARIO (ARREGLADO) ---
 @login_manager.user_loader
 def load_user(user_id):
     conn = get_db()
@@ -108,15 +122,26 @@ def load_user(user_id):
     conn.close()
 
     if user:
-        return Usuario(
-            user[0],
-            user[1],
-            user[2],
-            user[3]
-        )
+        try:
+            # PostgreSQL (dict)
+            return Usuario(
+                user['id'],
+                user['nombre_completo'],
+                user['correo'],
+                user['fecha_nacimiento']
+            )
+        except:
+            # SQLite (tuple)
+            return Usuario(
+                user[0],
+                user[1],
+                user[2],
+                user[3]
+            )
+
     return None
 
-# --- RESPALDO (SOLO LOCAL SQLITE) ---
+# --- RESPALDO ---
 @app.route('/respaldo')
 def descargar_respaldo():
     try:
@@ -133,7 +158,7 @@ def descargar_respaldo():
         else:
             return "Respaldo no disponible en producción", 404
     except Exception as e:
-        return f"Error al generar el respaldo: {str(e)}", 500
+        return f"Error: {str(e)}", 500
 
 # --- IMPORTACIÓN DE RUTAS ---
 from routes import home, cuentas, movimientos, deudas, auth
@@ -148,10 +173,10 @@ app.register_blueprint(auth.auth_bp)
 app.register_blueprint(finanzas_bp)
 app.register_blueprint(emprendimiento_bp)
 
-# --- INICIALIZAR DB ---
+# --- INIT DB ---
 init_db()
 
-# --- RUN LOCAL (NO AFECTA RENDER) ---
+# --- RUN LOCAL ---
 if __name__ == "__main__":
     init_db()
     app.run(host='0.0.0.0', port=5000, debug=False)
