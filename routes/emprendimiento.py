@@ -64,6 +64,8 @@ def resumen(eid):
     res = cursor.fetchone()
 
     if not res:
+        cursor.close()
+        conn.close()
         return "No autorizado"
 
     nombre_emprendimiento = res[0]
@@ -105,6 +107,8 @@ def resumen(eid):
 
                     if not stock or stock[0] <= 0:
                         conn.rollback()
+                        cursor.close()
+                        conn.close()
                         return "Sin stock"
 
                     cursor.execute("""
@@ -123,8 +127,12 @@ def resumen(eid):
 
         except Exception as e:
             conn.rollback()
+            cursor.close()
+            conn.close()
             return f"Error: {e}"
 
+        cursor.close()
+        conn.close()
         return redirect(url_for('emprendimiento.resumen', eid=eid))
 
     # --- DATOS ---
@@ -186,12 +194,16 @@ def stock(eid):
     res = cursor.fetchone()
 
     if not res:
+        cursor.close()
+        conn.close()
         return "Acceso denegado"
 
     if request.method == 'POST':
         nombre = request.form.get('nombre_prod', '').strip()
 
         if not nombre:
+            cursor.close()
+            conn.close()
             return "Nombre inválido"
 
         precio = float(request.form.get('precio_prod', 0))
@@ -238,6 +250,8 @@ def eliminar_producto(pid, eid):
         conn.commit()
     except Exception as e:
         conn.rollback()
+        cursor.close()
+        conn.close()
         return f"Error: {e}"
 
     cursor.close()
@@ -279,12 +293,4 @@ def actualizar_precio(pid):
     cursor = conn.cursor()
 
     cursor.execute(
-        "UPDATE productos SET precio=%s WHERE id=%s AND usuario_id=%s",
-        (nuevo_precio, pid, current_user.id)
-    )
-    conn.commit()
-
-    cursor.close()
-    conn.close()
-
-    return jsonify({"ok": True})
+        "UPDATE productos SET precio=%s WHERE id
