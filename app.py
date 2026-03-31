@@ -1,5 +1,4 @@
 import os
-import sys
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for
 from flask_login import LoginManager, UserMixin
@@ -118,18 +117,18 @@ app.register_blueprint(auth.auth_bp)
 app.register_blueprint(finanzas_bp)
 app.register_blueprint(emprendimiento_bp)
 
-# --- FIX DB (ruta temporal para resetear secuencia) ---
+# --- FIX DB (ruta temporal para resetear secuencias) ---
 @app.route("/fix-db")
 def fix_db():
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("""
-        SELECT setval(pg_get_serial_sequence('usuarios', 'id'), COALESCE(MAX(id), 1), false) FROM usuarios;
-    """)
+    # Reparar secuencia de usuarios
+    cursor.execute("ALTER TABLE usuarios ALTER COLUMN id SET DEFAULT nextval('usuarios_id_seq')")
+    cursor.execute("SELECT setval('usuarios_id_seq', COALESCE(MAX(id), 1), false) FROM usuarios")
     conn.commit()
     cursor.close()
     conn.close()
-    return "Secuencia de usuarios reseteada correctamente"
+    return "Secuencia de usuarios reparada correctamente"
 
 # --- INIT DB ---
 init_db()
