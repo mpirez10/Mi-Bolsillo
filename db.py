@@ -1,27 +1,25 @@
 import os
 import psycopg2
-from psycopg2.extras import RealDictCursor
-
+import psycopg2.extras
 
 def get_db():
     database_url = os.getenv("DATABASE_URL")
 
     if not database_url:
-        raise Exception("DATABASE_URL no está configurada")
+        raise Exception("DATABASE_URL no configurada")
 
-    conn = psycopg2.connect(database_url)
+    conn = psycopg2.connect(
+        database_url,
+        cursor_factory=psycopg2.extras.RealDictCursor
+    )
+
     return conn
-
-
-def get_cursor(conn):
-    return conn.cursor(cursor_factory=RealDictCursor)
 
 
 def init_db():
     conn = get_db()
-    cursor = get_cursor(conn)
+    cursor = conn.cursor()
 
-    # --- USUARIOS ---
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS usuarios (
             id SERIAL PRIMARY KEY,
@@ -32,100 +30,60 @@ def init_db():
         )
     """)
 
-    # --- CUENTAS ---
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS cuentas (
             id SERIAL PRIMARY KEY,
             nombre TEXT NOT NULL,
-            saldo NUMERIC DEFAULT 0,
-            usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE
+            saldo REAL DEFAULT 0,
+            usuario_id INTEGER
         )
     """)
 
-    # --- MOVIMIENTOS ---
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS movimientos (
             id SERIAL PRIMARY KEY,
             fecha TEXT,
             tipo TEXT,
-            monto NUMERIC,
+            monto REAL,
             cuenta_origen TEXT,
             cuenta_destino TEXT,
             motivo TEXT,
-            usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE
+            usuario_id INTEGER
         )
     """)
 
-    # --- DEUDAS ---
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS deudas (
             id SERIAL PRIMARY KEY,
             deudor TEXT,
             acreedor TEXT,
-            monto NUMERIC,
+            monto REAL,
             estado TEXT,
             motivo TEXT,
             fecha TEXT,
-            usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE
+            usuario_id INTEGER
         )
     """)
 
-    # --- EMPRENDIMIENTOS ---
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS emprendimientos (
-            id SERIAL PRIMARY KEY,
-            nombre TEXT,
-            usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE
-        )
-    """)
-
-    # --- PRODUCTOS ---
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS productos (
-            id SERIAL PRIMARY KEY,
-            emprendimiento_id INTEGER REFERENCES emprendimientos(id) ON DELETE CASCADE,
-            nombre TEXT,
-            stock INTEGER DEFAULT 0,
-            precio NUMERIC DEFAULT 0,
-            usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE
-        )
-    """)
-
-    # --- MOVIMIENTOS EMPRENDIMIENTO ---
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS movimientos_emprendimiento (
-            id SERIAL PRIMARY KEY,
-            emprendimiento_id INTEGER REFERENCES emprendimientos(id) ON DELETE CASCADE,
-            fecha TEXT,
-            concepto TEXT,
-            detalle TEXT,
-            monto NUMERIC,
-            usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
-            producto_id INTEGER
-        )
-    """)
-
-    # --- VENTAS ---
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS ventas (
             id SERIAL PRIMARY KEY,
-            producto_id INTEGER REFERENCES productos(id) ON DELETE CASCADE,
+            producto_id INTEGER,
             fecha TEXT,
             cantidad INTEGER,
-            precio_total NUMERIC,
-            usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE
+            precio_total REAL,
+            usuario_id INTEGER
         )
     """)
 
-    # --- GASTOS ---
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS gastos (
             id SERIAL PRIMARY KEY,
-            emprendimiento_id INTEGER REFERENCES emprendimientos(id) ON DELETE CASCADE,
+            emprendimiento_id INTEGER,
             fecha TEXT,
             concepto TEXT,
-            monto NUMERIC,
-            usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE
+            monto REAL,
+            usuario_id INTEGER
         )
     """)
 
