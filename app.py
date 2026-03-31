@@ -1,60 +1,34 @@
 import os
 import sys
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, send_file
+from flask import Flask, render_template, request, redirect, url_for
 from flask_login import LoginManager, UserMixin
 from werkzeug.security import generate_password_hash
 from db import get_db, init_db
-# en app.py o en routes/admin.py
-from flask import Blueprint
-from db import get_db
-
-admin_bp = Blueprint("admin", __name__)
-
-@app.route("/fix-db")
-def fix_db():
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT setval(pg_get_serial_sequence('usuarios', 'id'), COALESCE(MAX(id), 1), false) FROM usuarios;
-    """)
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return "Secuencia de usuarios reseteada correctamente"
-
 
 # --- CONFIGURACIÓN DE APP ---
 app = Flask(__name__, template_folder='templates', static_folder='static')
 app.secret_key = os.getenv("SECRET_KEY", "dev_key")
 
-
 # --- VERIFICAR SI HAY USUARIOS ---
 def hay_usuarios():
     conn = get_db()
     cursor = conn.cursor()
-
     cursor.execute("SELECT COUNT(*) FROM usuarios")
     result = cursor.fetchone()
-
     cursor.close()
     conn.close()
-
     return result["count"] > 0
-
 
 # --- REDIRECCIÓN AUTOMÁTICA ---
 @app.before_request
 def verificar_primer_uso():
     if request.endpoint is None:
         return
-
     if request.endpoint.startswith('static'):
         return
-
     if not hay_usuarios() and request.endpoint != 'setup':
         return redirect(url_for('setup'))
-
 
 # --- SETUP ---
 @app.route('/setup', methods=['GET', 'POST'])
@@ -75,7 +49,6 @@ def setup():
 
         conn = get_db()
         cursor = conn.cursor()
-
         cursor.execute(
             """
             INSERT INTO usuarios (nombre_completo, correo, fecha_nacimiento, password) 
@@ -83,7 +56,6 @@ def setup():
             """,
             (nombre, correo, fecha_nac, hashed_pw)
         )
-
         conn.commit()
         cursor.close()
         conn.close()
@@ -92,13 +64,11 @@ def setup():
 
     return render_template('setup.html')
 
-
 # --- LOGIN MANAGER ---
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'auth.login'
 login_manager.login_message = "Tienes que iniciar sesión."
-
 
 # --- MODELO USUARIO ---
 class Usuario(UserMixin):
@@ -108,20 +78,16 @@ class Usuario(UserMixin):
         self.correo = correo
         self.fecha_nacimiento = fecha_nacimiento
 
-
-# --- CARGAR USUARIO (SOLO POSTGRES) ---
+# --- CARGAR USUARIO ---
 @login_manager.user_loader
 def load_user(user_id):
     conn = get_db()
     cursor = conn.cursor()
-
     cursor.execute(
         "SELECT id, nombre_completo, correo, fecha_nacimiento FROM usuarios WHERE id = %s",
         (user_id,)
     )
-
     user = cursor.fetchone()
-
     cursor.close()
     conn.close()
 
@@ -132,15 +98,12 @@ def load_user(user_id):
             user["correo"],
             user["fecha_nacimiento"]
         )
-
     return None
 
-
-# --- RESPALDO (DESACTIVADO EN PRODUCCIÓN) ---
+# --- RESPALDO ---
 @app.route('/respaldo')
 def descargar_respaldo():
     return "Respaldo desactivado en PostgreSQL", 404
-
 
 # --- IMPORTACIÓN DE RUTAS ---
 from routes import home, cuentas, movimientos, deudas, auth
@@ -154,12 +117,22 @@ app.register_blueprint(deudas.bp)
 app.register_blueprint(auth.auth_bp)
 app.register_blueprint(finanzas_bp)
 app.register_blueprint(emprendimiento_bp)
-app.register_blueprint(admin_bp)
 
+# --- FIX DB (ruta temporal para resetear secuencia) ---
+@app.route("/fix-db")
+def fix_db():
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT setval(pg_get_serial_sequence('usuarios', 'id'), COALESCE(MAX(id), 1), false) FROM usuarios;
+    """)
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return "Secuencia de usuarios reseteada correctamente"
 
 # --- INIT DB ---
 init_db()
-
 
 # --- RUN LOCAL ---
 if __name__ == "__main__":
