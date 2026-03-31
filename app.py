@@ -5,6 +5,24 @@ from flask import Flask, render_template, request, redirect, url_for, send_file
 from flask_login import LoginManager, UserMixin
 from werkzeug.security import generate_password_hash
 from db import get_db, init_db
+# en app.py o en routes/admin.py
+from flask import Blueprint
+from db import get_db
+
+admin_bp = Blueprint("admin", __name__)
+
+@admin_bp.route("/fix-db")
+def fix_db():
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT setval(pg_get_serial_sequence('usuarios', 'id'), COALESCE(MAX(id), 1), false) FROM usuarios;
+    """)
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return "Secuencia de usuarios reseteada correctamente"
+
 
 # --- CONFIGURACIÓN DE APP ---
 app = Flask(__name__, template_folder='templates', static_folder='static')
@@ -136,6 +154,7 @@ app.register_blueprint(deudas.bp)
 app.register_blueprint(auth.auth_bp)
 app.register_blueprint(finanzas_bp)
 app.register_blueprint(emprendimiento_bp)
+app.register_blueprint(admin_bp)
 
 
 # --- INIT DB ---
