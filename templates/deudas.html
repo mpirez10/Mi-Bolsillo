@@ -2,65 +2,55 @@
 
 {% block content %}
 <div class="card">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2><i class="fas fa-hand-holding-usd"></i> Control de Deudas</h2>
-        <a href="/deudas/nueva" class="btn btn-blue">+ Registrar Nueva Deuda</a>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2>Control de Deudas</h2>
+        <a href="/deudas/nueva" class="btn btn-blue">+ Nueva Deuda</a>
     </div>
 
-    <table style="width: 100%; border-collapse: collapse;">
+    <table style="width:100%;">
         <thead>
-            <tr style="text-align: left; border-bottom: 2px solid #f1f5f9;">
-                <th style="padding: 10px;">Fecha</th>
+            <tr>
+                <th>Fecha</th>
                 <th>Deudor</th>
                 <th>Acreedor</th>
                 <th>Monto</th>
                 <th>Motivo</th>
                 <th>Estado</th>
-                <th style="text-align: center;">Acciones</th>
+                <th>Acciones</th>
             </tr>
         </thead>
-        <tbody>
-            {% for d in deudas %}
-            <tr style="border-bottom: 1px solid #f1f5f9;">
-                <td style="padding: 12px 10px;">{{ d.fecha }}</td>
-                <td>{{ d.deudor }}</td>
-                <td>{{ d.acreedor }}</td>
-                <td style="font-weight: bold; color: {{ 'var(--danger)' if d.deudor == 'YO' else '#10b981' }}">
-                    ${{ "{:,.2f}".format(d.monto) }}
-                </td>
-                <td><small style="color: #64748b;">{{ d.motivo }}</small></td>
-                <td>
-                    <span style="padding: 4px 10px; border-radius: 12px; font-size: 0.8em; font-weight: bold; 
-                                 background: {{ '#fef3c7' if d.estado == 'pendiente' else '#dcfce7' }};
-                                 color: {{ '#92400e' if d.estado == 'pendiente' else '#166534' }};">
-                        {{ d.estado.upper() }}
-                    </span>
-                </td>
-                <td style="text-align: center;">
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                        {% if d.estado == 'pendiente' %}
-                            <form action="{{ url_for('deudas.pagar_deuda', id=d.id) }}" method="POST" style="display: flex; gap: 5px; align-items: center;">
-                                <select name="cuenta_pago" required style="font-size: 0.75em; padding: 4px; border-radius: 4px; border: 1px solid #cbd5e1;">
-                                    <option value="" disabled selected>Cuenta...</option>
-                                    {% for c in cuentas %}
-                                        <option value="{{ c.nombre }}">{{ c.nombre }}</option>
-                                    {% endfor %}
-                                </select>
-                                <button type="submit" class="btn-sm" style="background: #10b981; color: white; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer;" title="Liquidar y mover saldo">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                            </form>
-                        {% endif %}
 
-                        <a href="{{ url_for('deudas.eliminar_deuda', id=d.id) }}" 
-                           style="color: var(--danger); font-size: 1.1em;" 
-                           onclick="return confirm('¿Borrar registro de deuda?')">
-                            <i class="fas fa-trash-alt"></i>
-                        </a>
-                    </div>
+        <tbody>
+        {% for d in deudas %}
+            <tr>
+                <td>{{ d['fecha'] if d is mapping else d[6] }}</td>
+                <td>{{ d['deudor'] if d is mapping else d[1] }}</td>
+                <td>{{ d['acreedor'] if d is mapping else d[2] }}</td>
+                <td>${{ (d['monto'] if d is mapping else d[3]) }}</td>
+                <td>{{ d['motivo'] if d is mapping else d[5] }}</td>
+                <td>{{ d['estado'] if d is mapping else d[4] }}</td>
+
+                <td>
+                    {% set estado = d['estado'] if d is mapping else d[4] %}
+                    {% set idd = d['id'] if d is mapping else d[0] %}
+
+                    {% if estado == 'pendiente' %}
+                    <form action="{{ url_for('deudas.pagar_deuda', id=idd) }}" method="POST">
+                        <select name="cuenta_pago">
+                            {% for c in cuentas %}
+                                <option value="{{ c['nombre'] if c is mapping else c[0] }}">
+                                    {{ c['nombre'] if c is mapping else c[0] }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit">Pagar</button>
+                    </form>
+                    {% endif %}
+
+                    <a href="{{ url_for('deudas.eliminar_deuda', id=idd) }}">Eliminar</a>
                 </td>
             </tr>
-            {% endfor %}
+        {% endfor %}
         </tbody>
     </table>
 </div>
