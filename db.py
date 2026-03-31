@@ -4,13 +4,15 @@ import sys
 def get_db():
     database_url = os.getenv("DATABASE_URL")
 
-    # 🔥 PRODUCCIÓN (Render con Postgres)
+    # 🔥 PRODUCCIÓN (PostgreSQL - Render)
     if database_url:
         import psycopg2
+        import psycopg2.extras
+
         conn = psycopg2.connect(database_url)
         return conn
 
-    # 💻 LOCAL (tu PC con SQLite)
+    # 💻 LOCAL (SQLite)
     else:
         import sqlite3
 
@@ -23,113 +25,140 @@ def get_db():
 
         conn = sqlite3.connect(db_path)
         conn.row_factory = sqlite3.Row
-
-        # 🔥 activar claves foráneas
         conn.execute("PRAGMA foreign_keys = ON")
 
         return conn
+
+
+# 🔥 FUNCIÓN CLAVE: ejecuta queries compatible con ambos motores
+def query_db(conn, query, params=(), fetchone=False, fetchall=False):
+    cursor = conn.cursor()
+
+    # 👉 Convertir ? → %s si es PostgreSQL
+    if "psycopg2" in str(type(conn)):
+        query = query.replace("?", "%s")
+
+    cursor.execute(query, params)
+
+    if fetchone:
+        result = cursor.fetchone()
+    elif fetchall:
+        result = cursor.fetchall()
+    else:
+        result = None
+
+    cursor.close()
+    return result
 
 
 def init_db():
     conn = get_db()
     cursor = conn.cursor()
 
-    cursor.execute("""
+    is_postgres = "psycopg2" in str(type(conn))
+
+    # 👉 Tipos distintos según motor
+    ID_TYPE = "SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"
+    TEXT_TYPE = "TEXT"
+    REAL_TYPE = "REAL"
+    DATE_TYPE = "DATE"
+
+    # --- TABLAS ---
+    cursor.execute(f"""
         CREATE TABLE IF NOT EXISTS usuarios (
-            id SERIAL PRIMARY KEY,
-            nombre_completo TEXT NOT NULL,
-            correo TEXT UNIQUE NOT NULL,
-            fecha_nacimiento DATE NOT NULL,
-            password TEXT NOT NULL
+            id {ID_TYPE},
+            nombre_completo {TEXT_TYPE} NOT NULL,
+            correo {TEXT_TYPE} UNIQUE NOT NULL,
+            fecha_nacimiento {DATE_TYPE} NOT NULL,
+            password {TEXT_TYPE} NOT NULL
         )
     """)
 
-    cursor.execute("""
+    cursor.execute(f"""
         CREATE TABLE IF NOT EXISTS cuentas (
-            id SERIAL PRIMARY KEY,
-            nombre TEXT NOT NULL,
-            saldo REAL NOT NULL DEFAULT 0,
-            usuario_id INTEGER REFERENCES usuarios(id)
+            id {ID_TYPE},
+            nombre {TEXT_TYPE} NOT NULL,
+            saldo {REAL_TYPE} NOT NULL DEFAULT 0,
+            usuario_id INTEGER
         )
     """)
 
-    cursor.execute("""
+    cursor.execute(f"""
         CREATE TABLE IF NOT EXISTS movimientos (
-            id SERIAL PRIMARY KEY,
-            fecha DATE,
-            tipo TEXT,
-            monto REAL,
-            cuenta_origen TEXT,
-            cuenta_destino TEXT,
-            motivo TEXT,
-            usuario_id INTEGER REFERENCES usuarios(id)
+            id {ID_TYPE},
+            fecha {DATE_TYPE},
+            tipo {TEXT_TYPE},
+            monto {REAL_TYPE},
+            cuenta_origen {TEXT_TYPE},
+            cuenta_destino {TEXT_TYPE},
+            motivo {TEXT_TYPE},
+            usuario_id INTEGER
         )
     """)
 
-    cursor.execute("""
+    cursor.execute(f"""
         CREATE TABLE IF NOT EXISTS deudas (
-            id SERIAL PRIMARY KEY,
-            deudor TEXT,
-            acreedor TEXT,
-            monto REAL,
-            estado TEXT,
-            motivo TEXT,
-            usuario_id INTEGER REFERENCES usuarios(id)
+            id {ID_TYPE},
+            deudor {TEXT_TYPE},
+            acreedor {TEXT_TYPE},
+            monto {REAL_TYPE},
+            estado {TEXT_TYPE},
+            motivo {TEXT_TYPE},
+            usuario_id INTEGER
         )
     """)
 
-    cursor.execute("""
+    cursor.execute(f"""
         CREATE TABLE IF NOT EXISTS emprendimientos (
-            id SERIAL PRIMARY KEY,
-            nombre TEXT,
-            tabla_stock TEXT,
-            usuario_id INTEGER REFERENCES usuarios(id)
+            id {ID_TYPE},
+            nombre {TEXT_TYPE},
+            usuario_id INTEGER
         )
     """)
 
-    cursor.execute("""
+    cursor.execute(f"""
         CREATE TABLE IF NOT EXISTS productos (
-            id SERIAL PRIMARY KEY,
-            emprendimiento_id INTEGER REFERENCES emprendimientos(id),
-            nombre TEXT NOT NULL,
+            id {ID_TYPE},
+            emprendimiento_id INTEGER,
+            nombre {TEXT_TYPE} NOT NULL,
             stock INTEGER DEFAULT 0,
-            precio_costo REAL DEFAULT 0,
-            precio_venta REAL DEFAULT 0,
-            usuario_id INTEGER REFERENCES usuarios(id)
+            precio REAL DEFAULT 0,
+            usuario_id INTEGER
         )
     """)
 
-    cursor.execute("""
+    cursor.execute(f"""
         CREATE TABLE IF NOT EXISTS movimientos_emprendimiento (
-            id SERIAL PRIMARY KEY,
-            emprendimiento_id INTEGER REFERENCES emprendimientos(id),
-            fecha DATE,
-            concepto TEXT,
-            detalle TEXT,
-            monto REAL,
-            usuario_id INTEGER REFERENCES usuarios(id)
+            id {ID_TYPE},
+            emprendimiento_id INTEGER,
+            fecha {DATE_TYPE},
+            concepto {TEXT_TYPE},
+            detalle {TEXT_TYPE},
+            monto {REAL_TYPE},
+            usuario_id INTEGER,
+            producto_id INTEGER
         )
     """)
 
-    cursor.execute("""
+    cursor.execute(f"""
         CREATE TABLE IF NOT EXISTS ventas (
-            id SERIAL PRIMARY KEY,
-            producto_id INTEGER REFERENCES productos(id),
-            fecha DATE,
+            id {ID_TYPE},
+            producto_id INTEGER,
+            fecha {DATE_TYPE},
             cantidad INTEGER,
-            precio_total REAL,
-            usuario_id INTEGER REFERENCES usuarios(id)
+            precio_total {REAL_TYPE},
+            usuario_id INTEGER
         )
     """)
 
-    cursor.execute("""
+    cursor.execute(f"""
         CREATE TABLE IF NOT EXISTS gastos (
-            id SERIAL PRIMARY KEY,
-            emprendimiento_id INTEGER REFERENCES emprendimientos(id),
-            fecha DATE,
-            concepto TEXT,
-            monto REAL,
-            usuario_id INTEGER REFERENCES usuarios(id)
+            id {ID_TYPE},
+            emprendimiento_id INTEGER,
+            fecha {DATE_TYPE},
+            concepto {TEXT_TYPE},
+            monto {REAL_TYPE},
+            usuario_id INTEGER
         )
     """)
 
