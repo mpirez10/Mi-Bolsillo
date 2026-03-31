@@ -4,13 +4,43 @@ import sys
 def get_db():
     database_url = os.getenv("DATABASE_URL")
 
-    # 🔥 PRODUCCIÓN (PostgreSQL - Render)
+    # 🔥 PRODUCCIÓN (PostgreSQL)
     if database_url:
         import psycopg2
         import psycopg2.extras
 
         conn = psycopg2.connect(database_url)
-        return conn
+
+        # 🔥 MAGIA: hacer que funcione como SQLite
+        conn.autocommit = False
+
+        # Wrapper para simular conn.execute()
+        class ConnWrapper:
+            def __init__(self, conn):
+                self.conn = conn
+
+            def execute(self, query, params=()):
+                cursor = self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+                # 🔥 Convertir ? → %s
+                query = query.replace("?", "%s")
+
+                cursor.execute(query, params)
+                return cursor
+
+            def commit(self):
+                self.conn.commit()
+
+            def rollback(self):
+                self.conn.rollback()
+
+            def close(self):
+                self.conn.close()
+
+            def cursor(self):
+                return self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+        return ConnWrapper(conn)
 
     # 💻 LOCAL (SQLite)
     else:
@@ -30,138 +60,107 @@ def get_db():
         return conn
 
 
-# 🔥 FUNCIÓN CLAVE: ejecuta queries compatible con ambos motores
-def query_db(conn, query, params=(), fetchone=False, fetchall=False):
-    cursor = conn.cursor()
-
-    # 👉 Convertir ? → %s si es PostgreSQL
-    if "psycopg2" in str(type(conn)):
-        query = query.replace("?", "%s")
-
-    cursor.execute(query, params)
-
-    if fetchone:
-        result = cursor.fetchone()
-    elif fetchall:
-        result = cursor.fetchall()
-    else:
-        result = None
-
-    cursor.close()
-    return result
-
-
 def init_db():
     conn = get_db()
-    cursor = conn.cursor()
 
-    is_postgres = "psycopg2" in str(type(conn))
-
-    # 👉 Tipos distintos según motor
-    ID_TYPE = "SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"
-    TEXT_TYPE = "TEXT"
-    REAL_TYPE = "REAL"
-    DATE_TYPE = "DATE"
-
-    # --- TABLAS ---
-    cursor.execute(f"""
+    # ⚠️ Usamos conn.execute directamente (ya funciona en ambos)
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS usuarios (
-            id {ID_TYPE},
-            nombre_completo {TEXT_TYPE} NOT NULL,
-            correo {TEXT_TYPE} UNIQUE NOT NULL,
-            fecha_nacimiento {DATE_TYPE} NOT NULL,
-            password {TEXT_TYPE} NOT NULL
+            id SERIAL PRIMARY KEY,
+            nombre_completo TEXT NOT NULL,
+            correo TEXT UNIQUE NOT NULL,
+            fecha_nacimiento TEXT NOT NULL,
+            password TEXT NOT NULL
         )
     """)
 
-    cursor.execute(f"""
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS cuentas (
-            id {ID_TYPE},
-            nombre {TEXT_TYPE} NOT NULL,
-            saldo {REAL_TYPE} NOT NULL DEFAULT 0,
+            id SERIAL PRIMARY KEY,
+            nombre TEXT NOT NULL,
+            saldo REAL NOT NULL DEFAULT 0,
             usuario_id INTEGER
         )
     """)
 
-    cursor.execute(f"""
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS movimientos (
-            id {ID_TYPE},
-            fecha {DATE_TYPE},
-            tipo {TEXT_TYPE},
-            monto {REAL_TYPE},
-            cuenta_origen {TEXT_TYPE},
-            cuenta_destino {TEXT_TYPE},
-            motivo {TEXT_TYPE},
+            id SERIAL PRIMARY KEY,
+            fecha TEXT,
+            tipo TEXT,
+            monto REAL,
+            cuenta_origen TEXT,
+            cuenta_destino TEXT,
+            motivo TEXT,
             usuario_id INTEGER
         )
     """)
 
-    cursor.execute(f"""
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS deudas (
-            id {ID_TYPE},
-            deudor {TEXT_TYPE},
-            acreedor {TEXT_TYPE},
-            monto {REAL_TYPE},
-            estado {TEXT_TYPE},
-            motivo {TEXT_TYPE},
+            id SERIAL PRIMARY KEY,
+            deudor TEXT,
+            acreedor TEXT,
+            monto REAL,
+            estado TEXT,
+            motivo TEXT,
             usuario_id INTEGER
         )
     """)
 
-    cursor.execute(f"""
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS emprendimientos (
-            id {ID_TYPE},
-            nombre {TEXT_TYPE},
+            id SERIAL PRIMARY KEY,
+            nombre TEXT,
             usuario_id INTEGER
         )
     """)
 
-    cursor.execute(f"""
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS productos (
-            id {ID_TYPE},
+            id SERIAL PRIMARY KEY,
             emprendimiento_id INTEGER,
-            nombre {TEXT_TYPE} NOT NULL,
+            nombre TEXT NOT NULL,
             stock INTEGER DEFAULT 0,
             precio REAL DEFAULT 0,
             usuario_id INTEGER
         )
     """)
 
-    cursor.execute(f"""
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS movimientos_emprendimiento (
-            id {ID_TYPE},
+            id SERIAL PRIMARY KEY,
             emprendimiento_id INTEGER,
-            fecha {DATE_TYPE},
-            concepto {TEXT_TYPE},
-            detalle {TEXT_TYPE},
-            monto {REAL_TYPE},
+            fecha TEXT,
+            concepto TEXT,
+            detalle TEXT,
+            monto REAL,
             usuario_id INTEGER,
             producto_id INTEGER
         )
     """)
 
-    cursor.execute(f"""
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS ventas (
-            id {ID_TYPE},
+            id SERIAL PRIMARY KEY,
             producto_id INTEGER,
-            fecha {DATE_TYPE},
+            fecha TEXT,
             cantidad INTEGER,
-            precio_total {REAL_TYPE},
+            precio_total REAL,
             usuario_id INTEGER
         )
     """)
 
-    cursor.execute(f"""
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS gastos (
-            id {ID_TYPE},
+            id SERIAL PRIMARY KEY,
             emprendimiento_id INTEGER,
-            fecha {DATE_TYPE},
-            concepto {TEXT_TYPE},
-            monto {REAL_TYPE},
+            fecha TEXT,
+            concepto TEXT,
+            monto REAL,
             usuario_id INTEGER
         )
     """)
 
     conn.commit()
-    cursor.close()
     conn.close()
