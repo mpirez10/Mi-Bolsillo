@@ -9,6 +9,7 @@ bp = Blueprint("movimientos", __name__)
 @login_required
 def movimiento():
     conn = get_db()
+    cursor = conn.cursor()
 
     if request.method == "POST":
         tipo = request.form.get("tipo")
@@ -18,7 +19,7 @@ def movimiento():
         motivo = request.form.get("motivo")
         fecha_cruda = request.form.get("fecha")
 
-        # --- VALIDACIONES BÁSICAS ---
+        # --- VALIDACIONES ---
         if not tipo or not cuenta_origen or not motivo or not fecha_cruda:
             return "Error: Faltan datos obligatorios."
 
@@ -32,31 +33,34 @@ def movimiento():
         try:
             fecha = normalizar_fecha(fecha_cruda)
         except ValueError:
-            return "Error: Fecha inválida. Use DDMMYY (6 números)."
+            return "Error: Fecha inválida. Use DDMMYY."
 
         try:
-            # --- VERIFICAR CUENTA ORIGEN ---
-            cuenta = conn.execute(
-                "SELECT saldo FROM cuentas WHERE nombre = ? AND usuario_id = ?",
+            # --- CUENTA ORIGEN ---
+            cursor.execute(
+                "SELECT saldo FROM cuentas WHERE nombre = %s AND usuario_id = %s",
                 (cuenta_origen, current_user.id)
-            ).fetchone()
+            )
+            cuenta = cursor.fetchone()
 
             if not cuenta:
                 return "Error: Cuenta origen no válida."
 
+            saldo_actual = cuenta[0]
+
             # --- LÓGICA ---
             if tipo == "Ingreso":
-                conn.execute(
-                    "UPDATE cuentas SET saldo = saldo + ? WHERE nombre = ? AND usuario_id = ?", 
+                cursor.execute(
+                    "UPDATE cuentas SET saldo = saldo + %s WHERE nombre = %s AND usuario_id = %s",
                     (monto, cuenta_origen, current_user.id)
                 )
 
             elif tipo == "Egreso":
-                if cuenta["saldo"] < monto:
+                if saldo_actual < monto:
                     return "Error: Saldo insuficiente."
 
-                conn.execute(
-                    "UPDATE cuentas SET saldo = saldo - ? WHERE nombre = ? AND usuario_id = ?", 
+                cursor.execute(
+                    "UPDATE cuentas SET saldo = saldo - %s WHERE nombre = %s AND usuario_id = %s",
                     (monto, cuenta_origen, current_user.id)
                 )
 
@@ -67,30 +71,32 @@ def movimiento():
                 if cuenta_origen == cuenta_destino:
                     return "Error: La cuenta origen y destino no pueden ser iguales."
 
-                cuenta_dest = conn.execute(
-                    "SELECT * FROM cuentas WHERE nombre = ? AND usuario_id = ?",
+                cursor.execute(
+                    "SELECT saldo FROM cuentas WHERE nombre = %s AND usuario_id = %s",
                     (cuenta_destino, current_user.id)
-                ).fetchone()
+                )
+                cuenta_dest = cursor.fetchone()
 
                 if not cuenta_dest:
                     return "Error: Cuenta destino no válida."
 
-                if cuenta["saldo"] < monto:
+                if saldo_actual < monto:
                     return "Error: Saldo insuficiente."
 
-                conn.execute(
-                    "UPDATE cuentas SET saldo = saldo - ? WHERE nombre = ? AND usuario_id = ?", 
+                cursor.execute(
+                    "UPDATE cuentas SET saldo = saldo - %s WHERE nombre = %s AND usuario_id = %s",
                     (monto, cuenta_origen, current_user.id)
                 )
-                conn.execute(
-                    "UPDATE cuentas SET saldo = saldo + ? WHERE nombre = ? AND usuario_id = ?", 
+                cursor.execute(
+                    "UPDATE cuentas SET saldo = saldo + %s WHERE nombre = %s AND usuario_id = %s",
                     (monto, cuenta_destino, current_user.id)
                 )
 
-            # --- REGISTRO ---
-            conn.execute("""
-                INSERT INTO movimientos (tipo, monto, cuenta_origen, cuenta_destino, motivo, fecha, usuario_id) 
-                VALUES (?,?,?,?,?,?,?)
+            # --- INSERT MOVIMIENTO ---
+            cursor.execute("""
+                INSERT INTO movimientos 
+                (tipo, monto, cuenta_origen, cuenta_destino, motivo, fecha, usuario_id) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (tipo, monto, cuenta_origen, cuenta_destino, motivo, fecha, current_user.id))
 
             conn.commit()
@@ -99,12 +105,20 @@ def movimiento():
             conn.rollback()
             return f"Error crítico al procesar el movimiento: {e}"
 
+        cursor.close()
+        conn.close()
+
         return redirect(url_for('home.index'))
 
-    cuentas = conn.execute(
-        "SELECT nombre FROM cuentas WHERE usuario_id = ?", 
+    # GET
+    cursor.execute(
+        "SELECT nombre FROM cuentas WHERE usuario_id = %s",
         (current_user.id,)
-    ).fetchall()
+    )
+    cuentas = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
 
     return render_template("movimiento.html", cuentas=cuentas)
 
@@ -113,11 +127,13 @@ def movimiento():
 @login_required
 def editar_fecha(id):
     conn = get_db()
+    cursor = conn.cursor()
 
-    mov = conn.execute(
-        "SELECT * FROM movimientos WHERE id = ? AND usuario_id = ?", 
+    cursor.execute(
+        "SELECT * FROM movimientos WHERE id = %s AND usuario_id = %s",
         (id, current_user.id)
-    ).fetchone()
+    )
+    mov = cursor.fetchone()
 
     if not mov:
         return "Error: Movimiento no encontrado o no tenés permiso."
@@ -131,15 +147,21 @@ def editar_fecha(id):
         try:
             nueva_fecha = normalizar_fecha(nueva_fecha_cruda)
 
-            conn.execute(
-                "UPDATE movimientos SET fecha = ? WHERE id = ? AND usuario_id = ?", 
+            cursor.execute(
+                "UPDATE movimientos SET fecha = %s WHERE id = %s AND usuario_id = %s",
                 (nueva_fecha, id, current_user.id)
             )
             conn.commit()
+
+            cursor.close()
+            conn.close()
 
             return redirect(url_for('home.index'))
 
         except ValueError:
             return "Error: Formato de fecha incorrecto. Usá DDMMYY."
+
+    cursor.close()
+    conn.close()
 
     return render_template("editar_movimiento.html", mov=mov)
