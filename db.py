@@ -1,18 +1,9 @@
 import os
 import sys
+import psycopg2
+import psycopg2.extras
 
-def get_db():
-    database_url = os.getenv("DATABASE_URL")
-
-    # 🔥 PRODUCCIÓN (PostgreSQL)
-    if database_url:
-        import psycopg2
-        import psycopg2.extras
-
-        conn = psycopg2.connect(database_url)
-
-        # 🔥 MAGIA: hacer que funcione como SQLite
-        conn.autocommit = False
+        conn = psycopg2.connect(database_url, cursor_factory=psycopg2.extras.RealDictCursor)
 
         # Wrapper para simular conn.execute()
         class ConnWrapper:
