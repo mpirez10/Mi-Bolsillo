@@ -85,24 +85,33 @@ def login():
         conn.close()
 
         if user:
-            id_usuario = user[0]
-            nombre = user[1]
-            correo_db = user[2]
-            fecha_nac = user[3]
-            password_hash = user[4]
+    try:
+        # PostgreSQL (dict)
+        id_usuario = user["id"]
+        nombre = user["nombre_completo"]
+        correo_db = user["correo"]
+        fecha_nac = user["fecha_nacimiento"]
+        password_hash = user["password"]
+    except:
+        # fallback tuple
+        id_usuario = user[0]
+        nombre = user[1]
+        correo_db = user[2]
+        fecha_nac = user[3]
+        password_hash = user[4]
 
-            if check_password_hash(password_hash, password):
-                from app import Usuario
+    if check_password_hash(password_hash, password):
+        from app import Usuario
 
-                usuario_obj = Usuario(
-                    id_usuario,
-                    nombre,
-                    correo_db,
-                    fecha_nac
-                )
+        usuario_obj = Usuario(
+            id_usuario,
+            nombre,
+            correo_db,
+            fecha_nac
+        )
 
-                login_user(usuario_obj)
-                return redirect(url_for('home.index'))
+        login_user(usuario_obj)
+        return redirect(url_for('home.index'))
 
         flash("Correo o contraseña incorrectos.")
 
