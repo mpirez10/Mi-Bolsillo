@@ -1,44 +1,27 @@
 import os
-import sys
+import psycopg2
+from psycopg2.extras import RealDictCursor
+
 
 def get_db():
     database_url = os.getenv("DATABASE_URL")
 
-    # 🔥 PRODUCCIÓN (PostgreSQL)
-    if database_url:
-        import psycopg2
-        import psycopg2.extras
+    if not database_url:
+        raise Exception("DATABASE_URL no está configurada")
 
-        conn = psycopg2.connect(
-            database_url,
-            cursor_factory=psycopg2.extras.RealDictCursor
-        )
-        return conn
+    conn = psycopg2.connect(database_url)
+    return conn
 
-    # 💻 LOCAL (SQLite)
-    else:
-        import sqlite3
 
-        if getattr(sys, 'frozen', False):
-            base_dir = os.path.dirname(sys.executable)
-        else:
-            base_dir = os.path.dirname(os.path.abspath(__file__))
-
-        db_path = os.path.join(base_dir, "finanzas.db")
-
-        conn = sqlite3.connect(db_path)
-        conn.row_factory = sqlite3.Row
-
-        conn.execute("PRAGMA foreign_keys = ON")
-
-        return conn
+def get_cursor(conn):
+    return conn.cursor(cursor_factory=RealDictCursor)
 
 
 def init_db():
     conn = get_db()
-    cursor = conn.cursor()
+    cursor = get_cursor(conn)
 
-    # 🔥 IMPORTANTE: sintaxis compatible
+    # --- USUARIOS ---
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS usuarios (
             id SERIAL PRIMARY KEY,
@@ -49,91 +32,100 @@ def init_db():
         )
     """)
 
+    # --- CUENTAS ---
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS cuentas (
             id SERIAL PRIMARY KEY,
             nombre TEXT NOT NULL,
-            saldo REAL DEFAULT 0,
-            usuario_id INTEGER
+            saldo NUMERIC DEFAULT 0,
+            usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE
         )
     """)
 
+    # --- MOVIMIENTOS ---
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS movimientos (
             id SERIAL PRIMARY KEY,
             fecha TEXT,
             tipo TEXT,
-            monto REAL,
+            monto NUMERIC,
             cuenta_origen TEXT,
             cuenta_destino TEXT,
             motivo TEXT,
-            usuario_id INTEGER
+            usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE
         )
     """)
 
+    # --- DEUDAS ---
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS deudas (
             id SERIAL PRIMARY KEY,
             deudor TEXT,
             acreedor TEXT,
-            monto REAL,
+            monto NUMERIC,
             estado TEXT,
             motivo TEXT,
-            usuario_id INTEGER
+            fecha TEXT,
+            usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE
         )
     """)
 
+    # --- EMPRENDIMIENTOS ---
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS emprendimientos (
             id SERIAL PRIMARY KEY,
             nombre TEXT,
-            usuario_id INTEGER
+            usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE
         )
     """)
 
+    # --- PRODUCTOS ---
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS productos (
             id SERIAL PRIMARY KEY,
-            emprendimiento_id INTEGER,
+            emprendimiento_id INTEGER REFERENCES emprendimientos(id) ON DELETE CASCADE,
             nombre TEXT,
             stock INTEGER DEFAULT 0,
-            precio REAL DEFAULT 0,
-            usuario_id INTEGER
+            precio NUMERIC DEFAULT 0,
+            usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE
         )
     """)
 
+    # --- MOVIMIENTOS EMPRENDIMIENTO ---
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS movimientos_emprendimiento (
             id SERIAL PRIMARY KEY,
-            emprendimiento_id INTEGER,
+            emprendimiento_id INTEGER REFERENCES emprendimientos(id) ON DELETE CASCADE,
             fecha TEXT,
             concepto TEXT,
             detalle TEXT,
-            monto REAL,
-            usuario_id INTEGER,
+            monto NUMERIC,
+            usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
             producto_id INTEGER
         )
     """)
 
+    # --- VENTAS ---
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS ventas (
             id SERIAL PRIMARY KEY,
-            producto_id INTEGER,
+            producto_id INTEGER REFERENCES productos(id) ON DELETE CASCADE,
             fecha TEXT,
             cantidad INTEGER,
-            precio_total REAL,
-            usuario_id INTEGER
+            precio_total NUMERIC,
+            usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE
         )
     """)
 
+    # --- GASTOS ---
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS gastos (
             id SERIAL PRIMARY KEY,
-            emprendimiento_id INTEGER,
+            emprendimiento_id INTEGER REFERENCES emprendimientos(id) ON DELETE CASCADE,
             fecha TEXT,
             concepto TEXT,
-            monto REAL,
-            usuario_id INTEGER
+            monto NUMERIC,
+            usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE
         )
     """)
 
