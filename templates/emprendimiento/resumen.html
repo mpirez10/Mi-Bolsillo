@@ -107,7 +107,7 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
             <div>
                 <label style="font-size: 0.8rem; font-weight: 600;">Fecha</label>
-                <input type="text" name="fecha" id="fecha_input" class="form-control" required>
+                <input type="date" name="fecha" id="fecha_input" class="form-control" required>
             </div>
             <div>
                 <label style="font-size: 0.8rem; font-weight: 600;">Tipo</label>
@@ -177,47 +177,42 @@
         <tbody>
             {% for m in movimientos %}
             <tr>
-                <div style="flex: 1; min-width: 140px;">
-    <label style="font-size: 0.8rem; font-weight: 600; color: #64748b;">Fecha del Movimiento</label>
-    <input type="date" 
-           id="fecha_input" 
-           name="fecha" 
-           class="form-control" 
-           required 
-           style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
-</div>
-                <td class="td-tipo">
+                <td class="td-fecha" style="padding: 12px;">{{ m.fecha }}</td>
+                
+                <td class="td-tipo" style="padding: 12px;">
                     <span class="badge {{ 'badge-ingreso' if m.concepto == 'INGRESO' else 'badge-egreso' }}" style="padding: 4px 8px; font-size: 0.65rem;">
                         {{ m.concepto }}
                     </span>
                 </td>
-               <td style="padding: 12px;">
-    <div style="font-weight: 700; color: #1e293b; line-height: 1.2;">
-        {{ m.detalle }}
-    </div>
+                
+                <td style="padding: 12px;">
+                    <div style="font-weight: 700; color: #1e293b; line-height: 1.2;">
+                        {{ m.detalle }}
+                    </div>
 
-    {% if m.producto %}
-        <div style="margin-top: 5px;">
-            <span style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
-                <i class="fas fa-tag" style="font-size: 0.6rem;"></i>
-                {{ m.producto.nombre }} {{ m.producto.detalle }} ({{ m.producto.talle }})
-            </span>
-        </div>
-    {% elif m.nombre_producto %}
-        {# Por si tu consulta SQL ya trae el nombre plano #}
-        <div style="margin-top: 5px;">
-            <span style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600;">
-                <i class="fas fa-tag"></i> {{ m.nombre_producto }}
-            </span>
-        </div>
-    {% endif %}
-</td>
-                <td class="td-monto">
+                    {% if m.producto %}
+                        <div style="margin-top: 5px;">
+                            <span style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                                <i class="fas fa-tag" style="font-size: 0.6rem;"></i>
+                                {{ m.producto.nombre }} {{ m.producto.detalle }} ({{ m.producto.talle }})
+                            </span>
+                        </div>
+                    {% elif m.nombre_producto %}
+                        <div style="margin-top: 5px;">
+                            <span style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600;">
+                                <i class="fas fa-tag"></i> {{ m.nombre_producto }}
+                            </span>
+                        </div>
+                    {% endif %}
+                </td>
+                
+                <td class="td-monto" style="padding: 12px;">
                     <strong style="color: {{ '#10b981' if m.concepto == 'INGRESO' else '#ef4444' }};">
                         {{ '+' if m.concepto == 'INGRESO' else '-' }} ${{ "{:,.2f}".format(m.monto) }}
                     </strong>
                 </td>
-                <td class="td-accion">
+                
+                <td class="td-accion" style="padding: 12px; text-align: center;">
                     <a href="{{ url_for('emprendimiento.eliminar_movimiento', mid=m.id, eid=eid) }}" 
                        style="color: #cbd5e1; padding: 10px;"
                        onclick="return confirm('¿Borrar movimiento?')">
@@ -240,7 +235,6 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Mantengo tu lógica de filtrado y gráfica, pero ajustada a la nueva estructura
     function toggleProductoSelector() {
         const concepto = document.getElementById('tipo_concepto').value;
         const wrapper = document.getElementById('wrapper_producto');
@@ -248,14 +242,17 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        // Autocompletar fecha de hoy en formato dd/mm/yy
+        // ARREGLO DE LA FECHA PARA LA BASE DE DATOS (YYYY-MM-DD)
         const hoy = new Date();
-        const dd = String(hoy.getDate()).padStart(2, '0');
+        const yyyy = hoy.getFullYear();
         const mm = String(hoy.getMonth() + 1).padStart(2, '0');
-        const yy = hoy.getFullYear().toString().slice(-2);
-        document.getElementById('fecha_input').value = `${dd}/${mm}/${yy}`;
+        const dd = String(hoy.getDate()).padStart(2, '0');
+        
+        const fechaInput = document.getElementById('fecha_input');
+        if(fechaInput) {
+            fechaInput.value = `${yyyy}-${mm}-${dd}`;
+        }
 
-        // Gráfica reducida para mobile
         const ctx = document.getElementById('graficaIngresos').getContext('2d');
         new Chart(ctx, {
             type: 'line',
@@ -278,35 +275,31 @@
                 scales: { x: { display: false }, y: { beginAtZero: true } }
             }
         });
-    filtrarMovimientos();
-});
+        
+        // Ejecutamos el filtro al inicio
+        // Usamos setTimeout para asegurar que la tabla cargó bien antes de calcular sumas
+        setTimeout(filtrarMovimientos, 100);
+    });
 
 function filtrarMovimientos() {
     const texto = document.getElementById("busquedaMovimiento").value.toLowerCase();
     const desdeInput = document.getElementById("fechaDesde").value;
-    const hastaInput = document.getElementById("fechaHasta").value;
+    const hastaInput = document.getElementById("fechaHasta") ? document.getElementById("fechaHasta").value : "";
     const filas = document.querySelectorAll("tbody tr");
     
     let sumaTotal = 0;
 
     filas.forEach(fila => {
         const celdas = fila.getElementsByTagName("td");
-        // Verificamos que la fila tenga al menos 4 columnas (Fecha, Tipo, Detalle, Monto)
         if (celdas.length < 4) return;
 
         const fechaTexto = celdas[0].innerText.trim();
         const detalle = celdas[2].innerText.toLowerCase();
         
-        // --- LIMPIEZA DE MONTO (Compatible con formato 3,300.00) ---
         let montoTexto = celdas[3].innerText.trim();
-        
-        // 1. Quitamos el símbolo $, espacios y las COMAS de los miles
         montoTexto = montoTexto.replace('$', '').replace(/\s/g, '').replace(/,/g, '');
-        
-        // 2. Ahora que no hay comas, el punto es el decimal puro que entiende JS
         let monto = parseFloat(montoTexto) || 0;
 
-        // --- LÓGICA DE FECHAS ---
         const fechaFilaISO = formatearAISO(fechaTexto);
         let coincideTexto = detalle.includes(texto);
         let coincideFecha = true;
@@ -318,7 +311,6 @@ function filtrarMovimientos() {
             if (fechaFilaISO > hastaInput) coincideFecha = false;
         }
 
-        // --- MOSTRAR U OCULTAR ---
         if (coincideTexto && coincideFecha) {
             fila.style.display = "";
             sumaTotal += monto;
@@ -327,25 +319,24 @@ function filtrarMovimientos() {
         }
     });
 
-    // --- ACTUALIZAR EL CARTELITO (Formato 3,300.00) ---
     const totalElemento = document.getElementById("sumaTotalFiltrada");
     if (totalElemento) {
-        // Usamos 'en-US' para mantener comas en miles y punto en decimales
         const formatoUsa = sumaTotal.toLocaleString('en-US', { 
             minimumFractionDigits: 2, 
             maximumFractionDigits: 2 
         });
 
         totalElemento.innerText = "$ " + formatoUsa;
-        
-        // Color dinámico: Verde para positivo, Rojo para negativo
         totalElemento.style.color = sumaTotal >= 0 ? "#16a34a" : "#ef4444";
     }
 }
 
 function formatearAISO(fechaStr) {
-    // Convierte dd/mm/yy o dd/mm/yyyy a yyyy-mm-dd
-    const partes = fechaStr.split('/');
+    if(!fechaStr) return null;
+    // Si la fecha ya viene como YYYY-MM-DD, la devolvemos igual
+    if(fechaStr.includes('-') && fechaStr.length === 10) return fechaStr;
+
+    const partes = fechaStr.split(/[-/]/);
     if (partes.length !== 3) return null;
 
     let dia = partes[0].padStart(2, '0');
@@ -354,30 +345,27 @@ function formatearAISO(fechaStr) {
     
     if (año.length === 2) año = "20" + año; 
     
+    // Asumimos que si el primer número es 4 cifras, viene como YYYY-MM-DD
+    if (partes[0].length === 4) return `${partes[0]}-${partes[1].padStart(2, '0')}-${partes[2].padStart(2, '0')}`;
+    
     return `${año}-${mes}-${dia}`;
 }
 
 function limpiarFiltros() {
     document.getElementById("busquedaMovimiento").value = "";
     document.getElementById("fechaDesde").value = "";
-    document.getElementById("fechaHasta").value = "";
+    if(document.getElementById("fechaHasta")) document.getElementById("fechaHasta").value = "";
     filtrarMovimientos();
 }
 
-// Iniciar sumatoria al cargar la página
-document.addEventListener("DOMContentLoaded", filtrarMovimientos);
 function exportarAExcel() {
-    // 1. Crear una matriz de datos (Array de Arrays) para el Excel
     const datosParaExcel = [];
-    
-    // 2. Obtener los encabezados de la tabla
     const encabezados = [];
     document.querySelectorAll("thead th").forEach(th => {
         encabezados.push(th.innerText.trim());
     });
-    datosParaExcel.push(encabezados); // La primera fila son los títulos
+    datosParaExcel.push(encabezados);
 
-    // 3. Recorrer las filas de la tabla y extraer solo las VISIBLES
     let sumaTotal = 0;
     const filas = document.querySelectorAll("tbody tr");
     
@@ -388,12 +376,10 @@ function exportarAExcel() {
             
             for (let i = 0; i < celdas.length; i++) {
                 let valor = celdas[i].innerText.trim();
-                
-                // Si es la columna del monto (índice 3), lo tratamos como número
                 if (i === 3) {
                     let num = valor.replace('$', '').replace(/\s/g, '').replace(/,/g, '');
                     let numLimpio = parseFloat(num) || 0;
-                    filaData.push(numLimpio); // Guardamos como número real
+                    filaData.push(numLimpio);
                     sumaTotal += numLimpio;
                 } else {
                     filaData.push(valor);
@@ -403,57 +389,22 @@ function exportarAExcel() {
         }
     });
 
-    // 4. AGREGAR FILA DE TOTAL AL FINAL
-    // Dejamos celdas vacías para Fecha, Tipo y Detalle, y ponemos el total en la col 4
     datosParaExcel.push(["", "", "TOTAL DEL REPORTE:", sumaTotal]);
 
-    // 5. Crear el libro y la hoja con SheetJS
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(datosParaExcel);
 
-    // 6. Configurar el formato de la columna de montos (Columna D) como moneda en Excel
     const rango = XLSX.utils.decode_range(ws['!ref']);
     for (let R = 1; R <= rango.e.r; ++R) {
         const celdaMonto = ws[XLSX.utils.encode_cell({c: 3, r: R})];
         if (celdaMonto && typeof celdaMonto.v === 'number') {
-            celdaMonto.z = '"$"#,##0.00'; // Formato de contabilidad en Excel
+            celdaMonto.z = '"$"#,##0.00';
         }
     }
 
-    // 7. Descargar el archivo
     XLSX.utils.book_append_sheet(wb, ws, "Movimientos");
     const fechaHoy = new Date().toISOString().slice(0, 10);
     XLSX.writeFile(wb, `Reporte_Caja_${fechaHoy}.xlsx`);
 }
 </script>
-<style>
-.producto-talle-info {
-    font-size: 0.8rem;
-    color: #64748b;
-    margin-top: 4px;
-    font-weight: 400;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-.producto-talle-info .tag-icon {
-    font-size: 0.7rem;
-    flex-shrink: 0;
-}
-.producto-talle-info .producto-nombre {
-    max-width: 140px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: inline-block;
-    vertical-align: bottom;
-}
-.producto-talle-info .producto-talle {
-    background: #f1f5f9;
-    padding: 1px 6px;
-    border-radius: 4px;
-    margin-left: 5px;
-    flex-shrink: 0;
-}
-</style>
 {% endblock %}
