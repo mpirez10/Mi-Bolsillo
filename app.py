@@ -128,17 +128,22 @@ def ver_agenda(id):
 @app.route('/agregar_dia', methods=['POST'])
 def agregar_dia():
     fecha = request.form.get('fecha')
-    if not fecha:
-        return redirect(url_for('ver_agenda'))
+    # Capturamos el id que mandamos en el input hidden
+    eid = request.form.get('emprendimiento_id') 
+
+    if not fecha or not eid:
+        return redirect(url_for('ver_agenda', id=eid))
 
     conn = get_db()
     cur = conn.cursor()
-    # Insertamos el día. El emprendimiento_id lo dejamos en 1 por ahora (Barbería)
-    cur.execute("INSERT INTO agendas (fecha, emprendimiento_id) VALUES (%s, 1)", (fecha,))
+    # Usamos el eid real en el INSERT
+    cur.execute("INSERT INTO agendas (fecha, emprendimiento_id) VALUES (%s, %s)", (fecha, eid))
     conn.commit()
     cur.close()
     conn.close()
-    return redirect(url_for('ver_agenda'))
+
+    # CORRECCIÓN DEL ERROR: Ahora le pasamos el id al url_for
+    return redirect(url_for('ver_agenda', id=eid))
 
 @app.route('/guardar_turno', methods=['POST'])
 def guardar_turno():
