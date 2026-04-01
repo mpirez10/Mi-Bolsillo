@@ -117,22 +117,22 @@ app.register_blueprint(auth.auth_bp)
 app.register_blueprint(finanzas_bp)
 app.register_blueprint(emprendimiento_bp)
 
-@app.route("/migrate-productos")
-def migrate_productos():
+@app.route("/migrate-movimientos-empr")
+def migrate_movimientos_empr():
     conn = get_db()
     cursor = conn.cursor()
     try:
-        cursor.execute("ALTER TABLE productos ADD COLUMN IF NOT EXISTS detalle TEXT")
-        cursor.execute("ALTER TABLE productos ADD COLUMN IF NOT EXISTS talle TEXT")
+        cursor.execute("ALTER TABLE movimientos_emprendimiento ADD COLUMN IF NOT EXISTS producto_id INTEGER")
         conn.commit()
     except Exception as e:
         conn.rollback()
         cursor.close()
         conn.close()
-        return f"Error migrando productos: {e}", 500
+        return f"Error migrando movimientos_emprendimiento: {e}", 500
     cursor.close()
     conn.close()
-    return "Migración de productos completada"
+    return "Migración de movimientos_emprendimiento completada"
+
 
 
 
