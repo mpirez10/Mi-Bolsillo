@@ -183,6 +183,29 @@ def resumen(eid):
     """, (eid, current_user.id))
     movimientos = cursor.fetchall()
 
+    # --- Preparar datos para gráficos (seguro: listas vacías si no hay datos) ---
+    labels_ingresos = []
+    data_ingresos = []
+    labels_gastos = []
+    data_gastos = []
+
+    for m in movimientos:
+        concepto_m = _get_value(m, "concepto", 2)
+        fecha_m = _get_value(m, "fecha", 1) or ""
+        monto_m = _get_value(m, "monto", 4) or 0
+
+        try:
+            monto_val = float(monto_m)
+        except:
+            monto_val = 0.0
+
+        if concepto_m == "INGRESO":
+            labels_ingresos.append(fecha_m)
+            data_ingresos.append(monto_val)
+        elif concepto_m == "EGRESO":
+            labels_gastos.append(fecha_m)
+            data_gastos.append(monto_val)
+
     cursor.close()
     conn.close()
 
@@ -194,7 +217,11 @@ def resumen(eid):
         ingresos=ingresos,
         gastos=gastos,
         movimientos=movimientos,
-        productos_lista=productos_lista
+        productos_lista=productos_lista,
+        labels_ingresos=labels_ingresos,
+        data_ingresos=data_ingresos,
+        labels_gastos=labels_gastos,
+        data_gastos=data_gastos
     )
 
 
