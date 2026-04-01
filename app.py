@@ -185,53 +185,46 @@ def guardar_turno():
 def actualizar_estado(id):
     datos = request.get_json()
     nuevo_estado = datos.get('estado')
-
     conn = get_db()
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     try:
-        # 1. Traemos la info (Solo lo que sabemos que existe)
         cur.execute("""
             SELECT a.fecha, a.emprendimiento_id, t.cliente, t.detalle, t.monto, t.estado as estado_anterior
             FROM turnos t
             JOIN agendas a ON t.agenda_id = a.id
             WHERE t.id = %s
         """, (id,))
-        
         turno = cur.fetchone()
 
         if not turno:
             return jsonify({"status": "error", "message": "Turno no encontrado"}), 404
 
-        # 2. Actualizamos el estado del turno
-        cur.execute("UPDATE turnos SET estado = %s WHERE id = %s", (nuevo_estado, id))
-        
-        # 3. Si es PAGO, insertamos en movimientos_emprendimiento
+        # Marcador único para este turno en los movimientos
+        identificador_movimiento = f"TURNO_ID_{id}: {turno['cliente']}"
+
+        # A. Si el nuevo estado es PAGO (y antes no lo era), insertamos
         if nuevo_estado == 'Pago' and turno['estado_anterior'] != 'Pago':
-            detalle_final = f"Turno: {turno['cliente']}"
-            if turno['detalle']:
-                detalle_final += f" - {turno['detalle']}"
-            
-            # Usamos current_user.id para el usuario_id
             cur.execute("""
                 INSERT INTO movimientos_emprendimiento 
                 (emprendimiento_id, fecha, concepto, detalle, monto, usuario_id)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """, (
-                turno['emprendimiento_id'], 
-                turno['fecha'], 
-                'INGRESO',
-                detalle_final,
-                turno['monto'], 
-                current_user.id 
-            ))
+                VALUES (%s, %s, 'INGRESO', %s, %s, %s)
+            """, (turno['emprendimiento_id'], turno['fecha'], identificador_movimiento, turno['monto'], current_user.id))
 
+        # B. Si el nuevo estado NO es PAGO (y antes sí lo era), borramos el movimiento
+        elif nuevo_estado != 'Pago' and turno['estado_anterior'] == 'Pago':
+            cur.execute("""
+                DELETE FROM movimientos_emprendimiento 
+                WHERE emprendimiento_id = %s AND detalle = %s AND usuario_id = %s
+            """, (turno['emprendimiento_id'], identificador_movimiento, current_user.id))
+
+        # Finalmente actualizamos el turno
+        cur.execute("UPDATE turnos SET estado = %s WHERE id = %s", (nuevo_estado, id))
+        
         conn.commit()
         return jsonify({"status": "success"})
-
     except Exception as e:
         conn.rollback()
-        print(f"ERROR EN CAJA: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
     finally:
         cur.close()
@@ -241,13 +234,38 @@ def actualizar_estado(id):
 @app.route('/borrar_turno/<int:id>', methods=['POST'])
 def borrar_turno(id):
     conn = get_db()
-    cur = conn.cursor()
-    cur.execute("DELETE FROM turnos WHERE id = %s", (id,))
-    conn.commit()
-    cur.close()
-    conn.close()
-    return jsonify({"success": True}) # Usamos JSON para que el AJAX lo borre sin recargar
+    # Usamos RealDictCursor para sacar los datos del turno antes de borrarlo
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    
+    try:
+        # 1. Antes de borrar el turno, necesitamos saber de quién era para borrar el movimiento
+        cur.execute("SELECT cliente, estado FROM turnos WHERE id = %s", (id,))
+        turno = cur.fetchone()
 
+        if turno:
+            # 2. Si el turno estaba 'Pago', tenemos que borrar su rastro en la caja
+            if turno['estado'] == 'Pago':
+                # Usamos exactamente el mismo formato de detalle que en actualizar_estado
+                identificador_movimiento = f"TURNO_ID_{id}: {turno['cliente']}"
+                
+                cur.execute("""
+                    DELETE FROM movimientos_emprendimiento 
+                    WHERE detalle = %s AND concepto = 'INGRESO'
+                """, (identificador_movimiento,))
+
+            # 3. Ahora sí, borramos el turno de la agenda
+            cur.execute("DELETE FROM turnos WHERE id = %s", (id,))
+            
+        conn.commit()
+        return jsonify({"success": True})
+
+    except Exception as e:
+        conn.rollback()
+        print(f"Error al borrar turno: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
 # --- IMPORTACIÓN Y REGISTRO DE RUTAS ---
 from routes import home, cuentas, movimientos, deudas, auth
 from routes.finanzas import finanzas_bp
