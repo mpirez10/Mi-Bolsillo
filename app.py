@@ -167,6 +167,25 @@ def fix_all_sequences():
     conn.close()
     return "Secuencias reparadas correctamente"
 
+@app.route("/migrate-add-columns")
+def migrate_add_columns():
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("ALTER TABLE productos ADD COLUMN IF NOT EXISTS detalle TEXT")
+        cursor.execute("ALTER TABLE productos ADD COLUMN IF NOT EXISTS talle TEXT")
+        cursor.execute("ALTER TABLE deudas ADD COLUMN IF NOT EXISTS fecha TEXT")
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        cursor.close()
+        conn.close()
+        return f"Error migrando columnas: {e}", 500
+    cursor.close()
+    conn.close()
+    return "Migración completada"
+
+
 # --- INICIALIZAR DB (crea tablas si no existen) ---
 with app.app_context():
     init_db()
