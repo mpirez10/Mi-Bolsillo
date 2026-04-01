@@ -299,6 +299,30 @@ def borrar_dia(id):
         # Si no la cerrás, Render se queda sin "slots" para la base de datos
         conn.close()
 
+@app.route('/emprendimiento/editar_nombre/<int:id>', methods=['POST'])
+def editar_nombre_emprendimiento(id):
+    nuevo_nombre = request.form.get('nombre_emprendimiento')
+    if not nuevo_nombre:
+        return redirect(url_for('emprendimiento.resumen', eid=id))
+
+    conn = get_db()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                UPDATE emprendimientos 
+                SET nombre = %s 
+                WHERE id = %s
+            """, (nuevo_nombre, id))
+            conn.commit()
+    except Exception as e:
+        print(f"Error al editar nombre: {e}")
+        conn.rollback()
+    finally:
+        conn.close()
+
+    # Redirigimos de vuelta al resumen (ajustá el nombre de la ruta si es necesario)
+    return redirect(url_for('emprendimiento.resumen', eid=id))
+
 # --- IMPORTACIÓN Y REGISTRO DE RUTAS ---
 from routes import home, cuentas, movimientos, deudas, auth
 from routes.finanzas import finanzas_bp
