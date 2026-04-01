@@ -179,20 +179,55 @@ def guardar_turno():
 
     # 2. REDIRECCIÓN CORRECTA: Usamos 'eid' que es la variable que definimos arriba
     return redirect(url_for('ver_agenda', id=eid))
+
 @app.route('/actualizar_estado/<int:id>', methods=['POST'])
 def actualizar_estado(id):
     datos = request.get_json()
     nuevo_estado = datos.get('estado')
 
     conn = get_db()
-    cur = conn.cursor()
-    cur.execute("UPDATE turnos SET estado = %s WHERE id = %s", (nuevo_estado, id))
+    # Usamos RealDictCursor para sacar los datos fácil por el nombre de la columna
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    
+    # 1. Buscamos toda la info del turno y de la agenda (con un JOIN)
+    cur.execute("""
+        SELECT a.fecha, a.emprendimiento_id, t.cliente, t.detalle, t.monto, t.estado as estado_anterior
+        FROM turnos t
+        JOIN agendas a ON t.agenda_id = a.id
+        WHERE t.id = %s
+    """, (id,))
+    
+    turno = cur.fetchone()
+
+    if turno:
+        # 2. Actualizamos el estado en la agenda a 'Pago', 'Faltó', etc.
+        cur.execute("UPDATE turnos SET estado = %s WHERE id = %s", (nuevo_estado, id))
+        
+        # 3. LA MAGIA: Si el nuevo estado es 'Pago' y ANTES no estaba pago...
+        if nuevo_estado == 'Pago' and turno['estado_anterior'] != 'Pago':
+            
+            # Armamos el texto para el detalle (Ej: "Juan Perez - Corte y Barba")
+            if turno['detalle']:
+                detalle_mov = f"{turno['cliente']} - {turno['detalle']}"
+            else:
+                detalle_mov = turno['cliente']
+                
+            # Insertamos el movimiento directo en la caja del emprendimiento
+            cur.execute("""
+                INSERT INTO movimientos (emprendimiento_id, fecha, tipo, detalle, monto)
+                VALUES (%s, %s, 'INGRESO', %s, %s)
+            """, (
+                turno['emprendimiento_id'], 
+                turno['fecha'], 
+                detalle_mov, 
+                turno['monto']
+            ))
+
     conn.commit()
     cur.close()
     conn.close()
-    return jsonify({"status": "success", "message": "Estado actualizado"})
-
-
+    
+    return jsonify({"status": "success", "message": "Estado actualizado y plata en caja, bo"})
 
 @app.route('/borrar_turno/<int:id>', methods=['POST'])
 def borrar_turno(id):
