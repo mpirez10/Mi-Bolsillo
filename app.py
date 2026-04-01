@@ -4,8 +4,8 @@ from flask_login import LoginManager, UserMixin
 from werkzeug.security import generate_password_hash
 from db import get_db, init_db
 from flask import render_template, request, redirect, url_for, jsonify
-# Importá tus funciones de get_db y seguridad si vas a encriptar nombres
-
+import psycopg2
+import psycopg2.extras  # Esto es fundamental para el RealDictCursor
 
 # --- CONFIGURACIÓN DE APP ---
 app = Flask(__name__, template_folder='templates', static_folder='static')
