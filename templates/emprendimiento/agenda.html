@@ -1,0 +1,40 @@
+<div class="container mt-4">
+    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalDia">
+        + Agregar Día
+    </button>
+
+    <div class="accordion" id="accordionAgenda">
+        {% for agenda in agendas %}
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="heading{{ agenda.id }}">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ agenda.id }}">
+                    📅 {{ agenda.fecha.strftime('%d/%m/%Y') }}
+                </button>
+            </h2>
+            <div id="collapse{{ agenda.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionAgenda">
+                <div class="accordion-body">
+                    <button class="btn btn-sm btn-outline-dark mb-2">+ Agregar Turno</button>
+                    
+                    <ul class="list-group">
+                        {% for turno in agenda.turnos %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ turno.hora.strftime('%H:%M') }}</strong> | {{ turno.cliente }}
+                                <br><small class="text-muted">{{ turno.detalle }} - ${{ turno.monto }}</small>
+                                <span class="badge bg-{{ 'warning' if turno.estado == 'Pendiente' else 'success' if turno.estado == 'Pago' else 'danger' if turno.estado == 'Faltó' else 'secondary' }}">
+                                    {{ turno.estado }}
+                                </span>
+                            </div>
+                            <div class="acciones">
+                                <button class="btn btn-link p-1">✏️</button>
+                                <button class="btn btn-link p-1 text-danger" onclick="borrarTurno({{ turno.id }})">🗑️</button>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
