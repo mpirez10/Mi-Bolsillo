@@ -117,25 +117,22 @@ app.register_blueprint(auth.auth_bp)
 app.register_blueprint(finanzas_bp)
 app.register_blueprint(emprendimiento_bp)
 
-@app.route("/migrate-productos-y-movimientos")
-def migrate_productos_y_movimientos():
+@app.route("/migrate-add-precio")
+def migrate_add_precio():
     conn = get_db()
     cursor = conn.cursor()
     try:
-        cursor.execute("ALTER TABLE productos ADD COLUMN IF NOT EXISTS detalle TEXT")
-        cursor.execute("ALTER TABLE productos ADD COLUMN IF NOT EXISTS talle TEXT")
-        cursor.execute("ALTER TABLE movimientos_emprendimiento ADD COLUMN IF NOT EXISTS producto_id INTEGER")
+        cursor.execute("ALTER TABLE productos ADD COLUMN IF NOT EXISTS precio NUMERIC(12,2) DEFAULT 0.00")
+        cursor.execute("ALTER TABLE productos ALTER COLUMN precio SET NOT NULL")
         conn.commit()
     except Exception as e:
         conn.rollback()
         cursor.close()
         conn.close()
-        return f"Error migrando: {e}", 500
+        return f"Error migrando precio: {e}", 500
     cursor.close()
     conn.close()
-    return "Migración completada"
-
-
+    return "Columna precio añadida"
 
 
 # --- INICIALIZAR DB (crea tablas si no existen) ---
