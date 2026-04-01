@@ -123,7 +123,7 @@ def ver_agenda(id):
     
     cur.close()
     conn.close()
-    return render_template('agenda.html', agendas=agendas, emprendimiento_id=id)
+    return render_template('emprendimiento/agenda.html', agendas=agendas, emprendimiento_id=id)
 
 @app.route('/agregar_dia', methods=['POST'])
 def agregar_dia():
