@@ -1,57 +1,151 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="card">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h2>Control de Deudas</h2>
-        <a href="/deudas/nueva" class="btn btn-blue">+ Nueva Deuda</a>
+<style>
+    .deudas-container { margin-top: 10px; }
+    
+    .header-flex {
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-bottom: 20px;
+    }
+
+    /* Estilo de la tabla (Desktop) */
+    .table-deudas { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .table-deudas th { text-align: left; padding: 12px; color: #64748b; font-size: 0.85rem; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+    .table-deudas td { padding: 15px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+
+    /* Forms y Selects */
+    .form-pago { display: flex; gap: 5px; align-items: center; }
+    .select-pago { padding: 8px; border-radius: 6px; border: 1px solid var(--border); font-size: 0.85rem; }
+    .btn-pagar { background: var(--money-green); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+
+    /* Mobile Cards */
+    @media (max-width: 768px) {
+        .header-flex { flex-direction: column; gap: 15px; text-align: center; }
+        .header-flex h2 { margin: 0; }
+        .btn-nueva { width: 100%; justify-content: center; }
+
+        .table-deudas thead { display: none; }
+        .table-deudas tbody tr {
+            display: block;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .table-deudas td {
+            display: block;
+            width: 100%;
+            padding: 5px 0 !important;
+            border: none !important;
+            text-align: left;
+        }
+
+        /* Etiquetas para datos en mobile */
+        .table-deudas td::before {
+            content: attr(data-label);
+            font-weight: 700;
+            color: #64748b;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .monto-destacado { font-size: 1.2rem; color: var(--danger); font-weight: 700; }
+        
+        .form-pago { flex-direction: column; width: 100%; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); }
+        .select-pago { width: 100%; padding: 12px; }
+        .btn-pagar { width: 100%; padding: 12px; margin-top: 5px; }
+        
+        .btn-eliminar { 
+            display: block; 
+            text-align: center; 
+            margin-top: 10px; 
+            color: #94a3b8; 
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+    }
+</style>
+
+<div class="deudas-container">
+    <div class="card" style="padding: 20px;">
+        <div class="header-flex">
+            <h2 style="margin:0;"><i class="fas fa-file-invoice-dollar" style="color: var(--pocket-blue); margin-right: 10px;"></i>Control de Deudas</h2>
+            <a href="/deudas/nueva" class="btn btn-blue btn-nueva">
+                <i class="fas fa-plus-circle"></i> Nueva Deuda
+            </a>
+        </div>
+
+        <table class="table-deudas">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Deudor / Acreedor</th>
+                    <th>Monto</th>
+                    <th>Motivo</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for d in deudas %}
+                {% set estado = d['estado'] if d is mapping else d[4] %}
+                {% set idd = d['id'] if d is mapping else d[0] %}
+                {% set monto = d['monto'] if d is mapping else d[3] %}
+                
+                <tr>
+                    <td data-label="Fecha">{{ d['fecha'] if d is mapping else d[6] }}</td>
+                    
+                    <td data-label="Relación">
+                        <strong>{{ d['deudor'] if d is mapping else d[1] }}</strong> 
+                        <i class="fas fa-long-arrow-alt-right" style="color: #cbd5e1; margin: 0 5px;"></i> 
+                        <strong>{{ d['acreedor'] if d is mapping else d[2] }}</strong>
+                    </td>
+
+                    <td data-label="Monto" class="monto-destacado">${{ "{:,.2f}".format(monto|float) }}</td>
+
+                    <td data-label="Motivo">{{ d['motivo'] if d is mapping else d[5] }}</td>
+
+                    <td data-label="Estado">
+                        {% if estado == 'pendiente' %}
+                            <span class="status-badge" style="background: #fff7ed; color: #f59e0b;"><i class="fas fa-clock"></i> Pendiente</span>
+                        {% else %}
+                            <span class="status-badge" style="background: #ecfdf5; color: #10b981;"><i class="fas fa-check-circle"></i> Pagado</span>
+                        {% endif %}
+                    </td>
+
+                    <td data-label="Acciones">
+                        {% if estado == 'pendiente' %}
+                        <form action="{{ url_for('deudas.pagar_deuda', id=idd) }}" method="POST" class="form-pago">
+                            <select name="cuenta_pago" class="select-pago" required>
+                                <option value="" disabled selected>Pagar con...</option>
+                                {% for c in cuentas %}
+                                    <option value="{{ c['nombre'] if c is mapping else c[0] }}">
+                                        {{ c['nombre'] if c is mapping else c[0] }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn-pagar">Pagar</button>
+                        </form>
+                        {% endif %}
+
+                        <a href="{{ url_for('deudas.eliminar_deuda', id=idd) }}" 
+                           class="btn-eliminar"
+                           onclick="return confirm('¿Eliminar esta deuda?')">
+                            <i class="fas fa-trash-alt"></i> Eliminar
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
     </div>
-
-    <table style="width:100%;">
-        <thead>
-            <tr>
-                <th>Fecha</th>
-                <th>Deudor</th>
-                <th>Acreedor</th>
-                <th>Monto</th>
-                <th>Motivo</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-
-        <tbody>
-        {% for d in deudas %}
-            <tr>
-                <td>{{ d['fecha'] if d is mapping else d[6] }}</td>
-                <td>{{ d['deudor'] if d is mapping else d[1] }}</td>
-                <td>{{ d['acreedor'] if d is mapping else d[2] }}</td>
-                <td>${{ (d['monto'] if d is mapping else d[3]) }}</td>
-                <td>{{ d['motivo'] if d is mapping else d[5] }}</td>
-                <td>{{ d['estado'] if d is mapping else d[4] }}</td>
-
-                <td>
-                    {% set estado = d['estado'] if d is mapping else d[4] %}
-                    {% set idd = d['id'] if d is mapping else d[0] %}
-
-                    {% if estado == 'pendiente' %}
-                    <form action="{{ url_for('deudas.pagar_deuda', id=idd) }}" method="POST">
-                        <select name="cuenta_pago">
-                            {% for c in cuentas %}
-                                <option value="{{ c['nombre'] if c is mapping else c[0] }}">
-                                    {{ c['nombre'] if c is mapping else c[0] }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                        <button type="submit">Pagar</button>
-                    </form>
-                    {% endif %}
-
-                    <a href="{{ url_for('deudas.eliminar_deuda', id=idd) }}">Eliminar</a>
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
 </div>
 {% endblock %}
