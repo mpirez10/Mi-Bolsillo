@@ -186,12 +186,13 @@ def actualizar_estado(id):
     nuevo_estado = datos.get('estado')
 
     conn = get_db()
+    # Usamos RealDictCursor para no marearnos con los índices
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     try:
-        # 1. Traemos la info de la agenda
+        # 1. Traemos la info (En agendas es emprendimiento_id, eso está bien)
         cur.execute("""
-            SELECT a.fecha, a.emprendimiento_id, t.cliente, t.detalle, t.monto, t.estado as estado_anterior
+            SELECT a.fecha, a.emprendimiento_id, t.cliente, t.detalle, t.monto, t.estado as estado_anterior, a.usuario_id
             FROM turnos t
             JOIN agendas a ON t.agenda_id = a.id
             WHERE t.id = %s
@@ -202,23 +203,26 @@ def actualizar_estado(id):
         if not turno:
             return jsonify({"status": "error", "message": "Turno no encontrado"}), 404
 
-        # 2. Actualizamos el estado
+        # 2. Actualizamos el estado en la tabla turnos
         cur.execute("UPDATE turnos SET estado = %s WHERE id = %s", (nuevo_estado, id))
         
-        # 3. Si es PAGO, insertamos con el nombre de columna id_emprendimiento
+        # 3. Si es PAGO, insertamos en la tabla CORRECTA: movimientos_emprendimiento
         if nuevo_estado == 'Pago' and turno['estado_anterior'] != 'Pago':
-            detalle_mov = f"Turno: {turno['cliente']}"
+            detalle_final = f"Turno: {turno['cliente']}"
             if turno['detalle']:
-                detalle_mov += f" - {turno['detalle']}"
+                detalle_final += f" - {turno['detalle']}"
             
             cur.execute("""
-                INSERT INTO movimientos (id_emprendimiento, fecha, tipo, detalle, monto)
-                VALUES (%s, %s, 'INGRESO', %s, %s)
+                INSERT INTO movimientos_emprendimiento 
+                (emprendimiento_id, fecha, concepto, detalle, monto, usuario_id)
+                VALUES (%s, %s, %s, %s, %s, %s)
             """, (
                 turno['emprendimiento_id'], 
-                str(turno['fecha']), 
-                detalle_mov, 
-                turno['monto']
+                turno['fecha'], 
+                'INGRESO',      # En tu tabla se llama 'concepto'
+                detalle_final,  # En tu tabla se llama 'detalle'
+                turno['monto'], 
+                turno['usuario_id'] # ¡Importante!
             ))
 
         conn.commit()
@@ -226,11 +230,13 @@ def actualizar_estado(id):
 
     except Exception as e:
         conn.rollback()
-        print(f"ERROR CRÍTICO: {e}")
+        print(f"ERROR EN CAJA: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
     finally:
         cur.close()
         conn.close()
+
+
 @app.route('/borrar_turno/<int:id>', methods=['POST'])
 def borrar_turno(id):
     conn = get_db()
