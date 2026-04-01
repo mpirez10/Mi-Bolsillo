@@ -104,6 +104,10 @@ def setup():
 def descargar_respaldo():
     return "Respaldo desactivado en PostgreSQL", 404
 
+from flask import render_template, request, redirect, url_for, jsonify
+# Importá tus funciones de get_db y seguridad si vas a encriptar nombres
+
+
 # --- IMPORTACIÓN Y REGISTRO DE RUTAS ---
 from routes import home, cuentas, movimientos, deudas, auth
 from routes.finanzas import finanzas_bp
@@ -117,23 +121,38 @@ app.register_blueprint(auth.auth_bp)
 app.register_blueprint(finanzas_bp)
 app.register_blueprint(emprendimiento_bp)
 
-@app.route("/migrate-add-precio")
-def migrate_add_precio():
-    conn = get_db()
-    cursor = conn.cursor()
+@app.route('/init_agenda')
+def init_agenda():
+    # Esta ruta es solo para crear las tablas una vez
     try:
-        cursor.execute("ALTER TABLE productos ADD COLUMN IF NOT EXISTS precio NUMERIC(12,2) DEFAULT 0.00")
-        cursor.execute("ALTER TABLE productos ALTER COLUMN precio SET NOT NULL")
+        conn = get_db()
+        cur = conn.cursor()
+        
+        # Ejecutamos el SQL de una
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS agendas (
+                id SERIAL PRIMARY KEY,
+                fecha DATE NOT NULL,
+                emprendimiento_id INTEGER DEFAULT 1
+            );
+            
+            CREATE TABLE IF NOT EXISTS turnos (
+                id SERIAL PRIMARY KEY,
+                agenda_id INTEGER REFERENCES agendas(id) ON DELETE CASCADE,
+                hora TIME NOT NULL,
+                cliente TEXT NOT NULL,
+                detalle TEXT,
+                monto DECIMAL(10, 2) DEFAULT 0.00,
+                estado VARCHAR(20) DEFAULT 'Pendiente'
+            );
+        """)
+        
         conn.commit()
-    except Exception as e:
-        conn.rollback()
-        cursor.close()
+        cur.close()
         conn.close()
-        return f"Error migrando precio: {e}", 500
-    cursor.close()
-    conn.close()
-    return "Columna precio añadida"
-
+        return "¡Tablas creadas con éxito, bo! Ya podés borrar esta ruta del código."
+    except Exception as e:
+        return f"Algo salió mal: {str(e)}"
 
 # --- INICIALIZAR DB (crea tablas si no existen) ---
 with app.app_context():
