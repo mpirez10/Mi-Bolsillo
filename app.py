@@ -275,12 +275,25 @@ def borrar_turno(id):
 
 @app.route('/borrar_dia/<int:id>', methods=['POST'])
 def borrar_dia(id):
-    # Esto borra el día de la tabla 'agendas'
-    # Si tenés clave foránea con turnos, asegurate de que sea ON DELETE CASCADE 
-    # o borrá los turnos de ese id primero.
-    cursor.execute("DELETE FROM agendas WHERE id = %s", (id,))
-    conn.commit()
-    return '', 204
+    try:
+        # 1. Tenés que usar tu conexión (supongamos que se llama 'conn')
+        # Si la conexión no es global, tenés que asegurarte de que esté disponible
+        with conn.cursor() as cursor:
+            # 2. Borramos primero los turnos de ese día (por seguridad de claves foráneas)
+            cursor.execute("DELETE FROM turnos WHERE agenda_id = %s", (id,))
+            
+            # 3. Ahora sí borramos la agenda
+            cursor.execute("DELETE FROM agendas WHERE id = %s", (id,))
+            
+            # 4. ¡No te olvides del commit para que impacte en la base!
+            conn.commit()
+            
+        return '', 204
+    except Exception as e:
+        print(f"Error al borrar: {e}")
+        conn.rollback() # Si algo falla, volvemos atrás para no romper nada
+        return 'Error', 500
+
 # --- IMPORTACIÓN Y REGISTRO DE RUTAS ---
 from routes import home, cuentas, movimientos, deudas, auth
 from routes.finanzas import finanzas_bp
