@@ -59,6 +59,35 @@ def crear_emprendimiento():
         return redirect(url_for('emprendimiento.emprendimiento_home'))
 
     return render_template('emprendimiento/crear.html')
+    
+# --- ELIMINAR EMPRENDIMIENTO ---
+@emprendimiento_bp.route('/emprendimiento/eliminar/<int:eid>')
+@login_required
+def eliminar_emprendimiento(eid):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    try:
+        # Primero borrar movimientos, ventas, gastos y productos asociados
+        cursor.execute("DELETE FROM movimientos_emprendimiento WHERE emprendimiento_id=%s AND usuario_id=%s", (eid, current_user.id))
+        cursor.execute("DELETE FROM ventas WHERE usuario_id=%s AND producto_id IN (SELECT id FROM productos WHERE emprendimiento_id=%s AND usuario_id=%s)", (current_user.id, eid, current_user.id))
+        cursor.execute("DELETE FROM gastos WHERE emprendimiento_id=%s AND usuario_id=%s", (eid, current_user.id))
+        cursor.execute("DELETE FROM productos WHERE emprendimiento_id=%s AND usuario_id=%s", (eid, current_user.id))
+
+        # Finalmente borrar el emprendimiento
+        cursor.execute("DELETE FROM emprendimientos WHERE id=%s AND usuario_id=%s", (eid, current_user.id))
+
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        cursor.close()
+        conn.close()
+        return f"Error eliminando emprendimiento: {e}"
+
+    cursor.close()
+    conn.close()
+
+    return redirect(url_for('emprendimiento.emprendimiento_home'))
 
 
 # --- RESUMEN ---
