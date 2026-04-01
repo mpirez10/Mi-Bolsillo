@@ -257,7 +257,34 @@ def resumen(eid):
         data_gastos=data_gastos
     )
 
-
+#ELIMINAR MOVIMIENTO
+@emprendimiento_bp.route('/eliminar_movimiento/<int:mid>/<int:eid>')
+@login_required
+def eliminar_movimiento(mid, eid):
+    conn = get_db()
+    cur = conn.cursor()
+    
+    try:
+        # 1. Verificamos que el movimiento pertenezca al usuario y al emprendimiento
+        # (Seguridad ante todo, bo)
+        cur.execute("""
+            DELETE FROM movimientos_emprendimiento 
+            WHERE id = %s AND emprendimiento_id = %s AND usuario_id = %s
+        """, (mid, eid, current_user.id))
+        
+        conn.commit()
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error al eliminar movimiento: {e}")
+        # Opcional: podrías pasar un mensaje de error con flash()
+        
+    finally:
+        cur.close()
+        conn.close()
+        
+    # Redirigimos de vuelta al resumen para que se vea el cambio
+    return redirect(url_for('emprendimiento.resumen', eid=eid))
 
 # --- STOCK ---
 @emprendimiento_bp.route('/emprendimiento/stock/<int:eid>', methods=['GET','POST'])
