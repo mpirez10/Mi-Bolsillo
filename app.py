@@ -200,25 +200,27 @@ def actualizar_estado(id):
         if not turno:
             return jsonify({"status": "error", "message": "Turno no encontrado"}), 404
 
-        # Marcador único para este turno en los movimientos
-        identificador_movimiento = f"TURNO_ID_{id}: {turno['cliente']}"
+        # Armamos el detalle como vos querés: CLIENTE + DETALLE
+        texto_movimiento = f"{turno['cliente']}"
+        if turno['detalle']:
+            texto_movimiento += f" - {turno['detalle']}"
 
-        # A. Si el nuevo estado es PAGO (y antes no lo era), insertamos
+        # A. Si pasa a PAGO: Insertamos
         if nuevo_estado == 'Pago' and turno['estado_anterior'] != 'Pago':
             cur.execute("""
                 INSERT INTO movimientos_emprendimiento 
                 (emprendimiento_id, fecha, concepto, detalle, monto, usuario_id)
                 VALUES (%s, %s, 'INGRESO', %s, %s, %s)
-            """, (turno['emprendimiento_id'], turno['fecha'], identificador_movimiento, turno['monto'], current_user.id))
+            """, (turno['emprendimiento_id'], turno['fecha'], texto_movimiento, turno['monto'], current_user.id))
 
-        # B. Si el nuevo estado NO es PAGO (y antes sí lo era), borramos el movimiento
+        # B. Si deja de ser PAGO: Borramos usando nombre, monto y fecha para no errarle
         elif nuevo_estado != 'Pago' and turno['estado_anterior'] == 'Pago':
             cur.execute("""
                 DELETE FROM movimientos_emprendimiento 
-                WHERE emprendimiento_id = %s AND detalle = %s AND usuario_id = %s
-            """, (turno['emprendimiento_id'], identificador_movimiento, current_user.id))
+                WHERE emprendimiento_id = %s AND detalle = %s AND monto = %s AND fecha = %s AND usuario_id = %s
+            """, (turno['emprendimiento_id'], texto_movimiento, turno['monto'], turno['fecha'], current_user.id))
 
-        # Finalmente actualizamos el turno
+        # Actualizamos el estado del turno
         cur.execute("UPDATE turnos SET estado = %s WHERE id = %s", (nuevo_estado, id))
         
         conn.commit()
@@ -230,30 +232,34 @@ def actualizar_estado(id):
         cur.close()
         conn.close()
 
-
 @app.route('/borrar_turno/<int:id>', methods=['POST'])
 def borrar_turno(id):
     conn = get_db()
-    # Usamos RealDictCursor para sacar los datos del turno antes de borrarlo
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     try:
-        # 1. Antes de borrar el turno, necesitamos saber de quién era para borrar el movimiento
-        cur.execute("SELECT cliente, estado FROM turnos WHERE id = %s", (id,))
+        # 1. Obtenemos los datos necesarios del turno y la agenda antes de borrar
+        cur.execute("""
+            SELECT t.cliente, t.estado, t.monto, t.detalle, a.fecha, a.emprendimiento_id 
+            FROM turnos t
+            JOIN agendas a ON t.agenda_id = a.id
+            WHERE t.id = %s
+        """, (id,))
         turno = cur.fetchone()
 
         if turno:
-            # 2. Si el turno estaba 'Pago', tenemos que borrar su rastro en la caja
+            # 2. Si estaba Pago, borramos el movimiento de la caja
             if turno['estado'] == 'Pago':
-                # Usamos exactamente el mismo formato de detalle que en actualizar_estado
-                identificador_movimiento = f"TURNO_ID_{id}: {turno['cliente']}"
+                texto_movimiento = f"{turno['cliente']}"
+                if turno['detalle']:
+                    texto_movimiento += f" - {turno['detalle']}"
                 
                 cur.execute("""
                     DELETE FROM movimientos_emprendimiento 
-                    WHERE detalle = %s AND concepto = 'INGRESO'
-                """, (identificador_movimiento,))
+                    WHERE emprendimiento_id = %s AND detalle = %s AND monto = %s AND fecha = %s AND usuario_id = %s
+                """, (turno['emprendimiento_id'], texto_movimiento, turno['monto'], turno['fecha'], current_user.id))
 
-            # 3. Ahora sí, borramos el turno de la agenda
+            # 3. Borramos el turno definitivamente
             cur.execute("DELETE FROM turnos WHERE id = %s", (id,))
             
         conn.commit()
