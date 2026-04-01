@@ -209,7 +209,7 @@ def resumen(eid):
     cursor.close()
     conn.close()
 
-        return render_template(
+    return render_template(
         'emprendimiento/resumen.html',
         nombre=nombre_emprendimiento,
         eid=eid,
@@ -218,17 +218,16 @@ def resumen(eid):
         gastos=gastos,
         movimientos=movimientos,
         productos_lista=productos_lista,
-        # nombres que el template espera
         valores_ingresos=data_ingresos,
         etiquetas_ingresos=labels_ingresos,
         valores_gastos=data_gastos,
         etiquetas_gastos=labels_gastos,
-        # mantener también los nombres originales por compatibilidad
         labels_ingresos=labels_ingresos,
         data_ingresos=data_ingresos,
         labels_gastos=labels_gastos,
         data_gastos=data_gastos
     )
+
 
 
 # --- STOCK ---
