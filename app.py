@@ -189,7 +189,7 @@ def actualizar_estado(id):
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     try:
-        # 1. Traemos la info (Usando emprendimiento_id que ya vimos que existe en agendas)
+        # 1. Traemos la info de la agenda
         cur.execute("""
             SELECT a.fecha, a.emprendimiento_id, t.cliente, t.detalle, t.monto, t.estado as estado_anterior
             FROM turnos t
@@ -202,18 +202,17 @@ def actualizar_estado(id):
         if not turno:
             return jsonify({"status": "error", "message": "Turno no encontrado"}), 404
 
-        # 2. Actualizamos el estado del turno (Para que el botón cambie sí o sí)
+        # 2. Actualizamos el estado
         cur.execute("UPDATE turnos SET estado = %s WHERE id = %s", (nuevo_estado, id))
         
-        # 3. Si es PAGO, insertamos en movimientos
+        # 3. Si es PAGO, insertamos con el nombre de columna id_emprendimiento
         if nuevo_estado == 'Pago' and turno['estado_anterior'] != 'Pago':
             detalle_mov = f"Turno: {turno['cliente']}"
             if turno['detalle']:
                 detalle_mov += f" - {turno['detalle']}"
             
-            # Cambié 'eid' por 'emprendimiento_id' también aquí
             cur.execute("""
-                INSERT INTO movimientos (emprendimiento_id, fecha, tipo, detalle, monto)
+                INSERT INTO movimientos (id_emprendimiento, fecha, tipo, detalle, monto)
                 VALUES (%s, %s, 'INGRESO', %s, %s)
             """, (
                 turno['emprendimiento_id'], 
@@ -232,7 +231,6 @@ def actualizar_estado(id):
     finally:
         cur.close()
         conn.close()
-
 @app.route('/borrar_turno/<int:id>', methods=['POST'])
 def borrar_turno(id):
     conn = get_db()
