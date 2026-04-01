@@ -1,144 +1,169 @@
 {% extends "base.html" %}
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
+
+<style>
+    /* Estilos para Mobile First */
+    .stock-header {
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-bottom: 20px; 
+        flex-wrap: wrap; 
+        gap: 10px;
+    }
+
+    .form-control-minimal {
+        border: none;
+        border-bottom: 1px solid #e2e8f0;
+        width: 100%;
+        padding: 4px 0;
+        background: transparent;
+        outline: none;
+        transition: 0.3s;
+    }
+
+    .form-control-minimal:focus {
+        border-bottom: 2px solid var(--primary);
+    }
+
+    /* Ajustes de Tabla para Celular */
+    @media (max-width: 768px) {
+        .stock-table thead { display: none; }
+        .stock-table tbody tr {
+            display: block;
+            background: white;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+        .stock-table td {
+            display: block;
+            width: 100% !important;
+            padding: 8px 0 !important;
+            text-align: left !important;
+            border: none !important;
+        }
+        .td-acciones {
+            border-top: 1px solid #f1f5f9 !important;
+            margin-top: 10px;
+            padding-top: 15px !important;
+            display: flex;
+            justify-content: space-between;
+        }
+    }
+
+    .badge-stock {
+        font-size: 0.7rem;
+        font-weight: 800;
+        padding: 3px 8px;
+        border-radius: 20px;
+        text-transform: uppercase;
+    }
+</style>
+
+<div class="stock-header">
     <div>
-        <h2 style="margin: 0; display: flex; align-items: center; gap: 10px;">
-            <i class="fas fa-boxes" style="color: var(--primary);"></i> Control de Inventario
+        <h2 style="margin: 0; font-size: 1.5rem;">
+            <i class="fas fa-boxes" style="color: var(--primary);"></i> Stock
         </h2>
-        <p style="color: #64748b; margin: 5px 0 0 0;">{{ nombre }} - Gestión de existencias</p>
+        <p style="color: #64748b; font-size: 0.9rem;">{{ nombre }} - Gestión de artículos</p>
     </div>
-    <div style="display: flex; gap: 10px;">
-        <a href="/emprendimiento/resumen/{{ eid }}" class="btn btn-outline">
-            <i class="fas fa-arrow-left"></i> Volver
+    <div style="display: flex; gap: 8px;">
+        <a href="/emprendimiento/resumen/{{ eid }}" class="btn btn-outline" style="padding: 10px;">
+            <i class="fas fa-chevron-left"></i>
         </a>
         <button class="btn btn-blue" onclick="document.getElementById('formStock').style.display='block'">
-            <i class="fas fa-plus"></i> AGREGAR PRODUCTO
+            <i class="fas fa-plus"></i> NUEVO
         </button>
     </div>
 </div>
 
-<div id="formStock" class="card" style="display:none; background: #f8fafc; padding: 25px; margin-bottom: 25px; border: 2px solid var(--primary);">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h3 style="margin:0;">Registrar Nuevo Artículo</h3>
-        <button type="button" onclick="document.getElementById('formStock').style.display='none'" style="background:none; border:none; color:gray; cursor:pointer;">
+<div id="formStock" class="card" style="display:none; background: #f0f7ff; border: 2px solid var(--primary); margin-bottom: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h4 style="margin:0;">Nuevo Artículo</h4>
+        <button type="button" onclick="document.getElementById('formStock').style.display='none'" style="background:none; border:none; color:#64748b;">
             <i class="fas fa-times"></i>
         </button>
     </div>
-    <form method="post" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px;">
-        <div>
-            <label style="font-weight: 600; font-size: 0.85rem;">Nombre del Producto:</label>
-            <input type="text" name="nombre_prod" placeholder="Ej: Camiseta Peñarol" required class="form-control">
+    <form method="post" style="display: grid; gap: 12px;">
+        <input type="text" name="nombre_prod" placeholder="Nombre (Ej: Camiseta Peñarol)" required class="form-control">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <input type="text" name="talle_prod" placeholder="Talle (L, XL, M)" class="form-control">
+            <input type="text" name="detalle_prod" placeholder="Color/Detalle" class="form-control">
         </div>
-        <div>
-            <label style="font-weight: 600; font-size: 0.85rem;">Detalle / Color:</label>
-            <input type="text" name="detalle_prod" placeholder="Ej: Titular 2024" class="form-control">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <input type="number" step="0.01" name="precio_prod" placeholder="Precio $" class="form-control">
+            <input type="number" name="stock_prod" placeholder="Cant. Inicial" required class="form-control">
         </div>
-        <div>
-            <label style="font-weight: 600; font-size: 0.85rem;">Talle:</label>
-            <input type="text" name="talle_prod" placeholder="Ej: L, XL, M" class="form-control">
-        </div>
-        <div>
-            <label style="font-weight: 600; font-size: 0.85rem;">Precio de Venta ($):</label>
-            <input type="number" step="0.01" name="precio_prod" placeholder="0.00" class="form-control">
-        </div>
-        <div>
-            <label style="font-weight: 600; font-size: 0.85rem;">Cantidad Inicial:</label>
-            <input type="number" name="stock_prod" placeholder="0" required class="form-control">
-        </div>
-        <div style="display: flex; align-items: flex-end;">
-            <button type="submit" class="btn btn-blue" style="width: 100%; padding: 12px;">
-                <i class="fas fa-save"></i> GUARDAR EN STOCK
-            </button>
-        </div>
+        <button type="submit" class="btn btn-blue" style="width: 100%; margin-top: 5px;">GUARDAR PRODUCTO</button>
     </form>
 </div>
 
-<div style="margin-bottom: 20px; position: relative; max-width: 500px;">
-    <i class="fas fa-search" style="position: absolute; left: 15px; top: 13px; color: #94a3b8;"></i>
+<div style="margin-bottom: 15px; position: relative;">
+    <i class="fas fa-search" style="position: absolute; left: 15px; top: 12px; color: #94a3b8;"></i>
     <input type="text" id="busquedaStock" onkeyup="filtrarStock()" 
-           placeholder="Filtrar por nombre, talle o detalle..." 
-           style="width: 100%; padding: 12px 12px 12px 45px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none;">
+           placeholder="Buscar producto, talle..." 
+           style="width: 100%; padding: 10px 10px 10px 40px; border-radius: 12px; border: 1px solid #e2e8f0; outline: none;">
 </div>
 
-<div class="card" style="padding: 0; border: none; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-
-    <div style="max-height: 500px; overflow-y: auto;">
-        <table style="width: 100%; border-collapse: collapse; background: white;">
-            <thead style="position: sticky; top: 0; background: #f8fafc; z-index: 2;">
-                <tr style="border-bottom: 2px solid #e2e8f0;">
-                    <th style="padding: 15px; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Producto</th>
-                    <th style="padding: 15px; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Info</th>
-                    <th style="padding: 15px; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Precio</th>
-                    <th style="padding: 15px; text-align: center; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Stock Disponible</th>
-                    <th style="padding: 15px; text-align: center; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-    {% for p in productos %}
-    <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s; {% if p.stock == 0 %}background: #fcfcfc;{% endif %}">
-        
-        <form method="POST" action="{{ url_for('emprendimiento.editar_producto', pid=p.id, eid=eid) }}">
-        
-        <td style="padding: 15px;">
-            <input name="nombre" value="{{ p.nombre }}" 
-                   style="font-weight: 700; border: none; border-bottom: 1px solid #e2e8f0; width: 100%;">
-            
-            <input name="talle" value="{{ p.talle }}" 
-                   placeholder="Talle"
-                   style="font-size: 0.8rem; color: #64748b; border: none; border-bottom: 1px solid #e2e8f0; width: 80px; margin-top: 5px;">
-        </td>
-
-        <td style="padding: 15px;">
-            <input name="detalle" value="{{ p.detalle }}" 
-                   placeholder="Detalle"
-                   style="border: none; border-bottom: 1px solid #e2e8f0; width: 100%;">
-        </td>
-
-        <td style="padding: 15px; text-align: center;">
-            <div style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-                <span>$</span>
-                <input name="precio" type="number" step="0.01" value="{{ p.precio }}" 
-                       style="width: 80px; text-align: right; border: 1px solid #e2e8f0; border-radius: 6px;">
-            </div>
-        </td>
-
-        <td style="padding: 15px; text-align: center;">
-            <input name="stock" type="number" value="{{ p.stock }}" 
-                   style="width: 60px; text-align: center; border: 1px solid #e2e8f0; border-radius: 6px;">
-            
-            <div id="status-badge-{{ p.id }}" style="margin-top: 5px;">
-                {% if p.stock == 0 %}
-                    <span style="font-size: 0.7rem; font-weight: 700; color: #ef4444;">🔴 Agotado</span>
-                {% elif p.stock == 1 %}
-                    <span style="font-size: 0.7rem; font-weight: 700; color: #d97706;">🟡 Última unidad</span>
-                {% else %}
-                    <span style="font-size: 0.7rem; font-weight: 700; color: #16a34a;">🟢 En Stock</span>
-                {% endif %}
-            </div>
-        </td>
-
-        <td style="padding: 15px; text-align: center; display: flex; gap: 8px; justify-content: center;">
-            
-            <!-- Guardar -->
-            <button type="submit" 
-                    style="background:#2563eb; color:white; border:none; width:35px; height:35px; border-radius:8px; cursor:pointer;">
-                💾
-            </button>
-        </td>
-
-        </form>
-        <!-- Eliminar -->
-        <td style="padding: 15px; text-align: center; display: flex; gap: 8px; justify-content: center;">
-            <a href="{{ url_for('emprendimiento.eliminar_producto', pid=p.id, eid=eid) }}" 
-               style="display: flex; align-items: center; justify-content: center; width:35px; height:35px; border-radius:8px; background:#fff1f2; color:#e11d48;"
-               onclick="return confirm('¿Eliminar {{ p.nombre }}?')">
-                🗑️
-            </a>
-        </td>
-
-    </tr>
-    {% endfor %}
-</tbody>
+<div class="card" style="padding: 0; border: none; background: transparent;">
+    <table class="stock-table" style="width: 100%; border-collapse: collapse;">
+        <thead style="background: #f8fafc;">
+            <tr>
+                <th style="padding: 12px; text-align: left; font-size: 0.75rem; color: #64748b;">PRODUCTO</th>
+                <th style="padding: 12px; text-align: left; font-size: 0.75rem; color: #64748b;">DETALLE</th>
+                <th style="padding: 12px; text-align: center; font-size: 0.75rem; color: #64748b;">PRECIO</th>
+                <th style="padding: 12px; text-align: center; font-size: 0.75rem; color: #64748b;">CANT.</th>
+                <th style="padding: 12px; text-align: center;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in productos %}
+            <tr>
+                <form method="POST" action="{{ url_for('emprendimiento.editar_producto', pid=p.id, eid=eid) }}">
+                    <td style="padding: 12px;">
+                        <input name="nombre" value="{{ p.nombre }}" class="form-control-minimal" style="font-weight: 700;">
+                        <input name="talle" value="{{ p.talle }}" placeholder="Talle" class="form-control-minimal" style="font-size: 0.8rem; color: #64748b;">
+                    </td>
+                    <td style="padding: 12px;">
+                        <input name="detalle" value="{{ p.detalle }}" placeholder="Detalle" class="form-control-minimal">
+                    </td>
+                    <td style="padding: 12px; text-align: center;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 3px;">
+                            <span style="font-size: 0.8rem; color: #64748b;">$</span>
+                            <input name="precio" type="number" step="0.01" value="{{ p.precio }}" style="width: 70px; border: 1px solid #e2e8f0; border-radius: 6px; padding: 2px 4px;">
+                        </div>
+                    </td>
+                    <td style="padding: 12px; text-align: center;">
+                        <input name="stock" type="number" value="{{ p.stock }}" style="width: 50px; text-align: center; border: 1px solid #e2e8f0; border-radius: 6px; padding: 2px 4px; font-weight: 700;">
+                        <div style="margin-top: 5px;">
+                            {% if p.stock == 0 %}
+                                <span class="badge-stock" style="color: #ef4444; background: #fef2f2;">Agotado</span>
+                            {% elif p.stock <= 2 %}
+                                <span class="badge-stock" style="color: #d97706; background: #fffbeb;">Bajo</span>
+                            {% else %}
+                                <span class="badge-stock" style="color: #16a34a; background: #f0fdf4;">OK</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td class="td-acciones" style="padding: 12px; text-align: center;">
+                        <div style="display: flex; gap: 10px; justify-content: center;">
+                            <button type="submit" style="background: #2563eb; color: white; border: none; width: 38px; height: 38px; border-radius: 10px; cursor: pointer;">
+                                <i class="fas fa-save"></i>
+                            </button>
+                            <a href="{{ url_for('emprendimiento.eliminar_producto', pid=p.id, eid=eid) }}" 
+                               style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px; background: #fff1f2; color: #e11d48; text-decoration: none;"
+                               onclick="return confirm('¿Borrar {{ p.nombre }}?')">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </form>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
 </div>
 
@@ -152,67 +177,6 @@ function filtrarStock() {
         let text = row.innerText.toLowerCase();
         row.style.display = text.includes(filter) ? "" : "none";
     });
-}
-</script>
-<script>
-function cambiarStock(productId, cambio) {
-    const input = document.getElementById(`stock-input-${productId}`);
-    let nuevoValor = parseInt(input.value) + cambio;
-    
-    if (nuevoValor < 0) nuevoValor = 0;
-    
-    input.value = nuevoValor;
-    enviarStock(productId, nuevoValor);
-}
-
-function enviarStock(productId, valor) {
-    const stock = parseInt(valor);
-    
-    fetch(`/emprendimiento/actualizar_stock/${productId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nuevo_stock: stock })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            // ACTUALIZACIÓN VISUAL DE COLORES
-            const badgeContainer = document.getElementById(`status-badge-${productId}`);
-            let htmlContent = "";
-
-            if (stock === 0) {
-                htmlContent = `<span style="font-size: 0.7rem; font-weight: 700; color: #ef4444; text-transform: uppercase;">🔴 Agotado</span>`;
-            } else if (stock === 1) {
-                htmlContent = `<span style="font-size: 0.7rem; font-weight: 700; color: #d97706; text-transform: uppercase;">🟡 Última unidad</span>`;
-            } else {
-                htmlContent = `<span style="font-size: 0.7rem; font-weight: 700; color: #16a34a; text-transform: uppercase;">🟢 En Stock</span>`;
-            }
-            
-            badgeContainer.innerHTML = htmlContent;
-        }
-    })
-    .catch(error => console.error('Error:', error));
-}
-function enviarPrecio(productId, valor) {
-    const precio = parseFloat(valor);
-    
-    fetch(`/emprendimiento/actualizar_precio/${productId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nuevo_precio: precio })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            // Efecto visual rápido para confirmar guardado (opcional)
-            const input = document.getElementById(`precio-input-${productId}`);
-            input.style.borderColor = '#10b981';
-            setTimeout(() => { input.style.borderColor = '#e2e8f0'; }, 1000);
-        } else {
-            alert("Error al actualizar el precio");
-        }
-    })
-    .catch(error => console.error('Error:', error));
 }
 </script>
 
