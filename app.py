@@ -275,24 +275,29 @@ def borrar_turno(id):
 
 @app.route('/borrar_dia/<int:id>', methods=['POST'])
 def borrar_dia(id):
+    conn = get_db() # <--- Llamamos a la función para obtener la conexión
     try:
-        # 1. Tenés que usar tu conexión (supongamos que se llama 'conn')
-        # Si la conexión no es global, tenés que asegurarte de que esté disponible
+        # Usamos cursor_factory si necesitás diccionarios, 
+        # pero para un DELETE simple con el cursor común alcanza
         with conn.cursor() as cursor:
-            # 2. Borramos primero los turnos de ese día (por seguridad de claves foráneas)
+            # 1. Borramos primero los turnos de ese día
             cursor.execute("DELETE FROM turnos WHERE agenda_id = %s", (id,))
             
-            # 3. Ahora sí borramos la agenda
+            # 2. Ahora sí borramos la agenda
             cursor.execute("DELETE FROM agendas WHERE id = %s", (id,))
             
-            # 4. ¡No te olvides del commit para que impacte en la base!
+            # 3. Guardamos los cambios
             conn.commit()
             
         return '', 204
     except Exception as e:
         print(f"Error al borrar: {e}")
-        conn.rollback() # Si algo falla, volvemos atrás para no romper nada
+        conn.rollback() 
         return 'Error', 500
+    finally:
+        # 4. ¡Importantísimo cerrar la conexión! 
+        # Si no la cerrás, Render se queda sin "slots" para la base de datos
+        conn.close()
 
 # --- IMPORTACIÓN Y REGISTRO DE RUTAS ---
 from routes import home, cuentas, movimientos, deudas, auth
