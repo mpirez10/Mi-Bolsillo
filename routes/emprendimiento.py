@@ -451,4 +451,30 @@ def actualizar_precio(pid):
     cursor.close()
     conn.close()
 
+@emprendimiento_bp.route('/editar_nombre/<int:eid>', methods=['POST'])
+def editar_nombre(eid):
+    nuevo_nombre = request.form.get('nuevo_nombre')
+    
+    if not nuevo_nombre:
+        return redirect(url_for('emprendimiento.resumen', eid=eid))
+
+    conn = get_db()
+    try:
+        with conn.cursor() as cursor:
+            # Cambiamos el nombre en la tabla de emprendimientos
+            cursor.execute("""
+                UPDATE emprendimientos 
+                SET nombre = %s 
+                WHERE id = %s
+            """, (nuevo_nombre, eid))
+            conn.commit()
+    except Exception as e:
+        print(f"Error al cambiar nombre: {e}")
+        conn.rollback()
+    finally:
+        conn.close()
+
+    # Volvemos a la página del resumen
+    return redirect(url_for('emprendimiento.resumen', eid=eid))
+
     return jsonify({"ok": True})
