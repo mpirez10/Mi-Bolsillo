@@ -189,9 +189,9 @@ def actualizar_estado(id):
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     try:
-        # 1. Buscamos info del turno (OJO: cambié a.emprendimiento_id por a.eid)
+        # 1. Traemos la info (Cambiamos a.eid que es como se llama tu columna)
         cur.execute("""
-            SELECT a.fecha, a.eid as emprendimiento_id, t.cliente, t.detalle, t.monto, t.estado as estado_anterior
+            SELECT a.fecha, a.eid, t.cliente, t.detalle, t.monto, t.estado as estado_anterior
             FROM turnos t
             JOIN agendas a ON t.agenda_id = a.id
             WHERE t.id = %s
@@ -199,33 +199,36 @@ def actualizar_estado(id):
         
         turno = cur.fetchone()
 
-        if turno:
-            # 2. Primero actualizamos el estado (para que el botón cambie sí o sí)
-            cur.execute("UPDATE turnos SET estado = %s WHERE id = %s", (nuevo_estado, id))
+        if not turno:
+            return jsonify({"status": "error", "message": "Turno no encontrado"}), 404
+
+        # 2. PRIMERO actualizamos el estado (para que el botón responda sí o sí)
+        cur.execute("UPDATE turnos SET estado = %s WHERE id = %s", (nuevo_estado, id))
+        
+        # 3. Solo si es Pago y no estaba pago antes, metemos el movimiento
+        if nuevo_estado == 'Pago' and turno['estado_anterior'] != 'Pago':
+            detalle_mov = f"Turno: {turno['cliente']}"
+            if turno['detalle']:
+                detalle_mov += f" - {turno['detalle']}"
             
-            # 3. Si es PAGO, insertamos en movimientos
-            if nuevo_estado == 'Pago' and turno['estado_anterior'] != 'Pago':
-                if turno['detalle']:
-                    detalle_mov = f"{turno['cliente']} - {turno['detalle']}"
-                else:
-                    detalle_mov = turno['cliente']
-                    
-                cur.execute("""
-                    INSERT INTO movimientos (eid, fecha, tipo, detalle, monto)
-                    VALUES (%s, %s, 'INGRESO', %s, %s)
-                """, (
-                    turno['emprendimiento_id'], 
-                    turno['fecha'], 
-                    detalle_mov, 
-                    turno['monto']
-                ))
+            # Usamos str(turno['fecha']) por si hay lío de formatos de fecha
+            cur.execute("""
+                INSERT INTO movimientos (eid, fecha, tipo, detalle, monto)
+                VALUES (%s, %s, 'INGRESO', %s, %s)
+            """, (
+                turno['eid'], 
+                str(turno['fecha']), 
+                detalle_mov, 
+                turno['monto']
+            ))
 
         conn.commit()
-        return jsonify({"status": "success", "message": "¡Plata en caja, bo!"})
+        print(f"DEBUG: Estado actualizado a {nuevo_estado} para turno {id}")
+        return jsonify({"status": "success"})
 
     except Exception as e:
-        print(f"Errorazo: {e}")
         conn.rollback()
+        print(f"ERROR CRÍTICO: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
     finally:
         cur.close()
