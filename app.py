@@ -189,9 +189,9 @@ def actualizar_estado(id):
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     try:
-        # 1. Traemos la info (Cambiamos a.eid que es como se llama tu columna)
+        # 1. Traemos la info (Usamos 'emprendimiento_id' que es el que existe en agendas)
         cur.execute("""
-            SELECT a.fecha, a.eid, t.cliente, t.detalle, t.monto, t.estado as estado_anterior
+            SELECT a.fecha, a.emprendimiento_id, t.cliente, t.detalle, t.monto, t.estado as estado_anterior
             FROM turnos t
             JOIN agendas a ON t.agenda_id = a.id
             WHERE t.id = %s
@@ -202,28 +202,26 @@ def actualizar_estado(id):
         if not turno:
             return jsonify({"status": "error", "message": "Turno no encontrado"}), 404
 
-        # 2. PRIMERO actualizamos el estado (para que el botón responda sí o sí)
+        # 2. Actualizamos el estado del turno
         cur.execute("UPDATE turnos SET estado = %s WHERE id = %s", (nuevo_estado, id))
         
-        # 3. Solo si es Pago y no estaba pago antes, metemos el movimiento
+        # 3. Si es PAGO, insertamos en movimientos (ahí sí la columna es 'eid')
         if nuevo_estado == 'Pago' and turno['estado_anterior'] != 'Pago':
             detalle_mov = f"Turno: {turno['cliente']}"
             if turno['detalle']:
                 detalle_mov += f" - {turno['detalle']}"
             
-            # Usamos str(turno['fecha']) por si hay lío de formatos de fecha
             cur.execute("""
                 INSERT INTO movimientos (eid, fecha, tipo, detalle, monto)
                 VALUES (%s, %s, 'INGRESO', %s, %s)
             """, (
-                turno['eid'], 
+                turno['emprendimiento_id'], 
                 str(turno['fecha']), 
                 detalle_mov, 
                 turno['monto']
             ))
 
         conn.commit()
-        print(f"DEBUG: Estado actualizado a {nuevo_estado} para turno {id}")
         return jsonify({"status": "success"})
 
     except Exception as e:
