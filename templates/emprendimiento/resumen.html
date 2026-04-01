@@ -177,7 +177,15 @@
         <tbody>
             {% for m in movimientos %}
             <tr>
-                <td class="td-fecha">{{ m.fecha }}</td>
+                <div style="flex: 1; min-width: 140px;">
+    <label style="font-size: 0.8rem; font-weight: 600; color: #64748b;">Fecha del Movimiento</label>
+    <input type="date" 
+           id="fecha_input" 
+           name="fecha" 
+           class="form-control" 
+           required 
+           style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+</div>
                 <td class="td-tipo">
                     <span class="badge {{ 'badge-ingreso' if m.concepto == 'INGRESO' else 'badge-egreso' }}" style="padding: 4px 8px; font-size: 0.65rem;">
                         {{ m.concepto }}
