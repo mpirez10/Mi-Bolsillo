@@ -174,7 +174,7 @@ def guardar_turno():
     conn.commit()
     cur.close()
     conn.close()
-    return redirect(url_for('ver_agenda'))
+    return redirect(url_for('ver_agenda', id=id_del_emprendimiento))
 
 @app.route('/actualizar_estado/<int:id>', methods=['POST'])
 def actualizar_estado(id):
