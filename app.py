@@ -3,6 +3,9 @@ from flask import Flask, render_template, request, redirect, url_for
 from flask_login import LoginManager, UserMixin
 from werkzeug.security import generate_password_hash
 from db import get_db, init_db
+from flask import render_template, request, redirect, url_for, jsonify
+# Importá tus funciones de get_db y seguridad si vas a encriptar nombres
+
 
 # --- CONFIGURACIÓN DE APP ---
 app = Flask(__name__, template_folder='templates', static_folder='static')
@@ -104,9 +107,34 @@ def setup():
 def descargar_respaldo():
     return "Respaldo desactivado en PostgreSQL", 404
 
-from flask import render_template, request, redirect, url_for, jsonify
-# Importá tus funciones de get_db y seguridad si vas a encriptar nombres
+# Agenda
+@app.route('/agenda')
+def ver_agenda():
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    
+    # Traemos los días de agenda (ordenados por fecha)
+    cur.execute("SELECT * FROM agendas ORDER BY fecha DESC")
+    agendas = cur.fetchall()
+    
+    # Para cada día, traemos sus turnos
+    for agenda in agendas:
+        cur.execute("SELECT * FROM turnos WHERE agenda_id = %s ORDER BY hora ASC", (agenda['id'],))
+        agenda['turnos'] = cur.fetchall()
+    
+    cur.close()
+    conn.close()
+    return render_template('agenda.html', agendas=agendas)
 
+@app.route('/borrar_turno/<int:id>', methods=['POST'])
+def borrar_turno(id):
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM turnos WHERE id = %s", (id,))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return jsonify({"success": True}) # Usamos JSON para que el AJAX lo borre sin recargar
 
 # --- IMPORTACIÓN Y REGISTRO DE RUTAS ---
 from routes import home, cuentas, movimientos, deudas, auth
