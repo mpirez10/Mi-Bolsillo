@@ -112,6 +112,7 @@
         <form id="formTurno" action="/guardar_turno" method="POST" class="modal-content">
             <div class="modal-header"><h5 id="tituloModal">Nuevo Turno</h5></div>
             <div class="modal-body">
+                <input type="hidden" name="emprendimiento_id" value="{{ emprendimiento_id }}">
                 <input type="hidden" name="agenda_id" id="agenda_id_input">
                 <input type="hidden" name="turno_id" id="turno_id_input">
                 
