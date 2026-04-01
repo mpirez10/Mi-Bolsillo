@@ -117,73 +117,23 @@ app.register_blueprint(auth.auth_bp)
 app.register_blueprint(finanzas_bp)
 app.register_blueprint(emprendimiento_bp)
 
-# --- RUTA TEMPORAL: REPARAR TODAS LAS SECUENCIAS ---
-@app.route("/fix-all-seqs")
-def fix_all_sequences():
-    conn = get_db()
-    cursor = conn.cursor()
-    try:
-        tablas = [
-            ("usuarios", "id"),
-            ("cuentas", "id"),
-            ("movimientos", "id"),
-            ("deudas", "id"),
-            ("ventas", "id"),
-            ("gastos", "id"),
-            ("productos", "id"),
-            ("movimientos_emprendimiento", "id"),
-            ("emprendimientos", "id")
-        ]
-
-        for tabla, columna in tablas:
-            seq_name = f"{tabla}_{columna}_seq"
-
-            # 1) Crear secuencia si no existe
-            cursor.execute(f"SELECT 1 FROM pg_class WHERE relkind = 'S' AND relname = %s", (seq_name,))
-            exists = cursor.fetchone()
-            if not exists:
-                cursor.execute(f"CREATE SEQUENCE {seq_name}")
-
-            # 2) Asegurar DEFAULT nextval para la columna
-            cursor.execute(
-                f"ALTER TABLE {tabla} ALTER COLUMN {columna} SET DEFAULT nextval(%s)",
-                (seq_name,)
-            )
-
-            # 3) Resincronizar la secuencia con el MAX(id) existente
-            cursor.execute(
-                f"SELECT setval(%s, COALESCE(MAX({columna}), 1), false) FROM {tabla}",
-                (seq_name,)
-            )
-
-        conn.commit()
-    except Exception as e:
-        conn.rollback()
-        cursor.close()
-        conn.close()
-        return f"Error al reparar secuencias: {e}", 500
-
-    cursor.close()
-    conn.close()
-    return "Secuencias reparadas correctamente"
-
-@app.route("/migrate-add-columns")
-def migrate_add_columns():
+@app.route("/migrate-productos")
+def migrate_productos():
     conn = get_db()
     cursor = conn.cursor()
     try:
         cursor.execute("ALTER TABLE productos ADD COLUMN IF NOT EXISTS detalle TEXT")
         cursor.execute("ALTER TABLE productos ADD COLUMN IF NOT EXISTS talle TEXT")
-        cursor.execute("ALTER TABLE deudas ADD COLUMN IF NOT EXISTS fecha TEXT")
         conn.commit()
     except Exception as e:
         conn.rollback()
         cursor.close()
         conn.close()
-        return f"Error migrando columnas: {e}", 500
+        return f"Error migrando productos: {e}", 500
     cursor.close()
     conn.close()
-    return "Migración completada"
+    return "Migración de productos completada"
+
 
 
 # --- INICIALIZAR DB (crea tablas si no existen) ---
