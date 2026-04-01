@@ -95,7 +95,9 @@
         <form action="/agregar_dia" method="POST" class="modal-content">
             <div class="modal-header"><h5>Nuevo Día de Agenda</h5></div>
             <div class="modal-body">
-                <label>Seleccionar Fecha (DD/MM/YYYY):</label>
+                <input type="hidden" name="emprendimiento_id" value="{{ emprendimiento_id }}">
+                
+                <label>Seleccionar Fecha:</label>
                 <input type="date" name="fecha" class="form-control" required>
             </div>
             <div class="modal-footer">
