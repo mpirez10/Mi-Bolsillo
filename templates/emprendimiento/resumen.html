@@ -164,13 +164,13 @@
                     </strong>
                 </td>
                 <td style="padding: 15px; text-align: center;">
-                    <a href="/emprendimiento/eliminar_movimiento/{{ m.id }}/{{ eid }}" 
-                       style="color: #cbd5e1; transition: color 0.2s;" 
-                       onmouseover="this.style.color='#ef4444'" 
-                       onmouseout="this.style.color='#cbd5e1'"
-                       onclick="return confirm('¿Borrar movimiento?')">
-                        <i class="fas fa-trash-alt"></i>
-                    </a>
+                    <a href="{{ url_for('emprendimiento.eliminar_movimiento', mid=m.id, eid=eid) }}" 
+   style="color: #cbd5e1; transition: color 0.2s;" 
+   onmouseover="this.style.color='#ef4444'" 
+   onmouseout="this.style.color='#cbd5e1'"
+   onclick="return confirm('¿Borrar movimiento?')">
+    <i class="fas fa-trash-alt"></i>
+</a>
                 </td>
             </tr>
             {% endfor %}
