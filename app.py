@@ -147,8 +147,10 @@ def agregar_dia():
 
 @app.route('/guardar_turno', methods=['POST'])
 def guardar_turno():
+    # 1. Capturamos los datos del form
+    eid = request.form.get('emprendimiento_id') # <--- Capturamos el ID real
     agenda_id = request.form.get('agenda_id')
-    turno_id = request.form.get('turno_id') # Viene si estamos editando
+    turno_id = request.form.get('turno_id')
     hora = request.form.get('hora')
     cliente = request.form.get('cliente')
     detalle = request.form.get('detalle')
@@ -158,14 +160,14 @@ def guardar_turno():
     cur = conn.cursor()
 
     if turno_id:
-        # MODO EDICIÓN: El barbero tocó el lápiz ✏️
+        # Modo Edición
         cur.execute("""
             UPDATE turnos 
             SET hora = %s, cliente = %s, detalle = %s, monto = %s 
             WHERE id = %s
         """, (hora, cliente, detalle, monto, turno_id))
     else:
-        # MODO NUEVO: El barbero tocó + AGREGAR TURNO
+        # Modo Nuevo
         cur.execute("""
             INSERT INTO turnos (agenda_id, hora, cliente, detalle, monto, estado)
             VALUES (%s, %s, %s, %s, %s, 'Pendiente')
@@ -174,8 +176,9 @@ def guardar_turno():
     conn.commit()
     cur.close()
     conn.close()
-    return redirect(url_for('ver_agenda', id=id_del_emprendimiento))
 
+    # 2. REDIRECCIÓN CORRECTA: Usamos 'eid' que es la variable que definimos arriba
+    return redirect(url_for('ver_agenda', id=eid))
 @app.route('/actualizar_estado/<int:id>', methods=['POST'])
 def actualizar_estado(id):
     datos = request.get_json()
