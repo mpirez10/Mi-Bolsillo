@@ -111,20 +111,87 @@ def descargar_respaldo():
 @app.route('/agenda')
 def ver_agenda():
     conn = get_db()
+    # Usamos RealDictCursor para que sea fácil leer los datos en el HTML
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
-    # Traemos los días de agenda (ordenados por fecha)
-    cur.execute("SELECT * FROM agendas ORDER BY fecha DESC")
+    # Traemos los días
+    cur.execute("SELECT id, fecha FROM agendas ORDER BY fecha DESC")
     agendas = cur.fetchall()
     
-    # Para cada día, traemos sus turnos
+    # Traemos los turnos para cada día
     for agenda in agendas:
-        cur.execute("SELECT * FROM turnos WHERE agenda_id = %s ORDER BY hora ASC", (agenda['id'],))
+        cur.execute("""
+            SELECT id, hora, cliente, detalle, monto, estado 
+            FROM turnos 
+            WHERE agenda_id = %s 
+            ORDER BY hora ASC
+        """, (agenda['id'],))
         agenda['turnos'] = cur.fetchall()
     
     cur.close()
     conn.close()
     return render_template('agenda.html', agendas=agendas)
+
+@app.route('/agregar_dia', methods=['POST'])
+def agregar_dia():
+    fecha = request.form.get('fecha')
+    if not fecha:
+        return redirect(url_for('ver_agenda'))
+
+    conn = get_db()
+    cur = conn.cursor()
+    # Insertamos el día. El emprendimiento_id lo dejamos en 1 por ahora (Barbería)
+    cur.execute("INSERT INTO agendas (fecha, emprendimiento_id) VALUES (%s, 1)", (fecha,))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return redirect(url_for('ver_agenda'))
+
+@app.route('/guardar_turno', methods=['POST'])
+def guardar_turno():
+    agenda_id = request.form.get('agenda_id')
+    turno_id = request.form.get('turno_id') # Viene si estamos editando
+    hora = request.form.get('hora')
+    cliente = request.form.get('cliente')
+    detalle = request.form.get('detalle')
+    monto = request.form.get('monto') or 0
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    if turno_id:
+        # MODO EDICIÓN: El barbero tocó el lápiz ✏️
+        cur.execute("""
+            UPDATE turnos 
+            SET hora = %s, cliente = %s, detalle = %s, monto = %s 
+            WHERE id = %s
+        """, (hora, cliente, detalle, monto, turno_id))
+    else:
+        # MODO NUEVO: El barbero tocó + AGREGAR TURNO
+        cur.execute("""
+            INSERT INTO turnos (agenda_id, hora, cliente, detalle, monto, estado)
+            VALUES (%s, %s, %s, %s, %s, 'Pendiente')
+        """, (agenda_id, hora, cliente, detalle, monto))
+
+    conn.commit()
+    cur.close()
+    conn.close()
+    return redirect(url_for('ver_agenda'))
+
+@app.route('/actualizar_estado/<int:id>', methods=['POST'])
+def actualizar_estado(id):
+    datos = request.get_json()
+    nuevo_estado = datos.get('estado')
+
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("UPDATE turnos SET estado = %s WHERE id = %s", (nuevo_estado, id))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return jsonify({"status": "success", "message": "Estado actualizado"})
+
+
 
 @app.route('/borrar_turno/<int:id>', methods=['POST'])
 def borrar_turno(id):
