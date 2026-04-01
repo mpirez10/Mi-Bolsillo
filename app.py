@@ -149,39 +149,6 @@ app.register_blueprint(auth.auth_bp)
 app.register_blueprint(finanzas_bp)
 app.register_blueprint(emprendimiento_bp)
 
-@app.route('/init_agenda')
-def init_agenda():
-    # Esta ruta es solo para crear las tablas una vez
-    try:
-        conn = get_db()
-        cur = conn.cursor()
-        
-        # Ejecutamos el SQL de una
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS agendas (
-                id SERIAL PRIMARY KEY,
-                fecha DATE NOT NULL,
-                emprendimiento_id INTEGER DEFAULT 1
-            );
-            
-            CREATE TABLE IF NOT EXISTS turnos (
-                id SERIAL PRIMARY KEY,
-                agenda_id INTEGER REFERENCES agendas(id) ON DELETE CASCADE,
-                hora TIME NOT NULL,
-                cliente TEXT NOT NULL,
-                detalle TEXT,
-                monto DECIMAL(10, 2) DEFAULT 0.00,
-                estado VARCHAR(20) DEFAULT 'Pendiente'
-            );
-        """)
-        
-        conn.commit()
-        cur.close()
-        conn.close()
-        return "¡Tablas creadas con éxito, bo! Ya podés borrar esta ruta del código."
-    except Exception as e:
-        return f"Algo salió mal: {str(e)}"
-
 # --- INICIALIZAR DB (crea tablas si no existen) ---
 with app.app_context():
     init_db()
