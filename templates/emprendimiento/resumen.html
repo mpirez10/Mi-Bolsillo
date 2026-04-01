@@ -124,7 +124,7 @@
                 <option value="">-- Sin stock vinculado --</option>
                 {% for prod in productos_lista %}
                     <option value="{{ prod.id }}">
-                        {{ '🟡' if prod.stock <= 1 else '🟢' }} {{ prod.nombre }} ({{ prod.talle }})
+                        {{ '🟡' if prod.stock <= 1 else '🟢' }} {{ prod.nombre }} {{prod.detalle}} ({{ prod.talle }})
                     </option>
                 {% endfor %}
             </select>
