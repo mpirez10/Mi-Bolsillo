@@ -177,8 +177,7 @@
         <tbody>
             {% for m in movimientos %}
             <tr>
-                <td class="td-fecha" style="padding: 12px;">{{ m.fecha }}</td>
-                
+                <td class="td-fecha" style="padding: 12px;">{{ m.fecha.strftime('%d/%m/%y') if m.fecha.strftime else m.fecha }}</td>
                 <td class="td-tipo" style="padding: 12px;">
                     <span class="badge {{ 'badge-ingreso' if m.concepto == 'INGRESO' else 'badge-egreso' }}" style="padding: 4px 8px; font-size: 0.65rem;">
                         {{ m.concepto }}
@@ -333,21 +332,14 @@ function filtrarMovimientos() {
 
 function formatearAISO(fechaStr) {
     if(!fechaStr) return null;
-    // Si la fecha ya viene como YYYY-MM-DD, la devolvemos igual
-    if(fechaStr.includes('-') && fechaStr.length === 10) return fechaStr;
-
-    const partes = fechaStr.split(/[-/]/);
-    if (partes.length !== 3) return null;
+    const partes = fechaStr.split('/');
+    if (partes.length !== 3) return fechaStr; // Ya está en ISO o formato raro
 
     let dia = partes[0].padStart(2, '0');
     let mes = partes[1].padStart(2, '0');
     let año = partes[2].trim();
     
     if (año.length === 2) año = "20" + año; 
-    
-    // Asumimos que si el primer número es 4 cifras, viene como YYYY-MM-DD
-    if (partes[0].length === 4) return `${partes[0]}-${partes[1].padStart(2, '0')}-${partes[2].padStart(2, '0')}`;
-    
     return `${año}-${mes}-${dia}`;
 }
 
