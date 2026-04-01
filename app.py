@@ -214,7 +214,7 @@ def actualizar_estado(id):
                 
             # Insertamos el movimiento directo en la caja del emprendimiento
             cur.execute("""
-                INSERT INTO movimientos (emprendimiento_id, fecha, tipo, detalle, monto)
+                INSERT INTO movimientos (eid, fecha, tipo, detalle, monto)
                 VALUES (%s, %s, 'INGRESO', %s, %s)
             """, (
                 turno['emprendimiento_id'], 
