@@ -184,13 +184,25 @@
                     </span>
                 </td>
                 <td>
-                    <div style="font-weight: 700; color: #1e293b;">{{ m.detalle }}</div>
-                    {% if m.nombre_producto %}
-                        <div style="font-size: 0.75rem; color: #64748b;">
-                            <i class="fas fa-tag"></i> {{ m.nombre_producto }} ({{ m.talle_producto }})
-                        </div>
-                    {% endif %}
-                </td>
+    <div style="font-weight: 700; color: #1e293b; line-height: 1.2;">
+        {{ m.detalle }}
+    </div>
+
+    {% if m.nombre_producto %}
+    <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px; display: flex; align-items: center; gap: 5px; flex-wrap: wrap;">
+        <i class="fas fa-tag" style="font-size: 0.7rem;"></i>
+        <span>{{ m.nombre_producto }}</span>
+        
+        {% if m.detalle_producto %}
+            <span style="color: #94a3b8;">• {{ m.detalle_producto }}</span>
+        {% endif %}
+        
+        <span style="background: #f1f5f9; padding: 1px 6px; border-radius: 4px; font-weight: 600; color: #475569;">
+            {{ m.talle_producto }}
+        </span>
+    </div>
+    {% endif %}
+</td>
                 <td class="td-monto">
                     <strong style="color: {{ '#10b981' if m.concepto == 'INGRESO' else '#ef4444' }};">
                         {{ '+' if m.concepto == 'INGRESO' else '-' }} ${{ "{:,.2f}".format(m.monto) }}
