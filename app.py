@@ -186,48 +186,50 @@ def actualizar_estado(id):
     nuevo_estado = datos.get('estado')
 
     conn = get_db()
-    # Usamos RealDictCursor para sacar los datos fácil por el nombre de la columna
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
-    # 1. Buscamos toda la info del turno y de la agenda (con un JOIN)
-    cur.execute("""
-        SELECT a.fecha, a.emprendimiento_id, t.cliente, t.detalle, t.monto, t.estado as estado_anterior
-        FROM turnos t
-        JOIN agendas a ON t.agenda_id = a.id
-        WHERE t.id = %s
-    """, (id,))
-    
-    turno = cur.fetchone()
-
-    if turno:
-        # 2. Actualizamos el estado en la agenda a 'Pago', 'Faltó', etc.
-        cur.execute("UPDATE turnos SET estado = %s WHERE id = %s", (nuevo_estado, id))
+    try:
+        # 1. Buscamos info del turno (OJO: cambié a.emprendimiento_id por a.eid)
+        cur.execute("""
+            SELECT a.fecha, a.eid as emprendimiento_id, t.cliente, t.detalle, t.monto, t.estado as estado_anterior
+            FROM turnos t
+            JOIN agendas a ON t.agenda_id = a.id
+            WHERE t.id = %s
+        """, (id,))
         
-        # 3. LA MAGIA: Si el nuevo estado es 'Pago' y ANTES no estaba pago...
-        if nuevo_estado == 'Pago' and turno['estado_anterior'] != 'Pago':
-            
-            # Armamos el texto para el detalle (Ej: "Juan Perez - Corte y Barba")
-            if turno['detalle']:
-                detalle_mov = f"{turno['cliente']} - {turno['detalle']}"
-            else:
-                detalle_mov = turno['cliente']
-                
-            # Insertamos el movimiento directo en la caja del emprendimiento
-            cur.execute("""
-                INSERT INTO movimientos (eid, fecha, tipo, detalle, monto)
-                VALUES (%s, %s, 'INGRESO', %s, %s)
-            """, (
-                turno['emprendimiento_id'], 
-                turno['fecha'], 
-                detalle_mov, 
-                turno['monto']
-            ))
+        turno = cur.fetchone()
 
-    conn.commit()
-    cur.close()
-    conn.close()
-    
-    return jsonify({"status": "success", "message": "Estado actualizado y plata en caja, bo"})
+        if turno:
+            # 2. Primero actualizamos el estado (para que el botón cambie sí o sí)
+            cur.execute("UPDATE turnos SET estado = %s WHERE id = %s", (nuevo_estado, id))
+            
+            # 3. Si es PAGO, insertamos en movimientos
+            if nuevo_estado == 'Pago' and turno['estado_anterior'] != 'Pago':
+                if turno['detalle']:
+                    detalle_mov = f"{turno['cliente']} - {turno['detalle']}"
+                else:
+                    detalle_mov = turno['cliente']
+                    
+                cur.execute("""
+                    INSERT INTO movimientos (eid, fecha, tipo, detalle, monto)
+                    VALUES (%s, %s, 'INGRESO', %s, %s)
+                """, (
+                    turno['emprendimiento_id'], 
+                    turno['fecha'], 
+                    detalle_mov, 
+                    turno['monto']
+                ))
+
+        conn.commit()
+        return jsonify({"status": "success", "message": "¡Plata en caja, bo!"})
+
+    except Exception as e:
+        print(f"Errorazo: {e}")
+        conn.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
 
 @app.route('/borrar_turno/<int:id>', methods=['POST'])
 def borrar_turno(id):
