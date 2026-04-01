@@ -188,19 +188,29 @@
         {{ m.detalle }}
     </div>
 
-    {% if m.nombre_producto %}
-    <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px; display: flex; align-items: center; gap: 5px; flex-wrap: wrap;">
-        <i class="fas fa-tag" style="font-size: 0.7rem;"></i>
-        <span>{{ m.nombre_producto }}</span>
-        
-        {% if m.detalle_producto %}
-            <span style="color: #94a3b8;">• {{ m.detalle_producto }}</span>
-        {% endif %}
-        
-        <span style="background: #f1f5f9; padding: 1px 6px; border-radius: 4px; font-weight: 600; color: #475569;">
-            {{ m.talle_producto }}
-        </span>
-    </div>
+    {# Intentamos acceder por la relación de objeto si m.producto existe #}
+    {% if m.producto %}
+        <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px; display: flex; align-items: center; gap: 5px; flex-wrap: wrap;">
+            <i class="fas fa-tag" style="font-size: 0.7rem;"></i>
+            <span>{{ m.producto.nombre }}</span>
+            
+            {% if m.producto.detalle %}
+                <span style="color: #94a3b8;">• {{ m.producto.detalle }}</span>
+            {% endif %}
+            
+            <span style="background: #f1f5f9; padding: 1px 6px; border-radius: 4px; font-weight: 600; color: #475569;">
+                {{ m.producto.talle }}
+            </span>
+        </div>
+    {# Si no hay objeto, pero los nombres vienen planos en 'm' #}
+    {% elif m.nombre_producto %}
+        <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px; display: flex; align-items: center; gap: 5px; flex-wrap: wrap;">
+            <i class="fas fa-tag" style="font-size: 0.7rem;"></i>
+            <span>{{ m.nombre_producto }}</span>
+            {% if m.talle_producto %}
+                <span style="background: #f1f5f9; padding: 1px 6px; border-radius: 4px;">{{ m.talle_producto }}</span>
+            {% endif %}
+        </div>
     {% endif %}
 </td>
                 <td class="td-monto">
