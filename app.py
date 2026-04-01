@@ -6,6 +6,7 @@ from db import get_db, init_db
 from flask import render_template, request, redirect, url_for, jsonify
 import psycopg2
 import psycopg2.extras  # Esto es fundamental para el RealDictCursor
+from flask_login import current_user # Asegurate de tener esta importación arriba
 
 # --- CONFIGURACIÓN DE APP ---
 app = Flask(__name__, template_folder='templates', static_folder='static')
@@ -186,13 +187,12 @@ def actualizar_estado(id):
     nuevo_estado = datos.get('estado')
 
     conn = get_db()
-    # Usamos RealDictCursor para no marearnos con los índices
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     try:
-        # 1. Traemos la info (En agendas es emprendimiento_id, eso está bien)
+        # 1. Traemos la info (Solo lo que sabemos que existe)
         cur.execute("""
-            SELECT a.fecha, a.emprendimiento_id, t.cliente, t.detalle, t.monto, t.estado as estado_anterior, a.usuario_id
+            SELECT a.fecha, a.emprendimiento_id, t.cliente, t.detalle, t.monto, t.estado as estado_anterior
             FROM turnos t
             JOIN agendas a ON t.agenda_id = a.id
             WHERE t.id = %s
@@ -203,15 +203,16 @@ def actualizar_estado(id):
         if not turno:
             return jsonify({"status": "error", "message": "Turno no encontrado"}), 404
 
-        # 2. Actualizamos el estado en la tabla turnos
+        # 2. Actualizamos el estado del turno
         cur.execute("UPDATE turnos SET estado = %s WHERE id = %s", (nuevo_estado, id))
         
-        # 3. Si es PAGO, insertamos en la tabla CORRECTA: movimientos_emprendimiento
+        # 3. Si es PAGO, insertamos en movimientos_emprendimiento
         if nuevo_estado == 'Pago' and turno['estado_anterior'] != 'Pago':
             detalle_final = f"Turno: {turno['cliente']}"
             if turno['detalle']:
                 detalle_final += f" - {turno['detalle']}"
             
+            # Usamos current_user.id para el usuario_id
             cur.execute("""
                 INSERT INTO movimientos_emprendimiento 
                 (emprendimiento_id, fecha, concepto, detalle, monto, usuario_id)
@@ -219,10 +220,10 @@ def actualizar_estado(id):
             """, (
                 turno['emprendimiento_id'], 
                 turno['fecha'], 
-                'INGRESO',      # En tu tabla se llama 'concepto'
-                detalle_final,  # En tu tabla se llama 'detalle'
+                'INGRESO',
+                detalle_final,
                 turno['monto'], 
-                turno['usuario_id'] # ¡Importante!
+                current_user.id 
             ))
 
         conn.commit()
