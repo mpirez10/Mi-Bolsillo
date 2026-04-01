@@ -108,29 +108,22 @@ def descargar_respaldo():
     return "Respaldo desactivado en PostgreSQL", 404
 
 # Agenda
-@app.route('/agenda')
-def ver_agenda():
+@app.route('/agenda/<int:id>')
+def ver_agenda(id):
     conn = get_db()
-    # Usamos RealDictCursor para que sea fácil leer los datos en el HTML
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
-    # Traemos los días
-    cur.execute("SELECT id, fecha FROM agendas ORDER BY fecha DESC")
+    # Traemos las agendas que pertenecen solo a este emprendimiento (id=1 es Barbería)
+    cur.execute("SELECT id, fecha FROM agendas WHERE emprendimiento_id = %s ORDER BY fecha DESC", (id,))
     agendas = cur.fetchall()
     
-    # Traemos los turnos para cada día
     for agenda in agendas:
-        cur.execute("""
-            SELECT id, hora, cliente, detalle, monto, estado 
-            FROM turnos 
-            WHERE agenda_id = %s 
-            ORDER BY hora ASC
-        """, (agenda['id'],))
+        cur.execute("SELECT * FROM turnos WHERE agenda_id = %s ORDER BY hora ASC", (agenda['id'],))
         agenda['turnos'] = cur.fetchall()
     
     cur.close()
     conn.close()
-    return render_template('agenda.html', agendas=agendas)
+    return render_template('agenda.html', agendas=agendas, emprendimiento_id=id)
 
 @app.route('/agregar_dia', methods=['POST'])
 def agregar_dia():
