@@ -295,6 +295,41 @@ def stock(eid):
 
     return render_template('emprendimiento/stock.html', nombre=nombre_empr, eid=eid, productos=productos)
 
+@emprendimiento_bp.route('/emprendimiento/editar_producto/<int:pid>/<int:eid>', methods=['POST'])
+@login_required
+def editar_producto(pid, eid):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    nombre = request.form.get('nombre', '').strip()
+    detalle = request.form.get('detalle', '')
+    talle = request.form.get('talle', '')
+    try:
+        precio = float(request.form.get('precio', 0))
+    except:
+        precio = 0.0
+    try:
+        stock_val = int(request.form.get('stock', 0))
+    except:
+        stock_val = 0
+
+    try:
+        cursor.execute("""
+            UPDATE productos
+            SET nombre=%s, detalle=%s, talle=%s, precio=%s, stock=%s
+            WHERE id=%s AND usuario_id=%s
+        """, (nombre, detalle, talle, precio, stock_val, pid, current_user.id))
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        cursor.close()
+        conn.close()
+        return f"Error: {e}"
+
+    cursor.close()
+    conn.close()
+    return redirect(url_for('emprendimiento.stock', eid=eid))
+
 
 # --- ELIMINAR PRODUCTO ---
 @emprendimiento_bp.route('/emprendimiento/eliminar_producto/<int:pid>/<int:eid>')
