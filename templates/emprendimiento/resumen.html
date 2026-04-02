@@ -143,17 +143,6 @@
 <div style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 25px;">
     <form method="GET" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
         
-        <div style="flex: 1; min-width: 150px;">
-            <label style="font-size: 0.8rem; color: #64748b; font-weight: 700; display: block; margin-bottom: 5px;">Desde:</label>
-            <input type="date" name="desde" value="{{ request.args.get('desde', '') }}" 
-                   style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;">
-        </div>
-
-        <div style="flex: 1; min-width: 150px;">
-            <label style="font-size: 0.8rem; color: #64748b; font-weight: 700; display: block; margin-bottom: 5px;">Hasta:</label>
-            <input type="date" name="hasta" value="{{ request.args.get('hasta', '') }}" 
-                   style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;">
-        </div>
 
         <div style="display: flex; gap: 8px;">
             <button type="submit" class="btn" style="background: #2563eb; color: white; padding: 10px 15px; border-radius: 8px; border: none;">
