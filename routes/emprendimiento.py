@@ -343,6 +343,7 @@ def stock(eid):
     cursor.execute("""
         SELECT * FROM productos
         WHERE emprendimiento_id=%s AND usuario_id=%s
+        ORDER BY cantidad DESC
     """, (eid, current_user.id))
     productos = cursor.fetchall()
 
