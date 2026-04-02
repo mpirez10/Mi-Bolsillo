@@ -1,6 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify
 from flask_login import login_required, current_user
 from db import get_db
+import pandas as pd
+from io import BytesIO
+from flask import send_file, current_app
 
 emprendimiento_bp = Blueprint('emprendimiento', __name__)
 
@@ -59,6 +62,54 @@ def crear_emprendimiento():
         return redirect(url_for('emprendimiento.emprendimiento_home'))
 
     return render_template('emprendimiento/crear.html')
+
+@emprendimiento_bp.route('/exportar_excel/<int:eid>')
+@login_required
+def exportar_excel(eid):
+    conn = get_db()
+    # Usamos RealDictCursor para que Pandas reconozca los nombres de las columnas de una
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+    try:
+        # Traemos los productos ordenaditos como querías hoy
+        cursor.execute("""
+            SELECT nombre, detalle, talle, precio, stock 
+            FROM productos 
+            WHERE emprendimiento_id = %s AND usuario_id = %s
+            ORDER BY stock DESC, nombre ASC
+        """, (eid, current_user.id))
+        
+        productos = cursor.fetchall()
+
+        if not productos:
+            return "No hay mercadería para exportar.", 400
+
+        # Convertimos la lista de diccionarios a un DataFrame de Pandas
+        df = pd.DataFrame(productos)
+        
+        # Ponemos los nombres de las columnas lindos para el cliente
+        df.columns = ['Producto', 'Detalle', 'Talle', 'Precio ($)', 'Stock Actual']
+
+        # Creamos el archivo en la memoria RAM (BytesIO)
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, sheet_name='Inventario')
+        
+        output.seek(0)
+
+        # Enviamos el archivo al navegador
+        return send_file(
+            output,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            as_attachment=True,
+            download_name=f"Stock_Emprendimiento_{eid}.xlsx"
+        )
+    except Exception as e:
+        print(f"Error exportando Excel: {e}")
+        return "Error al generar el archivo", 500
+    finally:
+        cursor.close()
+        conn.close()
     
 # --- ELIMINAR EMPRENDIMIENTO ---
 @emprendimiento_bp.route('/emprendimiento/eliminar/<int:eid>')
