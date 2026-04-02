@@ -4,6 +4,7 @@ from db import get_db
 import pandas as pd
 from io import BytesIO
 from flask import send_file, current_app
+import psycopg2.extras
 
 emprendimiento_bp = Blueprint('emprendimiento', __name__)
 
