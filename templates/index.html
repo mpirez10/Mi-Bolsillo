@@ -207,7 +207,6 @@
                             <td style="font-weight: 700; color: #1e293b;">${{ "{:,.2f}".format(m.monto) }}</td>
                             <td style="font-size: 0.85rem; color: #475569;">{{ m.cuenta_origen }}</td>
                             <td style="text-align: center;">
-                                <a href="{{ url_for('movimientos.editar_fecha', id=m.id) }}" style="color: #94a3b8; margin-right: 15px;"><i class="fas fa-pen"></i></a>
                                 <a href="{{ url_for('home.eliminar_movimiento', mid=m.id) }}" style="color: #94a3b8;" onclick="return confirm('¿Eliminar?')"><i class="fas fa-trash-alt"></i></a>
                             </td>
                         </tr>
