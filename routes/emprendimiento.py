@@ -64,53 +64,48 @@ def crear_emprendimiento():
 
     return render_template('emprendimiento/crear.html')
 
-@emprendimiento_bp.route('/exportar_excel/<int:eid>')
+@emprendimiento_bp.route('/exportar_movimientos_excel/<int:eid>')
 @login_required
-def exportar_excel(eid):
+def exportar_movimientos_excel(eid):
+    # Capturamos las fechas del filtro para que el Excel salga con lo que estás viendo
+    desde = request.args.get('desde')
+    hasta = request.args.get('hasta')
+    
     conn = get_db()
-    # Usamos RealDictCursor para que Pandas reconozca los nombres de las columnas de una
     cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
-    try:
-        # Traemos los productos ordenaditos como querías hoy
-        cursor.execute("""
-            SELECT nombre, detalle, talle, precio, stock 
-            FROM productos 
-            WHERE emprendimiento_id = %s AND usuario_id = %s
-            ORDER BY stock DESC, nombre ASC
-        """, (eid, current_user.id))
-        
-        productos = cursor.fetchall()
+    # Consulta con rango de fechas
+    sql = """
+        SELECT fecha, concepto, detalle, monto 
+        FROM movimientos_emprendimiento 
+        WHERE emprendimiento_id = %s AND usuario_id = %s
+    """
+    params = [eid, current_user.id]
 
-        if not productos:
-            return "No hay mercadería para exportar.", 400
+    if desde and hasta:
+        sql += " AND fecha BETWEEN %s AND %s"
+        params.extend([desde, hasta])
+    
+    sql += " ORDER BY fecha DESC"
+    
+    cursor.execute(sql, tuple(params))
+    movs = cursor.fetchall()
+    cursor.close()
+    conn.close()
 
-        # Convertimos la lista de diccionarios a un DataFrame de Pandas
-        df = pd.DataFrame(productos)
-        
-        # Ponemos los nombres de las columnas lindos para el cliente
-        df.columns = ['Producto', 'Detalle', 'Talle', 'Precio ($)', 'Stock Actual']
+    if not movs:
+        return "No hay movimientos para exportar en este rango.", 400
 
-        # Creamos el archivo en la memoria RAM (BytesIO)
-        output = BytesIO()
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            df.to_excel(writer, index=False, sheet_name='Inventario')
-        
-        output.seek(0)
+    df = pd.DataFrame(movs)
+    df.columns = ['Fecha', 'Tipo', 'Detalle', 'Monto ($)']
 
-        # Enviamos el archivo al navegador
-        return send_file(
-            output,
-            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            as_attachment=True,
-            download_name=f"Stock_Emprendimiento_{eid}.xlsx"
-        )
-    except Exception as e:
-        print(f"Error exportando Excel: {e}")
-        return "Error al generar el archivo", 500
-    finally:
-        cursor.close()
-        conn.close()
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Movimientos')
+    output.seek(0)
+
+    return send_file(output, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                     as_attachment=True, download_name=f"Movimientos_E{eid}.xlsx")
     
 # --- ELIMINAR EMPRENDIMIENTO ---
 @emprendimiento_bp.route('/emprendimiento/eliminar/<int:eid>')
