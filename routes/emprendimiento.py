@@ -305,12 +305,13 @@ def stock(eid):
         conn.close()
         return "Acceso denegado"
 
-nombre_empr = _get_value(res, "nombre", 0)
+    # Esta línea ahora tiene los 4 espacios de sangría correctos:
+    nombre_empr = _get_value(res, "nombre", 0)
+
     # 2. Manejo del POST (Agregar producto)
     if request.method == 'POST':
         nombre = request.form.get('nombre_prod', '').strip()
         if not nombre:
-            # Mejor redirigir o mostrar error amigable
             return "Nombre inválido", 400
 
         try:
@@ -327,7 +328,7 @@ nombre_empr = _get_value(res, "nombre", 0)
               request.form.get('talle_prod', ''), precio, stock_val, current_user.id))
         conn.commit()
 
-    # 3. Traer productos ORDENADOS (Acá está la magia)
+    # 3. Traer productos ORDENADOS
     cursor.execute("""
         SELECT * FROM productos
         WHERE emprendimiento_id=%s AND usuario_id=%s
