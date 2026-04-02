@@ -142,47 +142,42 @@ def eliminar_emprendimiento(eid):
 @login_required
 def resumen(eid):
     conn = get_db()
-    cursor = conn.cursor()
-
+    
+    # --- 1. VERIFICACIÓN DE ACCESO ---
+    # Usamos RealDictCursor para que sea más fácil de usar en el HTML (e.id, e.nombre)
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    
     cursor.execute(
-        "SELECT nombre FROM emprendimientos WHERE id=%s AND usuario_id=%s",
+        "SELECT * FROM emprendimientos WHERE id=%s AND usuario_id=%s",
         (eid, current_user.id)
     )
-    res = cursor.fetchone()
+    empr = cursor.fetchone()
 
-    if not res:
+    if not empr:
         cursor.close()
         conn.close()
-        return "No autorizado"
+        return "No autorizado o emprendimiento no encontrado, bo.", 403
 
-    nombre_emprendimiento = _get_value(res, "nombre", 0)
-
-    # --- POST MOVIMIENTO ---
+    # --- 2. MANEJO DEL POST (GUARDAR MOVIMIENTO) ---
     if request.method == 'POST' and 'concepto' in request.form:
         fecha = request.form.get('fecha')
         concepto = request.form.get('concepto')
         detalle = request.form.get('detalle', '')
+        producto_id = request.form.get('producto_id') or None
 
         try:
             monto = float(request.form.get('monto', 0))
             if monto <= 0:
-                cursor.close()
-                conn.close()
-                return "Monto inválido"
-        except:
-            cursor.close()
-            conn.close()
-            return "Monto inválido"
-
-        producto_id = request.form.get('producto_id') or None
-
-        try:
+                raise ValueError("Monto inválido")
+            
+            # A. Insertar en movimientos_emprendimiento
             cursor.execute("""
                 INSERT INTO movimientos_emprendimiento
                 (emprendimiento_id, fecha, concepto, detalle, monto, usuario_id, producto_id)
                 VALUES (%s,%s,%s,%s,%s,%s,%s)
             """, (eid, fecha, concepto, detalle, monto, current_user.id, producto_id))
 
+            # B. Lógica de Ventas (INGRESO) y Stock
             if concepto == "INGRESO":
                 cursor.execute("""
                     INSERT INTO ventas (producto_id, fecha, cantidad, precio_total, usuario_id)
@@ -190,25 +185,16 @@ def resumen(eid):
                 """, (producto_id, fecha, 1, monto, current_user.id))
 
                 if producto_id:
-                    cursor.execute(
-                        "SELECT stock FROM productos WHERE id=%s AND usuario_id=%s",
-                        (producto_id, current_user.id)
-                    )
+                    # Chequeamos stock antes de bajar
+                    cursor.execute("SELECT stock FROM productos WHERE id=%s AND usuario_id=%s", (producto_id, current_user.id))
                     stock_row = cursor.fetchone()
-                    stock_val = _get_value(stock_row, "stock", 0)
-
-                    if stock_val is None or int(stock_val) <= 0:
+                    if stock_row and stock_row['stock'] > 0:
+                        cursor.execute("UPDATE productos SET stock = stock - 1 WHERE id=%s", (producto_id,))
+                    else:
                         conn.rollback()
-                        cursor.close()
-                        conn.close()
-                        return "Sin stock"
+                        return "Error: No hay stock suficiente para esta venta.", 400
 
-                    cursor.execute("""
-                        UPDATE productos
-                        SET stock = stock - 1
-                        WHERE id=%s AND usuario_id=%s
-                    """, (producto_id, current_user.id))
-
+            # C. Lógica de Gastos (EGRESO)
             elif concepto == "EGRESO":
                 cursor.execute("""
                     INSERT INTO gastos (emprendimiento_id, fecha, concepto, monto, usuario_id)
@@ -216,16 +202,47 @@ def resumen(eid):
                 """, (eid, fecha, detalle, monto, current_user.id))
 
             conn.commit()
+            return redirect(url_for('emprendimiento.resumen', eid=eid))
 
         except Exception as e:
             conn.rollback()
-            cursor.close()
-            conn.close()
-            return f"Error: {e}"
+            return f"Error al guardar: {e}", 400
 
-        cursor.close()
-        conn.close()
-        return redirect(url_for('emprendimiento.resumen', eid=eid))
+    # --- 3. MANEJO DEL GET (MOSTRAR Y FILTRAR) ---
+    desde = request.args.get('desde')
+    hasta = request.args.get('hasta')
+
+    # Consulta de movimientos con filtro de rango (Inclusive)
+    query_movs = "SELECT * FROM movimientos_emprendimiento WHERE emprendimiento_id = %s AND usuario_id = %s"
+    params_movs = [eid, current_user.id]
+
+    if desde and hasta:
+        query_movs += " AND fecha BETWEEN %s AND %s"
+        params_movs.extend([desde, hasta])
+    
+    query_movs += " ORDER BY fecha DESC, id DESC"
+    
+    cursor.execute(query_movs, tuple(params_movs))
+    movimientos = cursor.fetchall()
+
+    # Traer productos para el selector (el dropdown del formulario)
+    cursor.execute("SELECT id, nombre, stock FROM productos WHERE emprendimiento_id=%s AND usuario_id=%s", (eid, current_user.id))
+    productos = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    # Mandamos 'e=empr' para que el HTML no se queje de que 'e' no existe
+    return render_template(
+        'emprendimiento/resumen.html',
+        e=empr, 
+        eid=eid,
+        nombre=empr['nombre'],
+        movimientos=movimientos,
+        productos=productos,
+        desde=desde,
+        hasta=hasta
+    )
 
     # --- DATOS ---
     cursor.execute("""
