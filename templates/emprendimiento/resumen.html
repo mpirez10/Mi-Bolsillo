@@ -220,6 +220,85 @@
     </table>
 </div>
 
+<style>
+    /* Estilos para que las filas se vean prolijas y con aire */
+    .movimiento-row td {
+        padding: 15px 10px; /* Más espacio vertical */
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+        background: white;
+        transition: background 0.2s;
+    }
+
+    /* Efecto al pasar el mouse */
+    .movimiento-row:hover td {
+        background: #f8fafc;
+    }
+
+    /* Alineaciones específicas */
+    .td-fecha { 
+        color: #64748b; 
+        font-size: 0.85rem; 
+        padding-left: 15px !important; 
+    }
+    
+    .td-monto { 
+        text-align: right; 
+        padding-right: 15px !important; 
+        font-size: 1rem;
+    }
+
+    .td-detalle {
+        max-width: 300px; /* Para que no se estire infinito */
+    }
+
+    .detalle-texto {
+        font-weight: 600;
+        color: #1e293b;
+        line-height: 1.2;
+    }
+
+    /* Estilo para el tag del producto (el azulcito) */
+    .producto-tag {
+        margin-top: 4px;
+        background: #e0f2fe;
+        color: #0369a1;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* El tachito de basura */
+    .td-accion {
+        text-align: center;
+    }
+    
+    .td-accion a {
+        color: #cbd5e1;
+        padding: 8px;
+        transition: color 0.2s;
+    }
+    
+    .td-accion a:hover {
+        color: #ef4444; /* Rojo al borrar */
+    }
+
+    /* Badges de Ingreso/Egreso */
+    .badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    .badge-ingreso { background: #dcfce7; color: #16a34a; }
+    .badge-egreso { background: #fee2e2; color: #dc2626; }
+</style>
+
 <div class="card" style="margin-top: 25px; padding: 20px;">
     <h3 style="margin: 0 0 15px 0; font-size: 1rem;"><i class="fas fa-chart-line" style="color: #10b981;"></i> Ventas Diarias</h3>
     <div style="height: 200px;">
