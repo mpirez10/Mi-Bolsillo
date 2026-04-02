@@ -142,11 +142,10 @@ def eliminar_emprendimiento(eid):
 @login_required
 def resumen(eid):
     conn = get_db()
-    
-    # --- 1. VERIFICACIÓN DE ACCESO ---
-    # Usamos RealDictCursor para que sea más fácil de usar en el HTML (e.id, e.nombre)
+    # Usamos RealDictCursor para que el HTML reciba objetos tipo diccionario (e.id, e.nombre)
     cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
+    # --- 1. VERIFICACIÓN DE ACCESO ---
     cursor.execute(
         "SELECT * FROM emprendimientos WHERE id=%s AND usuario_id=%s",
         (eid, current_user.id)
@@ -170,14 +169,14 @@ def resumen(eid):
             if monto <= 0:
                 raise ValueError("Monto inválido")
             
-            # A. Insertar en movimientos_emprendimiento
+            # A. Insertar movimiento
             cursor.execute("""
                 INSERT INTO movimientos_emprendimiento
                 (emprendimiento_id, fecha, concepto, detalle, monto, usuario_id, producto_id)
                 VALUES (%s,%s,%s,%s,%s,%s,%s)
             """, (eid, fecha, concepto, detalle, monto, current_user.id, producto_id))
 
-            # B. Lógica de Ventas (INGRESO) y Stock
+            # B. Lógica de Stock y Ventas
             if concepto == "INGRESO":
                 cursor.execute("""
                     INSERT INTO ventas (producto_id, fecha, cantidad, precio_total, usuario_id)
@@ -185,16 +184,16 @@ def resumen(eid):
                 """, (producto_id, fecha, 1, monto, current_user.id))
 
                 if producto_id:
-                    # Chequeamos stock antes de bajar
                     cursor.execute("SELECT stock FROM productos WHERE id=%s AND usuario_id=%s", (producto_id, current_user.id))
                     stock_row = cursor.fetchone()
                     if stock_row and stock_row['stock'] > 0:
                         cursor.execute("UPDATE productos SET stock = stock - 1 WHERE id=%s", (producto_id,))
                     else:
                         conn.rollback()
-                        return "Error: No hay stock suficiente para esta venta.", 400
+                        cursor.close()
+                        conn.close()
+                        return "Error: No hay stock suficiente.", 400
 
-            # C. Lógica de Gastos (EGRESO)
             elif concepto == "EGRESO":
                 cursor.execute("""
                     INSERT INTO gastos (emprendimiento_id, fecha, concepto, monto, usuario_id)
@@ -208,11 +207,25 @@ def resumen(eid):
             conn.rollback()
             return f"Error al guardar: {e}", 400
 
-    # --- 3. MANEJO DEL GET (MOSTRAR Y FILTRAR) ---
+    # --- 3. MANEJO DEL GET (CÁLCULOS Y FILTROS) ---
     desde = request.args.get('desde')
     hasta = request.args.get('hasta')
 
-    # Consulta de movimientos con filtro de rango (Inclusive)
+    # A. Calculamos los totales para las tarjetas (Ingresos, Egresos y Saldo)
+    cursor.execute("""
+        SELECT 
+            SUM(CASE WHEN concepto = 'INGRESO' THEN monto ELSE 0 END) as total_ingresos,
+            SUM(CASE WHEN concepto = 'EGRESO' THEN monto ELSE 0 END) as total_egresos
+        FROM movimientos_emprendimiento 
+        WHERE emprendimiento_id = %s AND usuario_id = %s
+    """, (eid, current_user.id))
+    
+    res_totales = cursor.fetchone()
+    ingresos = res_totales['total_ingresos'] or 0
+    egresos = res_totales['total_egresos'] or 0
+    saldo = ingresos - egresos  # Esta es la variable que te hacía falta
+
+    # B. Consulta de movimientos con filtro de rango inclusive
     query_movs = "SELECT * FROM movimientos_emprendimiento WHERE emprendimiento_id = %s AND usuario_id = %s"
     params_movs = [eid, current_user.id]
 
@@ -221,18 +234,17 @@ def resumen(eid):
         params_movs.extend([desde, hasta])
     
     query_movs += " ORDER BY fecha DESC, id DESC"
-    
     cursor.execute(query_movs, tuple(params_movs))
     movimientos = cursor.fetchall()
 
-    # Traer productos para el selector (el dropdown del formulario)
+    # C. Traer productos para el selector
     cursor.execute("SELECT id, nombre, stock FROM productos WHERE emprendimiento_id=%s AND usuario_id=%s", (eid, current_user.id))
     productos = cursor.fetchall()
 
     cursor.close()
     conn.close()
 
-    # Mandamos 'e=empr' para que el HTML no se queje de que 'e' no existe
+    # --- 4. RENDER FINAL ---
     return render_template(
         'emprendimiento/resumen.html',
         e=empr, 
@@ -241,9 +253,11 @@ def resumen(eid):
         movimientos=movimientos,
         productos=productos,
         desde=desde,
-        hasta=hasta
+        hasta=hasta,
+        saldo=saldo,      # Enviamos el saldo al HTML
+        ingresos=ingresos,
+        egresos=egresos
     )
-
     # --- DATOS ---
     cursor.execute("""
         SELECT id, nombre, detalle, talle, stock
