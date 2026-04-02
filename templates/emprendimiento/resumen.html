@@ -140,18 +140,33 @@
     </form>
 </div>
 
-<div class="card" style="padding: 15px; margin-bottom: 20px;">
-    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-        <div style="flex: 1; position: relative;">
-            <i class="fas fa-search" style="position: absolute; left: 12px; top: 12px; color: #94a3b8;"></i>
-            <input type="text" id="busquedaMovimiento" onkeyup="filtrarMovimientos()" placeholder="Buscar..." style="width: 100%; padding: 10px 10px 10px 35px; border-radius: 10px; border: 1px solid #e2e8f0;">
+<div style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 25px;">
+    <form method="GET" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+        
+        <div style="flex: 1; min-width: 150px;">
+            <label style="font-size: 0.8rem; color: #64748b; font-weight: 700; display: block; margin-bottom: 5px;">Desde:</label>
+            <input type="date" name="desde" value="{{ request.args.get('desde', '') }}" 
+                   style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;">
         </div>
-        <a href="{{ url_for('emprendimiento.exportar_excel', eid=eid) }}" 
-   class="btn" 
-   style="background: #16a34a; color: white; border: none; padding: 10px 15px; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
-    <i class="fas fa-file-excel"></i>
-</a>
-    </div>
+
+        <div style="flex: 1; min-width: 150px;">
+            <label style="font-size: 0.8rem; color: #64748b; font-weight: 700; display: block; margin-bottom: 5px;">Hasta:</label>
+            <input type="date" name="hasta" value="{{ request.args.get('hasta', '') }}" 
+                   style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;">
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+            <button type="submit" class="btn" style="background: #2563eb; color: white; padding: 10px 15px; border-radius: 8px; border: none;">
+                <i class="fas fa-search"></i>
+            </button>
+
+            <a href="{{ url_for('emprendimiento.exportar_movimientos_excel', eid=eid, desde=request.args.get('desde'), hasta=request.args.get('hasta')) }}" 
+               class="btn" style="background: #16a34a; color: white; padding: 10px 15px; border-radius: 8px; text-decoration: none; display: flex; align-items: center;">
+                <i class="fas fa-file-excel"></i>
+            </a>
+        </div>
+    </form>
+</div>
     
     <div style="display: flex; align-items: center; justify-content: space-between;">
         <div id="panel-sumatoria">
