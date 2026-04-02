@@ -293,6 +293,7 @@ def stock(eid):
     conn = get_db()
     cursor = conn.cursor()
 
+    # 1. Verificamos acceso y traemos nombre
     cursor.execute(
         "SELECT nombre FROM emprendimientos WHERE id=%s AND usuario_id=%s",
         (eid, current_user.id)
@@ -304,53 +305,42 @@ def stock(eid):
         conn.close()
         return "Acceso denegado"
 
-    nombre_empr = _get_value(res, "nombre", 0)
+    nombre_empr = res[0] # Simplificado si res es una tupla
 
+    # 2. Manejo del POST (Agregar producto)
     if request.method == 'POST':
         nombre = request.form.get('nombre_prod', '').strip()
-
         if not nombre:
-            cursor.close()
-            conn.close()
-            return "Nombre inválido"
+            # Mejor redirigir o mostrar error amigable
+            return "Nombre inválido", 400
 
         try:
             precio = float(request.form.get('precio_prod', 0))
-        except:
-            precio = 0.0
-
-        try:
             stock_val = int(request.form.get('stock_prod', 0))
-        except:
-            stock_val = 0
+        except ValueError:
+            precio, stock_val = 0.0, 0
 
         cursor.execute("""
             INSERT INTO productos
             (emprendimiento_id, nombre, detalle, talle, precio, stock, usuario_id)
             VALUES (%s,%s,%s,%s,%s,%s,%s)
-        """, (
-            eid,
-            nombre,
-            request.form.get('detalle_prod', ''),
-            request.form.get('talle_prod', ''),
-            precio,
-            stock_val,
-            current_user.id
-        ))
-
+        """, (eid, nombre, request.form.get('detalle_prod', ''), 
+              request.form.get('talle_prod', ''), precio, stock_val, current_user.id))
         conn.commit()
 
+    # 3. Traer productos ORDENADOS (Acá está la magia)
     cursor.execute("""
         SELECT * FROM productos
         WHERE emprendimiento_id=%s AND usuario_id=%s
+        ORDER BY stock DESC, nombre ASC
     """, (eid, current_user.id))
+    
     productos = cursor.fetchall()
-
     cursor.close()
     conn.close()
 
     return render_template('emprendimiento/stock.html', nombre=nombre_empr, eid=eid, productos=productos)
-
+    
 @emprendimiento_bp.route('/emprendimiento/editar_producto/<int:pid>/<int:eid>', methods=['POST'])
 @login_required
 def editar_producto(pid, eid):
@@ -447,26 +437,28 @@ def actualizar_precio(pid):
         (nuevo_precio, pid, current_user.id)
     )
     conn.commit()
-
     cursor.close()
     conn.close()
+    return jsonify({"ok": True}) # Esto siempre debe ir al final
 
 @emprendimiento_bp.route('/editar_nombre/<int:eid>', methods=['POST'])
+@login_required # <--- Siempre protegé estas rutas
 def editar_nombre(eid):
-    nuevo_nombre = request.form.get('nuevo_nombre')
+    nuevo_nombre = request.form.get('nuevo_nombre', '').strip()
     
+    # Si el nombre está vacío, lo mandamos de vuelta sin hacer nada
     if not nuevo_nombre:
         return redirect(url_for('emprendimiento.resumen', eid=eid))
 
     conn = get_db()
     try:
         with conn.cursor() as cursor:
-            # Cambiamos el nombre en la tabla de emprendimientos
+            # IMPORTANTE: Filtramos por eid Y por current_user.id por seguridad
             cursor.execute("""
                 UPDATE emprendimientos 
                 SET nombre = %s 
-                WHERE id = %s
-            """, (nuevo_nombre, eid))
+                WHERE id = %s AND usuario_id = %s
+            """, (nuevo_nombre, eid, current_user.id))
             conn.commit()
     except Exception as e:
         print(f"Error al cambiar nombre: {e}")
@@ -474,7 +466,5 @@ def editar_nombre(eid):
     finally:
         conn.close()
 
-    # Volvemos a la página del resumen
+    # Redirigimos al resumen para que vea el cambio reflejado
     return redirect(url_for('emprendimiento.resumen', eid=eid))
-
-    return jsonify({"ok": True})
