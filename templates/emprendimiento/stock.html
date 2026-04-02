@@ -121,34 +121,37 @@
         </thead>
         <tbody>
             {% for p in productos %}
-            <tr>
-                <form method="POST" action="{{ url_for('emprendimiento.editar_producto', pid=p.id, eid=eid) }}">
-                    <td style="padding: 12px;">
-                        <input name="nombre" value="{{ p.nombre }}" class="form-control-minimal" style="font-weight: 700;">
-                        <input name="talle" value="{{ p.talle }}" placeholder="Talle" class="form-control-minimal" style="font-size: 0.8rem; color: #64748b;">
+<tr>
+    <td colspan="5" style="padding: 0;">
+        <form method="POST" action="{{ url_for('emprendimiento.editar_producto', pid=p.id, eid=eid) }}" style="display: contents;">
+            <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+                <tr>
+                    <td style="padding: 12px; width: 25%;">
+                        <input name="nombre" value="{{ p.nombre }}" class="form-control-minimal" style="font-weight: 700; width: 100%;">
+                        <input name="talle" value="{{ p.talle }}" placeholder="Talle" class="form-control-minimal" style="font-size: 0.8rem; color: #64748b; width: 100%;">
                     </td>
-                    <td style="padding: 12px;">
-                        <input name="detalle" value="{{ p.detalle }}" placeholder="Detalle" class="form-control-minimal">
+                    <td style="padding: 12px; width: 25%;">
+                        <input name="detalle" value="{{ p.detalle }}" placeholder="Detalle" class="form-control-minimal" style="width: 100%;">
                     </td>
-                    <td style="padding: 12px; text-align: center;">
+                    <td style="padding: 12px; text-align: center; width: 15%;">
                         <div style="display: flex; align-items: center; justify-content: center; gap: 3px;">
                             <span style="font-size: 0.8rem; color: #64748b;">$</span>
                             <input name="precio" type="number" step="0.01" value="{{ p.precio }}" style="width: 70px; border: 1px solid #e2e8f0; border-radius: 6px; padding: 2px 4px;">
                         </div>
                     </td>
-                    <td style="padding: 12px; text-align: center;">
+                    <td style="padding: 12px; text-align: center; width: 15%;">
                         <input name="stock" type="number" value="{{ p.stock }}" style="width: 50px; text-align: center; border: 1px solid #e2e8f0; border-radius: 6px; padding: 2px 4px; font-weight: 700;">
                         <div style="margin-top: 5px;">
                             {% if p.stock == 0 %}
-                                <span class="badge-stock" style="color: #ef4444; background: #fef2f2;">Agotado</span>
+                                <span class="badge-stock" style="color: #ef4444; background: #fef2f2; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">Agotado</span>
                             {% elif p.stock <= 2 %}
-                                <span class="badge-stock" style="color: #d97706; background: #fffbeb;">Bajo</span>
+                                <span class="badge-stock" style="color: #d97706; background: #fffbeb; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">Bajo</span>
                             {% else %}
-                                <span class="badge-stock" style="color: #16a34a; background: #f0fdf4;">OK</span>
+                                <span class="badge-stock" style="color: #16a34a; background: #f0fdf4; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">OK</span>
                             {% endif %}
                         </div>
                     </td>
-                    <td class="td-acciones" style="padding: 12px; text-align: center;">
+                    <td class="td-acciones" style="padding: 12px; text-align: center; width: 20%;">
                         <div style="display: flex; gap: 10px; justify-content: center;">
                             <button type="submit" style="background: #2563eb; color: white; border: none; width: 38px; height: 38px; border-radius: 10px; cursor: pointer;">
                                 <i class="fas fa-save"></i>
@@ -160,9 +163,12 @@
                             </a>
                         </div>
                     </td>
-                </form>
-            </tr>
-            {% endfor %}
+                </tr>
+            </table>
+        </form>
+    </td>
+</tr>
+{% endfor %}
         </tbody>
     </table>
 </div>
