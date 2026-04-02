@@ -305,8 +305,7 @@ def stock(eid):
         conn.close()
         return "Acceso denegado"
 
-    nombre_empr = res[0] # Simplificado si res es una tupla
-
+nombre_empr = _get_value(res, "nombre", 0)
     # 2. Manejo del POST (Agregar producto)
     if request.method == 'POST':
         nombre = request.form.get('nombre_prod', '').strip()
