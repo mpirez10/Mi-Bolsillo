@@ -143,12 +143,12 @@
 <div style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 25px;">
     <form method="GET" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
         
-
-        <div style="display: flex; gap: 8px;">
-            <button type="submit" class="btn" style="background: #2563eb; color: white; padding: 10px 15px; border-radius: 8px; border: none;">
-                <i class="fas fa-search"></i>
-            </button>
-
+        <div style="display: flex; gap: 5px;">
+            <input type="date" id="fechaDesde" onchange="filtrarMovimientos()" style="flex: 1; padding: 8px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.8rem;">
+            <input type="date" id="fechaHasta" onchange="filtrarMovimientos()" style="flex: 1; padding: 8px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.8rem;">
+            <button onclick="limpiarFiltros()" class="btn btn-outline" style="padding: 5px 10px;"><i class="fas fa-eraser"></i></button>
+        </div>
+        
             <a href="{{ url_for('emprendimiento.exportar_movimientos_excel', eid=eid, desde=request.args.get('desde'), hasta=request.args.get('hasta')) }}" 
    class="btn btn-excel">
    <i class="fas fa-file-excel"></i> Exportar
