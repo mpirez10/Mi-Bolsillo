@@ -138,83 +138,128 @@ def eliminar_emprendimiento(eid):
 
 
 # --- RESUMEN ---
-@emprendimiento_bp.route('/emprendimiento/resumen/<int:eid>', methods=['GET','POST'])
+@emprendimiento_bp.route('/emprendimiento/resumen/<int:eid>', methods=['GET', 'POST'])
 @login_required
 def resumen(eid):
     conn = get_db()
+    # Usamos RealDictCursor para que el HTML reconozca los nombres de las columnas
     cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     # --- 1. VERIFICACIÓN DE ACCESO ---
-    cursor.execute("SELECT * FROM emprendimientos WHERE id=%s AND usuario_id=%s", (eid, current_user.id))
+    cursor.execute(
+        "SELECT * FROM emprendimientos WHERE id=%s AND usuario_id=%s",
+        (eid, current_user.id)
+    )
     empr = cursor.fetchone()
 
     if not empr:
         cursor.close()
         conn.close()
-        return "No autorizado", 403
+        return "No autorizado, bo.", 403
 
-    # --- 2. MANEJO DEL POST (Sin cambios) ---
+    # --- 2. MANEJO DEL POST (GUARDAR NUEVO MOVIMIENTO) ---
     if request.method == 'POST' and 'concepto' in request.form:
-        # ... (Tu lógica de INSERT que ya funciona) ...
-        # (Asegúrate de que termine en redirect)
-        pass
+        fecha = request.form.get('fecha')
+        concepto = request.form.get('concepto') # INGRESO o EGRESO
+        detalle = request.form.get('detalle', '')
+        producto_id = request.form.get('producto_id') or None
 
-    # --- 3. MANEJO DEL GET (CÁLCULOS Y GRÁFICOS) ---
+        try:
+            monto = float(request.form.get('monto', 0))
+            if monto <= 0:
+                raise ValueError("Monto inválido")
+            
+            # A. Insertar en la tabla de movimientos
+            cursor.execute("""
+                INSERT INTO movimientos_emprendimiento
+                (emprendimiento_id, fecha, concepto, detalle, monto, usuario_id, producto_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (eid, fecha, concepto, detalle, monto, current_user.id, producto_id))
+
+            # B. Si es INGRESO, registramos venta y bajamos stock
+            if concepto == "INGRESO":
+                cursor.execute("""
+                    INSERT INTO ventas (producto_id, fecha, cantidad, precio_total, usuario_id)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (producto_id, fecha, 1, monto, current_user.id))
+
+                if producto_id:
+                    cursor.execute("UPDATE productos SET stock = stock - 1 WHERE id=%s AND stock > 0", (producto_id,))
+
+            # C. Si es EGRESO, registramos en la tabla de gastos
+            elif concepto == "EGRESO":
+                cursor.execute("""
+                    INSERT INTO gastos (emprendimiento_id, fecha, concepto, monto, usuario_id)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (eid, fecha, detalle, monto, current_user.id))
+
+            conn.commit()
+            return redirect(url_for('emprendimiento.resumen', eid=eid))
+
+        except Exception as e:
+            conn.rollback()
+            return f"Error al guardar: {e}", 400
+
+    # --- 3. MANEJO DEL GET (FILTROS, TABLA Y GRÁFICOS) ---
     desde = request.args.get('desde')
     hasta = request.args.get('hasta')
 
-    # A. Totales para tarjetas
+    # A. Totales para las tarjetas (Saldo, Ingresos, Gastos)
     cursor.execute("""
         SELECT 
-            SUM(CASE WHEN concepto = 'INGRESO' THEN monto ELSE 0 END) as ingresos,
-            SUM(CASE WHEN concepto = 'EGRESO' THEN monto ELSE 0 END) as gastos
+            SUM(CASE WHEN concepto = 'INGRESO' THEN monto ELSE 0 END) as total_i,
+            SUM(CASE WHEN concepto = 'EGRESO' THEN monto ELSE 0 END) as total_g
         FROM movimientos_emprendimiento 
         WHERE emprendimiento_id = %s AND usuario_id = %s
     """, (eid, current_user.id))
-    totales = cursor.fetchone()
-    val_ingresos = totales['ingresos'] or 0
-    val_gastos = totales['gastos'] or 0
+    
+    res_totales = cursor.fetchone()
+    val_ingresos = res_totales['total_i'] or 0
+    val_gastos = res_totales['total_g'] or 0
     val_saldo = val_ingresos - val_gastos
 
-    # B. Datos para Gráfico de GASTOS (Agrupados por detalle)
+    # B. Datos para el Gráfico de Gastos (Agrupados por detalle)
     cursor.execute("""
-        SELECT detalle as etiqueta, SUM(monto) as total 
+        SELECT detalle, SUM(monto) as total 
         FROM movimientos_emprendimiento 
         WHERE emprendimiento_id = %s AND usuario_id = %s AND concepto = 'EGRESO'
         GROUP BY detalle
     """, (eid, current_user.id))
-    res_gastos = cursor.fetchall()
-    labels_gastos = [r['etiqueta'] for r in res_gastos]
-    data_gastos = [float(r['total']) for r in res_gastos]
+    res_g_grafico = cursor.fetchall()
+    labels_gastos = [r['detalle'] or "Varios" for r in res_g_grafico]
+    data_gastos = [float(r['total']) for r in res_g_grafico]
 
-    # C. Datos para Gráfico de INGRESOS (Agrupados por concepto/producto)
+    # C. Datos para el Gráfico de Ingresos
     cursor.execute("""
-        SELECT detalle as etiqueta, SUM(monto) as total 
+        SELECT detalle, SUM(monto) as total 
         FROM movimientos_emprendimiento 
         WHERE emprendimiento_id = %s AND usuario_id = %s AND concepto = 'INGRESO'
         GROUP BY detalle
     """, (eid, current_user.id))
-    res_ingresos = cursor.fetchall()
-    labels_ingresos = [r['etiqueta'] or "Venta Directa" for r in res_ingresos]
-    data_ingresos = [float(r['total']) for r in res_ingresos]
+    res_i_grafico = cursor.fetchall()
+    labels_ingresos = [r['detalle'] or "Venta" for r in res_i_grafico]
+    data_ingresos = [float(r['total']) for r in res_i_grafico]
 
-    # D. Lista de movimientos para la tabla (con filtro)
+    # D. Consulta de Movimientos para la tabla con filtro BETWEEN
     query_movs = "SELECT * FROM movimientos_emprendimiento WHERE emprendimiento_id = %s AND usuario_id = %s"
     params_movs = [eid, current_user.id]
+
     if desde and hasta:
         query_movs += " AND fecha BETWEEN %s AND %s"
         params_movs.extend([desde, hasta])
+    
     query_movs += " ORDER BY fecha DESC, id DESC"
     cursor.execute(query_movs, tuple(params_movs))
     movimientos = cursor.fetchall()
 
-    # E. Productos para el modal
+    # E. Productos para el modal de carga
     cursor.execute("SELECT id, nombre FROM productos WHERE emprendimiento_id=%s AND usuario_id=%s", (eid, current_user.id))
     productos = cursor.fetchall()
 
     cursor.close()
     conn.close()
 
+    # --- 4. RENDERIZADO ---
     return render_template(
         'emprendimiento/resumen.html',
         e=empr, 
@@ -225,12 +270,12 @@ def resumen(eid):
         desde=desde,
         hasta=hasta,
         ingresos=val_ingresos,
-        gastos=val_gastos,
-        saldo=val_saldo,
-        labels_ingresos=labels_ingresos,
-        data_ingresos=data_ingresos,
-        labels_gastos=labels_gastos,
-        data_gastos=data_gastos
+        gastos=val_gastos,    # Coincide con línea 100 de tu HTML
+        saldo=val_saldo,      # Coincide con línea 92 de tu HTML
+        labels_ingresos=labels_ingresos, # Para el gráfico
+        data_ingresos=data_ingresos,     # Para el gráfico
+        labels_gastos=labels_gastos,     # Para el gráfico
+        data_gastos=data_gastos          # Para el gráfico
     )
     # --- DATOS ---
     cursor.execute("""
