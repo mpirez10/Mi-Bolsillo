@@ -259,49 +259,37 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        // ARREGLO DE LA FECHA PARA LA BASE DE DATOS (YYYY-MM-DD)
-        const hoy = new Date();
-        const yyyy = hoy.getFullYear();
-        const mm = String(hoy.getMonth() + 1).padStart(2, '0');
-        const dd = String(hoy.getDate()).padStart(2, '0');
-        
-        const fechaInput = document.getElementById('fecha_input');
-        if(fechaInput) {
-            fechaInput.value = `${yyyy}-${mm}-${dd}`;
-        }
+    // Seteamos la fecha de hoy en el modal de nuevo movimiento
+    const hoy = new Date();
+    const fechaInput = document.getElementById('fecha_input');
+    if(fechaInput) {
+        fechaInput.value = hoy.toISOString().split('T')[0];
+    }
 
-        const ctx = document.getElementById('graficaIngresos').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: {{ labels_ingresos | tojson }},
-                datasets: [{
-                    data: {{ valores_ingresos | tojson }},
-                    borderColor: '#10b981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 3
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: { x: { display: false }, y: { beginAtZero: true } }
-            }
-        });
-        
-        // Ejecutamos el filtro al inicio
-        // Usamos setTimeout para asegurar que la tabla cargó bien antes de calcular sumas
-        setTimeout(filtrarMovimientos, 100);
+    // Calculamos el total inicial apenas carga la página
+    setTimeout(filtrarMovimientos, 100);
+
+    // Gráfico (mantené tu lógica de Chart.js que ya funciona)
+    const ctx = document.getElementById('graficaIngresos').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ labels_ingresos | tojson }},
+            datasets: [{
+                data: {{ valores_ingresos | tojson }},
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
     });
+});
 
 function filtrarMovimientos() {
-    const texto = document.getElementById("busquedaMovimiento").value.toLowerCase();
     const desdeInput = document.getElementById("fechaDesde").value;
-    const hastaInput = document.getElementById("fechaHasta") ? document.getElementById("fechaHasta").value : "";
+    const hastaInput = document.getElementById("fechaHasta").value;
     const filas = document.querySelectorAll("tbody tr");
     
     let sumaTotal = 0;
@@ -310,25 +298,30 @@ function filtrarMovimientos() {
         const celdas = fila.getElementsByTagName("td");
         if (celdas.length < 4) return;
 
-        const fechaTexto = celdas[0].innerText.trim();
-        const detalle = celdas[2].innerText.toLowerCase();
+        const fechaTexto = celdas[0].innerText.trim(); // dd/mm/yy
+        const montoTexto = celdas[3].innerText.trim()
+            .replace('$', '')
+            .replace('+', '')
+            .replace(/\s/g, '')
+            .replace(/,/g, '');
         
-        let montoTexto = celdas[3].innerText.trim();
-        montoTexto = montoTexto.replace('$', '').replace(/\s/g, '').replace(/,/g, '');
         let monto = parseFloat(montoTexto) || 0;
+        
+        // Si el tipo es EGRESO, el monto para la suma debe ser negativo
+        const tipo = celdas[1].innerText.toUpperCase();
+        if (tipo.includes("EGRESO")) {
+            monto = -Math.abs(monto);
+        } else {
+            monto = Math.abs(monto);
+        }
 
         const fechaFilaISO = formatearAISO(fechaTexto);
-        let coincideTexto = detalle.includes(texto);
         let coincideFecha = true;
 
-        if (desdeInput && fechaFilaISO) {
-            if (fechaFilaISO < desdeInput) coincideFecha = false;
-        }
-        if (hastaInput && fechaFilaISO) {
-            if (fechaFilaISO > hastaInput) coincideFecha = false;
-        }
+        if (desdeInput && fechaFilaISO < desdeInput) coincideFecha = false;
+        if (hastaInput && fechaFilaISO > hastaInput) coincideFecha = false;
 
-        if (coincideTexto && coincideFecha) {
+        if (coincideFecha) {
             fila.style.display = "";
             sumaTotal += monto;
         } else {
@@ -338,16 +331,13 @@ function filtrarMovimientos() {
 
     const totalElemento = document.getElementById("sumaTotalFiltrada");
     if (totalElemento) {
-        const formatoUsa = sumaTotal.toLocaleString('en-US', { 
+        totalElemento.innerText = "$ " + sumaTotal.toLocaleString('en-US', { 
             minimumFractionDigits: 2, 
             maximumFractionDigits: 2 
         });
-
-        totalElemento.innerText = "$ " + formatoUsa;
         totalElemento.style.color = sumaTotal >= 0 ? "#16a34a" : "#ef4444";
     }
 }
-
 function formatearAISO(fechaStr) {
     if(!fechaStr) return null;
     const partes = fechaStr.split('/');
