@@ -45,46 +45,75 @@
     .btn-delete-small:hover { color: var(--danger); }
 
     /* 3. FORMULARIOS E INPUTS - Para que no se te deformen los filtros */
+    /* 3. FILTROS - Alineación total */
     .filtros-grid {
         display: flex; 
-        gap: 15px; 
-        padding: 10px 0;
-        background: transparent; 
-        align-items: center; /* Alinea todo al medio verticalmente */
-        flex-wrap: wrap; /* Por si achicás la ventana, que bajen solitos */
+        gap: 12px; 
+        padding: 15px;
+        background: #f8fafc; /* Un fondo sutil para agrupar los filtros */
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        align-items: flex-end; /* Alinea el borde inferior de todo */
+        flex-wrap: wrap;
+        margin-bottom: 20px;
     }
 
-    /* Contenedor del buscador para que ocupe el espacio sobrante */
     .search-container {
         flex: 2;
         min-width: 200px;
         position: relative;
     }
 
-    /* Contenedor de fechas */
     .fecha-inputs {
         display: flex;
         gap: 8px;
-        flex: 1;
-        min-width: 250px;
+        flex: 1.5;
+        min-width: 280px;
     }
+
+    /* Forzamos la misma altura para inputs y botones */
+    .form-control, .btn-export {
+        height: 42px !important; 
+        box-sizing: border-box;
+    }
+
     .form-control {
-        padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border);
-        font-size: 0.9rem; transition: all 0.2s; width: 100%;
+        padding: 8px 14px; 
+        border-radius: 8px; 
+        border: 1px solid var(--border);
+        font-size: 0.9rem; 
+        width: 100%;
+        background: white;
     }
-    .form-control:focus { border-color: var(--pocket-blue); outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
 
-    /* 4. TABLA Y BOTONES - Estética de los movimientos */
+    /* 4. BOTONES DE EXPORTACIÓN - Estilo compacto para la barra */
     .btn-export {
-        display: flex; align-items: center; justify-content: center; gap: 8px;
-        padding: 12px; border-radius: 10px; border: none; font-weight: 700;
-        cursor: pointer; color: white; transition: 0.2s; flex: 1;
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        padding: 0 15px; 
+        border-radius: 8px; 
+        border: none; 
+        font-weight: 700;
+        cursor: pointer; 
+        color: white; 
+        transition: 0.2s;
+        min-width: 42px; /* Cuadrados si no tienen texto */
     }
-    .btn-excel { background: #10b981; box-shadow: 0 4px 0px #059669; }
-    .btn-pdf { background: #ef4444; box-shadow: 0 4px 0px #dc2626; }
-    .btn-export:active { transform: translateY(4px); box-shadow: none; }
 
-    .status-badge { padding: 6px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
+    /* Quitamos el box-shadow que los hacía más altos y "flotantes" */
+    .btn-excel { background: #10b981; }
+    .btn-pdf { background: #ef4444; }
+
+    .btn-export:hover {
+        filter: brightness(0.9);
+        transform: translateY(-1px);
+    }
+
+    .btn-export:active { transform: translateY(0); }
+
+    /* Estética de la Tabla */
+    .status-badge { padding: 5px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; }
     
     table { width: 100%; border-collapse: collapse; }
     th { background: #f8fafc; padding: 12px 15px; text-align: left; font-size: 0.75rem; color: var(--text-muted); border-bottom: 2px solid var(--border); }
