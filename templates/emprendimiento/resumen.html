@@ -234,104 +234,66 @@
 
 <style>
 @media (max-width: 768px) {
-    /* 1. Limpieza de tabla vieja */
-    .movimientos-table thead {
-        display: none;
-    }
-    .movimientos-table, .movimientos-table tbody, .movimientos-table tr, .movimientos-table td {
-        display: block;
-        width: 100%;
-    }
-
-    /* 2. La Card 'Pro' con Grid */
+    /* 1. La Card: Ajustamos el padding lateral a 24px para alinear con el cabezal */
     .movimientos-table tr {
         background: #ffffff;
         margin-bottom: 16px;
         border-radius: 16px;
         border: 1px solid #e2e8f0;
-        padding: 16px;
+        padding: 16px 24px; /* 24px a los lados igual que el cabezal */
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         display: grid;
-        /* Definimos 3 filas: Fecha / Detalle+Monto / Tipo+Acciones */
         grid-template-areas: 
             "fecha fecha"
+            "tipo tipo"
             "detalle monto"
-            "tipo acciones";
+            "acciones acciones";
         grid-template-columns: 1fr auto;
-        gap: 8px;
+        gap: 10px;
     }
 
-    /* 3. Posicionamiento de cada dato */
+    /* 2. Quitamos paddings de los TD para que no sumen espacio extra */
     .movimientos-table td {
         padding: 0 !important;
         border: none !important;
-        display: flex;
-        align-items: center;
     }
 
-    /* Fila 1: Fecha (Toda la franja de arriba) */
-    .movimientos-table td[data-label="Fecha"] {
-        grid-area: fecha;
-        font-size: 0.8rem;
-        color: #94a3b8;
-        font-weight: 600;
-        margin-bottom: 4px;
-    }
-    .movimientos-table td[data-label="Fecha"]::before { display: none; }
-
-    /* Fila 2 Izquierda: Detalle */
-    .movimientos-table td[data-label="Detalle"] {
-        grid-area: detalle;
-        font-weight: 700;
-        color: #1e293b;
-        font-size: 1rem;
-    }
-    .movimientos-table td[data-label="Detalle"]::before {
-        content: "DETALLE: ";
-        font-size: 0.65rem;
-        color: #94a3b8;
-        margin-right: 4px;
-    }
-
-    /* Fila 2 Derecha: Monto */
+    /* 3. El Monto: Forzamos que se pegue bien a la derecha */
     .movimientos-table td[data-label="Monto"] {
         grid-area: monto;
-        justify-content: flex-end;
+        display: flex;
+        justify-content: flex-end; /* Lo empuja contra el borde derecho */
+        align-items: center;
+        text-align: right;
     }
+
+    /* 4. Estilo de los textos para que no se pisen */
     .movimientos-table td[data-label="Monto"]::before {
         content: "MONTO: ";
         font-size: 0.65rem;
         color: #94a3b8;
-        margin-right: 4px;
+        font-weight: 800;
+        margin-right: 6px;
     }
+
     .movimientos-table td[data-label="Monto"] span {
         font-weight: 800;
-        font-size: 1rem;
+        font-size: 1.1rem;
+        color: inherit; /* Mantiene el verde o rojo que ya tenías */
     }
 
-    /* Fila 3 Izquierda: Tipo (Badge) */
-    .movimientos-table td[data-label="Tipo"] {
-        grid-area: tipo;
-        margin-top: 8px;
-    }
-    .movimientos-table td[data-label="Tipo"]::before { display: none; }
-
-    /* Fila 3 Derecha: Acciones (Tacho) */
+    /* 5. Acciones: El tacho de basura también alineado a la derecha */
     .movimientos-table td[data-label="Acciones"] {
         grid-area: acciones;
+        display: flex;
         justify-content: flex-end;
-        margin-top: 8px;
-    }
-    .movimientos-table td[data-label="Acciones"]::before { display: none; }
-    
-    /* El tacho de basura más grande y fácil de tocar */
-    .movimientos-table td[data-label="Acciones"] i {
-        font-size: 1.2rem;
-        color: #cbd5e1;
-        padding: 5px;
+        padding-top: 10px !important;
+        margin-top: 5px;
+        border-top: 1px solid #f1f5f9 !important;
     }
 }
 </style>
+
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
