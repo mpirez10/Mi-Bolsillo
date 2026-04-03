@@ -368,37 +368,70 @@
         .fecha-inputs { width: 100%; display: flex; gap: 8px; }
     }
 
-    /* 7. CONFIGURACIÓN DE IMPRESIÓN (Para el PDF Pro) */
-    @media print {
-        nav, aside, .btn, .btn-export, .filtros-grid, .chart-card, .btn-delete-small, i.fas.fa-trash-alt {
-            display: none !important;
-        }
-        
-        body { background: white !important; padding: 0; }
-        .dashboard-layout { display: block; }
-        main { width: 100%; }
-        
-        .card { 
-            border: none !important; 
-            box-shadow: none !important; 
-            padding: 0 !important; 
-        }
-        
-        table { 
-            width: 100% !important; 
-            border-collapse: collapse; 
-            margin-top: 20px;
-        }
-        
-        th, td { 
-            border: 1px solid #eee !important; 
-            padding: 12px !important; 
-            color: black !important;
-        }
-        
-        thead { display: table-header-group !important; } /* En PDF sí mostramos cabecera */
-        tr { display: table-row !important; }
+    /* =========================================
+   ESTILO DE IMPRESIÓN (PDF VERSIÓN WEB)
+   ========================================= */
+@media print {
+    /* 1. Forzamos el tamaño de la página y ocultamos lo que no va */
+    @page { 
+        size: A4 landscape; /* Landscape (horizontal) suele quedar mejor para tablas anchas */
+        margin: 1cm; 
     }
+    
+    nav, aside, .btn, .btn-export, .filtros-grid, .chart-card, 
+    .btn-delete-small, i.fas.fa-trash-alt, td:last-child, th:last-child { 
+        display: none !important; 
+    }
+
+    /* 2. Reseteamos el Layout para que ocupe todo el ancho */
+    body { background: white !important; font-size: 10pt; }
+    .dashboard-layout { display: block !important; width: 100% !important; }
+    main { width: 100% !important; margin: 0 !important; padding: 0 !important; }
+    .card { border: none !important; box-shadow: none !important; width: 100% !important; }
+
+    /* 3. EL TRUCO: Forzamos comportamiento de tabla y matamos el Grid */
+    .table-responsive { overflow: visible !important; }
+    
+    table { 
+        display: table !important; /* Forzamos que sea una tabla */
+        width: 100% !important; 
+        border-collapse: collapse !important;
+    }
+
+    thead { 
+        display: table-header-group !important; /* Mostramos el encabezado siempre */
+    }
+
+    tbody { 
+        display: table-row-group !important; 
+    }
+
+    tr { 
+        display: table-row !important; /* Anulamos el display: grid del móvil */
+        page-break-inside: avoid; 
+    }
+
+    th, td { 
+        display: table-cell !important; /* Forzamos que vuelvan a ser celdas */
+        border: 1px solid #ddd !important; 
+        padding: 8px !important;
+        text-align: left !important;
+        font-size: 9pt !important;
+    }
+
+    /* 4. Mostramos las columnas que en el móvil escondíamos */
+    td:nth-child(4), th:nth-child(4) { 
+        display: table-cell !important; 
+    }
+
+    /* Ajuste de colores para que el PDF no gaste tinta al divino botón pero se vea bien */
+    .status-badge {
+        border: 1px solid #ccc !important;
+        background: transparent !important;
+        color: black !important;
+        font-weight: bold !important;
+    }
+}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
