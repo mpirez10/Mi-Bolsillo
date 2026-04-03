@@ -328,9 +328,10 @@
    ESTILO DE IMPRESIÓN (PDF VERSIÓN WEB)
    ========================================= */
 @media print {
-    /* 1. Configuración de página: Horizontal para que entre todo */
+
+    /* 1. Configuración de página (MEJORADO) */
     @page { 
-        size: landscape; 
+        size: A4; /* 🔥 vertical para evitar cortes raros */
         margin: 1cm; 
     }
 
@@ -340,40 +341,64 @@
         display: none !important; 
     }
 
-    /* 3. Forzamos que el contenedor sea una tabla y no un grid */
+    /* 3. Layout limpio */
     .dashboard-layout { display: block !important; }
     main { width: 100% !important; margin: 0 !important; padding: 0 !important; }
-    .card { border: none !important; box-shadow: none !important; }
+    
+    .card { 
+        border: none !important; 
+        box-shadow: none !important; 
+        page-break-inside: avoid !important; /* 🔥 evita cortes de bloques */
+        break-inside: avoid !important;
+    }
 
-    /* 4. RESET DE TABLA: Esto arregla lo que viste en la captura */
+    /* 4. TABLA PERFECTA */
     table { 
         display: table !important; 
         width: 100% !important; 
         border-collapse: collapse !important;
         border: 1px solid #000 !important;
+        page-break-inside: auto;
     }
 
-    thead { display: table-header-group !important; }
-    tbody { display: table-row-group !important; }
+    thead { 
+        display: table-header-group !important; 
+    }
 
-    /* CRÍTICO: Anulamos el 'display: grid' que pusimos para el móvil */
+    tbody { 
+        display: table-row-group !important; 
+    }
+
+    tfoot {
+        display: table-footer-group !important;
+    }
+
+    /* 🔥 CLAVE: evitar que filas se corten */
     tr { 
         display: table-row !important; 
         border-bottom: 1px solid #eee !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
     }
 
-    /* CRÍTICO: Anulamos el 'display: block' de las celdas */
+    /* 🔥 Celdas normales (quita efecto mobile) */
     th, td { 
         display: table-cell !important; 
         padding: 10px !important;
         text-align: left !important;
         border: 1px solid #eee !important;
         vertical-align: middle !important;
-        width: auto !important; /* Que el navegador decida el ancho */
+        width: auto !important;
+        page-break-inside: avoid !important;
     }
 
-    /* 5. Aseguramos que los textos se vean negros y claros */
-    body { background: white !important; color: black !important; font-size: 10pt; }
+    /* 5. Tipografía limpia */
+    body { 
+        background: white !important; 
+        color: black !important; 
+        font-size: 10pt; 
+    }
+
     .status-badge { 
         background: none !important; 
         color: black !important; 
@@ -381,8 +406,12 @@
         padding: 2px 5px !important;
     }
 
-    /* Forzamos a que aparezcan columnas que quizás ocultamos en móvil */
-    td:nth-child(4), th:nth-child(4) { display: table-cell !important; }
+    /* 6. Asegurar columnas ocultas en mobile */
+    td:nth-child(4), 
+    th:nth-child(4) { 
+        display: table-cell !important; 
+    }
+
 }
     /* 6. MODO MOBILE (Responsivo) */
     @media (max-width: 768px) {
