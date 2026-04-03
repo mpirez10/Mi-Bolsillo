@@ -234,9 +234,9 @@
 
 <style>
 @media (max-width: 768px) {
-    /* 1. Quitamos la estructura de tabla rígida */
+    /* 1. Limpieza de estructura */
     .movimientos-table thead {
-        display: none; /* Chau encabezado azul */
+        display: none;
     }
 
     .movimientos-table, 
@@ -247,79 +247,73 @@
         width: 100%;
     }
 
-    /* 2. Cada fila ahora es una Card Pro */
+    /* 2. La Card: Más redondeada y con sombra suave */
     .movimientos-table tr {
         background: #ffffff;
-        margin-bottom: 16px;
+        margin-bottom: 20px;
         border-radius: 16px;
         border: 1px solid #e2e8f0;
-        padding: 12px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        padding: 10px 5px; /* Menos padding lateral para ganar espacio */
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
 
-    /* 3. Layout de Grilla para los datos */
+    /* 3. Grilla Perfecta: 100px para etiquetas, el resto para el dato */
     .movimientos-table td {
         display: grid;
-        grid-template-columns: 90px 1fr; /* Espacio fijo para etiqueta, resto para el dato */
-        gap: 10px;
+        grid-template-columns: 100px 1fr; 
         align-items: center;
-        padding: 8px 12px !important;
+        padding: 10px 15px !important;
         border: none !important;
     }
 
-    /* 4. Estilo de las etiquetas (izquierda) */
+    /* 4. Etiquetas (FECHA, TIPO, etc.) */
     .movimientos-table td::before {
         content: attr(data-label);
         font-size: 0.65rem;
         font-weight: 800;
-        color: #94a3b8;
+        color: #94a3b8; /* Gris azulado suave */
         text-transform: uppercase;
         letter-spacing: 0.05em;
     }
 
-    /* 5. Alineación de los datos (derecha) */
+    /* 5. Valores (Los datos de la derecha) */
     .movimientos-table td > span,
     .movimientos-table td > div {
         text-align: right;
         font-size: 0.95rem;
-        word-break: break-word; /* Para que el detalle largo no rompa nada */
+        color: #1e293b;
+        font-weight: 600;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
-    /* 6. Badge de Tipo ajustado */
-    .status-badge {
-        justify-self: end; /* Lo pega a la derecha */
-        margin: 0 !important;
+    /* 6. El Monto: Más grande para que resalte */
+    td[data-label="Monto"] span, 
+    td[data-label="Monto"] div {
+        font-size: 1.15rem !important;
+        font-weight: 800 !important;
     }
 
-    /* 7. Fila de Acciones (Botón de borrar pro) */
+    /* 7. Acciones: Botón discreto pero funcional */
     .td-accion {
-        grid-template-columns: 1fr !important; /* Una sola columna */
-        margin-top: 10px;
-        padding-top: 12px !important;
+        grid-template-columns: 1fr !important; /* Centrado total */
+        margin-top: 5px;
+        padding-top: 10px !important;
         border-top: 1px solid #f1f5f9 !important;
-        justify-content: center;
     }
 
     .td-accion::before {
-        display: none; /* Quitamos la palabra 'ACCIONES' */
+        display: none;
     }
 
     .td-accion a {
-        display: flex;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
-        background: #fef2f2;
-        color: #ef4444 !important;
-        padding: 10px;
-        border-radius: 10px;
+        color: #94a3b8 !important; /* Icono suave para no distraer */
+        padding: 8px;
+        width: 100%;
         text-decoration: none;
-        font-weight: 700;
-        font-size: 0.85rem;
-    }
-    
-    .td-accion a::after {
-        content: "Eliminar Movimiento";
     }
 }
 </style>
