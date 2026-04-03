@@ -328,65 +328,61 @@
    ESTILO DE IMPRESIÓN (PDF VERSIÓN WEB)
    ========================================= */
 @media print {
-    /* 1. Forzamos el tamaño de la página y ocultamos lo que no va */
+    /* 1. Configuración de página: Horizontal para que entre todo */
     @page { 
-        size: A4 landscape; /* Landscape (horizontal) suele quedar mejor para tablas anchas */
+        size: landscape; 
         margin: 1cm; 
     }
-    
+
+    /* 2. Limpieza total de elementos web */
     nav, aside, .btn, .btn-export, .filtros-grid, .chart-card, 
     .btn-delete-small, i.fas.fa-trash-alt, td:last-child, th:last-child { 
         display: none !important; 
     }
 
-    /* 2. Reseteamos el Layout para que ocupe todo el ancho */
-    body { background: white !important; font-size: 10pt; }
-    .dashboard-layout { display: block !important; width: 100% !important; }
+    /* 3. Forzamos que el contenedor sea una tabla y no un grid */
+    .dashboard-layout { display: block !important; }
     main { width: 100% !important; margin: 0 !important; padding: 0 !important; }
-    .card { border: none !important; box-shadow: none !important; width: 100% !important; }
+    .card { border: none !important; box-shadow: none !important; }
 
-    /* 3. EL TRUCO: Forzamos comportamiento de tabla y matamos el Grid */
-    .table-responsive { overflow: visible !important; }
-    
+    /* 4. RESET DE TABLA: Esto arregla lo que viste en la captura */
     table { 
-        display: table !important; /* Forzamos que sea una tabla */
+        display: table !important; 
         width: 100% !important; 
         border-collapse: collapse !important;
+        border: 1px solid #000 !important;
     }
 
-    thead { 
-        display: table-header-group !important; /* Mostramos el encabezado siempre */
-    }
+    thead { display: table-header-group !important; }
+    tbody { display: table-row-group !important; }
 
-    tbody { 
-        display: table-row-group !important; 
-    }
-
+    /* CRÍTICO: Anulamos el 'display: grid' que pusimos para el móvil */
     tr { 
-        display: table-row !important; /* Anulamos el display: grid del móvil */
-        page-break-inside: avoid; 
+        display: table-row !important; 
+        border-bottom: 1px solid #eee !important;
     }
 
+    /* CRÍTICO: Anulamos el 'display: block' de las celdas */
     th, td { 
-        display: table-cell !important; /* Forzamos que vuelvan a ser celdas */
-        border: 1px solid #ddd !important; 
-        padding: 8px !important;
-        text-align: left !important;
-        font-size: 9pt !important;
-    }
-
-    /* 4. Mostramos las columnas que en el móvil escondíamos */
-    td:nth-child(4), th:nth-child(4) { 
         display: table-cell !important; 
+        padding: 10px !important;
+        text-align: left !important;
+        border: 1px solid #eee !important;
+        vertical-align: middle !important;
+        width: auto !important; /* Que el navegador decida el ancho */
     }
 
-    /* Ajuste de colores para que el PDF no gaste tinta al divino botón pero se vea bien */
-    .status-badge {
+    /* 5. Aseguramos que los textos se vean negros y claros */
+    body { background: white !important; color: black !important; font-size: 10pt; }
+    .status-badge { 
+        background: none !important; 
+        color: black !important; 
         border: 1px solid #ccc !important;
-        background: transparent !important;
-        color: black !important;
-        font-weight: bold !important;
+        padding: 2px 5px !important;
     }
+
+    /* Forzamos a que aparezcan columnas que quizás ocultamos en móvil */
+    td:nth-child(4), th:nth-child(4) { display: table-cell !important; }
 }
     /* 6. MODO MOBILE (Responsivo) */
     @media (max-width: 768px) {
