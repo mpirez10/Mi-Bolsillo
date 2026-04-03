@@ -47,17 +47,34 @@
         </div>
 
         <div style="margin-bottom: 20px;">
-            <label>Fecha (DDMMYY):</label>
-            <input type="text" name="fecha" maxlength="6" required placeholder="Ej: 240326"
-                   style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
-        </div>
+    <label style="display: block; margin-bottom: 8px; color: #64748b; font-weight: 700; font-size: 0.85rem; text-transform: uppercase;">
+        <i class="fas fa-calendar-alt" style="color: #2563eb; margin-right: 5px;"></i> Fecha de Movimiento
+    </label>
+    <input type="date" name="fecha" required 
+           class="input-calendario-pro"
+           style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; font-family: inherit; font-size: 1rem; color: #1e293b; background-color: #f8fafc; outline: none; transition: all 0.3s ease;">
+</div>
 
         <button type="submit" class="btn btn-blue" style="width: 100%; font-size: 1.1em;">
             <i class="fas fa-save"></i> Guardar Movimiento
         </button>
     </form>
 </div>
+<style>
+    /* Efecto Pro al seleccionar el calendario */
+    .input-calendario-pro:focus {
+        border-color: #2563eb !important;
+        background-color: #ffffff !important;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
 
+    /* Estilo para el icono del calendario en Chrome/Android */
+    .input-calendario-pro::-webkit-calendar-picker-indicator {
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="15" viewBox="0 0 24 24" fill="none" stroke="%232563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>');
+        cursor: pointer;
+        padding: 5px;
+    }
+</style>
 <script>
 function toggleDestino() {
     var tipo = document.getElementById("tipo").value;
