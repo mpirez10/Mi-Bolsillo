@@ -233,95 +233,95 @@
 </div>
 
 <style>
-    /* Contenedor para que todo se alinee con las tarjetas de arriba */
-    .dashboard-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 15px;
+@media (max-width: 768px) {
+    /* 1. Quitamos la estructura de tabla rígida */
+    .movimientos-table thead {
+        display: none; /* Chau encabezado azul */
     }
 
-    .seccion-card {
-        background: white;
-        border-radius: 12px;
+    .movimientos-table, 
+    .movimientos-table tbody, 
+    .movimientos-table tr, 
+    .movimientos-table td {
+        display: block;
+        width: 100%;
+    }
+
+    /* 2. Cada fila ahora es una Card Pro */
+    .movimientos-table tr {
+        background: #ffffff;
+        margin-bottom: 16px;
+        border-radius: 16px;
         border: 1px solid #e2e8f0;
+        padding: 12px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        margin-bottom: 25px;
-        overflow: hidden;
     }
 
-    /* Estilo para los badges con iconos */
-    .status-badge {
-        display: inline-flex;
+    /* 3. Layout de Grilla para los datos */
+    .movimientos-table td {
+        display: grid;
+        grid-template-columns: 90px 1fr; /* Espacio fijo para etiqueta, resto para el dato */
+        gap: 10px;
         align-items: center;
-        gap: 5px;
-        padding: 4px 10px;
-        border-radius: 20px;
+        padding: 8px 12px !important;
+        border: none !important;
+    }
+
+    /* 4. Estilo de las etiquetas (izquierda) */
+    .movimientos-table td::before {
+        content: attr(data-label);
         font-size: 0.65rem;
-        font-weight: 700;
+        font-weight: 800;
+        color: #94a3b8;
         text-transform: uppercase;
+        letter-spacing: 0.05em;
     }
 
-    /* RESPONSIVE: La magia para el celular */
-    @media (max-width: 768px) {
-        .movimientos-table thead {
-            display: none;
-        }
-
-        .movimientos-table, .movimientos-table tbody, .movimientos-table tr, .movimientos-table td {
-            display: block;
-            width: 100%;
-        }
-
-        .movimientos-table tr {
-            margin: 15px 10px; /* Separación entre tarjetas */
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 10px;
-            background: #ffffff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-
-        .movimientos-table td {
-            display: grid;
-            /* Bajamos a 80px para dar más aire al dato de la derecha */
-            grid-template-columns: 80px 1fr; 
-            align-items: center;
-            text-align: right !important; /* El contenido del dato a la derecha */
-            padding: 8px 12px !important;
-            border: none !important;
-        }
-
-        .movimientos-table td::before {
-            content: attr(data-label);
-            font-weight: 800;
-            color: #94a3b8;
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            text-align: left; /* La etiqueta a la izquierda */
-        }
-
-        /* Forzamos que los elementos internos no rompan el grid */
-        .movimientos-table td span, 
-        .movimientos-table td div {
-            display: block;
-            width: 100%;
-            word-break: break-word;
-        }
-
-        /* El tacho de basura centrado al final */
-        .td-accion {
-            display: flex !important;
-            justify-content: center !important;
-            margin-top: 10px;
-            background: #f8fafc;
-            border-radius: 8px;
-            padding: 12px !important;
-        }
-        
-        .td-accion::before {
-            display: none; /* Quitamos la etiqueta 'ACCIONES' para que el tacho luzca mejor solo */
-        }
+    /* 5. Alineación de los datos (derecha) */
+    .movimientos-table td > span,
+    .movimientos-table td > div {
+        text-align: right;
+        font-size: 0.95rem;
+        word-break: break-word; /* Para que el detalle largo no rompa nada */
     }
+
+    /* 6. Badge de Tipo ajustado */
+    .status-badge {
+        justify-self: end; /* Lo pega a la derecha */
+        margin: 0 !important;
+    }
+
+    /* 7. Fila de Acciones (Botón de borrar pro) */
+    .td-accion {
+        grid-template-columns: 1fr !important; /* Una sola columna */
+        margin-top: 10px;
+        padding-top: 12px !important;
+        border-top: 1px solid #f1f5f9 !important;
+        justify-content: center;
+    }
+
+    .td-accion::before {
+        display: none; /* Quitamos la palabra 'ACCIONES' */
+    }
+
+    .td-accion a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background: #fef2f2;
+        color: #ef4444 !important;
+        padding: 10px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+    
+    .td-accion a::after {
+        content: "Eliminar Movimiento";
+    }
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
