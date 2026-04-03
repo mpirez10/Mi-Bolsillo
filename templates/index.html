@@ -46,8 +46,27 @@
 
     /* 3. FORMULARIOS E INPUTS - Para que no se te deformen los filtros */
     .filtros-grid {
-        display: flex; gap: 12px; padding: 20px;
-        background: white; align-items: flex-end; flex-wrap: wrap;
+        display: flex; 
+        gap: 15px; 
+        padding: 10px 0;
+        background: transparent; 
+        align-items: center; /* Alinea todo al medio verticalmente */
+        flex-wrap: wrap; /* Por si achicás la ventana, que bajen solitos */
+    }
+
+    /* Contenedor del buscador para que ocupe el espacio sobrante */
+    .search-container {
+        flex: 2;
+        min-width: 200px;
+        position: relative;
+    }
+
+    /* Contenedor de fechas */
+    .fecha-inputs {
+        display: flex;
+        gap: 8px;
+        flex: 1;
+        min-width: 250px;
     }
     .form-control {
         padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border);
@@ -177,33 +196,30 @@
                     </div>
                 </div>
 
-                <div class="filtros-grid" style="display: flex; flex-direction: column; gap: 10px;">
-                    <div style="position: relative;">
-                        <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
-                        <input type="text" id="busquedaMovimiento" onkeyup="filtrarMovimientos()" 
-                               placeholder="Buscar..." 
-                               style="width: 100%; padding: 10px 10px 10px 35px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem;">
-                    </div>
-                    
-                    <div class="fecha-inputs">
-                        <input type="date" id="fechaDesde" onchange="filtrarMovimientos()" style="flex: 1; padding: 8px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.8rem;">
-                        <input type="date" id="fechaHasta" onchange="filtrarMovimientos()" style="flex: 1; padding: 8px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.8rem;">
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
-    <button onclick="exportarAExcel()" class="btn-export btn-excel">
-        <i class="fas fa-file-excel"></i> <span>Excel</span>
-    </button>
+                <div class="filtros-grid">
+    <div class="search-container">
+        <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+        <input type="text" id="busquedaMovimiento" onkeyup="filtrarMovimientos()" 
+               placeholder="Buscar movimiento..." class="form-control" style="padding-left: 35px;">
+    </div>
+    
+    <div class="fecha-inputs">
+        <input type="date" id="fechaDesde" onchange="filtrarMovimientos()" class="form-control">
+        <input type="date" id="fechaHasta" onchange="filtrarMovimientos()" class="form-control">
+    </div>
 
-    <button onclick="exportarAPDF()" class="btn-export btn-pdf">
-        <i class="fas fa-file-pdf"></i> <span>PDF</span>
-    </button>
+    <div class="acciones-filtros">
+        <button onclick="exportarAExcel()" class="btn-export btn-excel" title="Exportar a Excel">
+            <i class="fas fa-file-excel"></i>
+        </button>
+        <button onclick="exportarAPDF()" class="btn-export btn-pdf" title="Imprimir PDF">
+            <i class="fas fa-file-pdf"></i>
+        </button>
+        <button onclick="limpiarFiltros()" class="btn-limpiar" title="Limpiar Filtros">
+            <i class="fas fa-sync-alt"></i>
+        </button>
+    </div>
 </div>
-                        <button onclick="limpiarFiltros()" style="padding: 10px; background: white; border: 1px solid var(--border); border-radius: 8px; color: #94a3b8;">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
             
             <div class="table-responsive">
                 <table style="width: 100%; border-collapse: collapse;">
