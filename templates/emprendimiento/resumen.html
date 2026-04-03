@@ -228,6 +228,57 @@
 
 </div>
 <style>
+/* Diseño para pantallas chicas (Móvil) */
+@media (max-width: 768px) {
+    /* Escondemos el encabezado azul original */
+    .movimientos-table thead {
+        display: none;
+    }
+
+    /* Hacemos que cada fila y cada celda ocupen todo el ancho */
+    .movimientos-table, 
+    .movimientos-table tbody, 
+    .movimientos-table tr, 
+    .movimientos-table td {
+        display: block;
+        width: 100%;
+    }
+
+    /* Cada fila ahora parece una tarjeta individual */
+    .movimientos-table tr {
+        margin-bottom: 15px;
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 10px;
+    }
+
+    /* Ajustamos las celdas para que el texto vaya a la derecha */
+    .movimientos-table td {
+        text-align: right !important;
+        padding: 10px 24px !important;
+        position: relative;
+        border: none !important;
+    }
+
+    /* Agregamos una etiqueta a la izquierda para saber qué es cada dato */
+    .movimientos-table td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 24px;
+        font-weight: 800;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+    
+    /* El botón de eliminar lo centramos al final de la 'tarjeta' */
+    .td-accion {
+        text-align: center !important;
+        background: #f8fafc;
+        margin-top: 5px;
+    }
+}
+</style>
+<style>
     /* Contenedor para que todo se alinee con las tarjetas de arriba */
     .dashboard-container {
         max-width: 1200px; /* O el ancho que tengan tus tarjetas superiores */
