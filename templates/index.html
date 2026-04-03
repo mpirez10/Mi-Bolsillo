@@ -324,92 +324,79 @@
     .chart-card { padding: 24px; min-height: 300px; margin-bottom: 20px; }
 
     
-    /* =========================================
-   ESTILO DE IMPRESIÓN (PDF VERSIÓN WEB)
+   /* =========================================
+   ESTILO DE IMPRESIÓN (PDF PROLIJO FINAL)
    ========================================= */
 @media print {
 
-    /* 1. Configuración de página (MEJORADO) */
     @page { 
-        size: A4; /* 🔥 vertical para evitar cortes raros */
+        size: A4;
         margin: 1cm; 
     }
 
-    /* 2. Limpieza total de elementos web */
-    nav, aside, .btn, .btn-export, .filtros-grid, .chart-card, 
-    .btn-delete-small, i.fas.fa-trash-alt, td:last-child, th:last-child { 
-        display: none !important; 
+    /* 🔥 RESET GLOBAL FUERTE (clave para evitar deformaciones) */
+    * {
+        all: unset;
+        box-sizing: border-box;
     }
 
-    /* 3. Layout limpio */
-    .dashboard-layout { display: block !important; }
-    main { width: 100% !important; margin: 0 !important; padding: 0 !important; }
-    
-    .card { 
-        border: none !important; 
-        box-shadow: none !important; 
-        page-break-inside: avoid !important; /* 🔥 evita cortes de bloques */
-        break-inside: avoid !important;
+    body {
+        all: unset;
+        font-family: Arial, sans-serif;
+        font-size: 10pt;
+        color: black;
     }
 
-    /* 4. TABLA PERFECTA */
-    table { 
-        display: table !important; 
-        width: 100% !important; 
-        border-collapse: collapse !important;
-        border: 1px solid #000 !important;
-        page-break-inside: auto;
+    /* Ocultar elementos innecesarios */
+    nav, aside, .btn, .btn-export, .filtros-grid, .chart-card,
+    .btn-delete-small, i.fas.fa-trash-alt {
+        display: none !important;
     }
 
-    thead { 
-        display: table-header-group !important; 
+    /* Contenedor limpio */
+    main, .dashboard-layout {
+        display: block !important;
+        width: 100% !important;
     }
 
-    tbody { 
-        display: table-row-group !important; 
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
-    tfoot {
-        display: table-footer-group !important;
+    /* 🔥 TABLA REAL (sin estilos modernos) */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 10pt;
     }
 
-    /* 🔥 CLAVE: evitar que filas se corten */
-    tr { 
-        display: table-row !important; 
-        border-bottom: 1px solid #eee !important;
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
+    thead {
+        display: table-header-group;
     }
 
-    /* 🔥 Celdas normales (quita efecto mobile) */
-    th, td { 
-        display: table-cell !important; 
-        padding: 10px !important;
-        text-align: left !important;
-        border: 1px solid #eee !important;
-        vertical-align: middle !important;
-        width: auto !important;
-        page-break-inside: avoid !important;
+    tr {
+        page-break-inside: avoid;
     }
 
-    /* 5. Tipografía limpia */
-    body { 
-        background: white !important; 
-        color: black !important; 
-        font-size: 10pt; 
+    th, td {
+        border: 1px solid #000;
+        padding: 6px;
+        text-align: left;
     }
 
-    .status-badge { 
-        background: none !important; 
-        color: black !important; 
-        border: 1px solid #ccc !important;
-        padding: 2px 5px !important;
+    /* Texto simple (sin badges visuales) */
+    .status-badge {
+        border: 1px solid #000;
+        padding: 2px 4px;
     }
 
-    /* 6. Asegurar columnas ocultas en mobile */
-    td:nth-child(4), 
-    th:nth-child(4) { 
-        display: table-cell !important; 
+    /* Asegurar columnas */
+    td:nth-child(4),
+    th:nth-child(4) {
+        display: table-cell !important;
     }
 
 }
