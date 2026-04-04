@@ -45,34 +45,35 @@
     .btn-delete-small:hover { color: var(--danger); }
 
     /* 3. FORMULARIOS E INPUTS - Para que no se te deformen los filtros */
-    /* 3. FILTROS - Alineación total */
+    /* 3. FILTROS DEFINITIVOS - Alineación de Ingeniería */
     .filtros-grid {
         display: flex; 
         gap: 12px; 
         padding: 15px;
-        background: #f8fafc; /* Un fondo sutil para agrupar los filtros */
+        background: #f8fafc; /* Fondo sutil para agrupar */
         border: 1px solid var(--border);
         border-radius: 12px;
-        align-items: flex-end; /* Alinea el borde inferior de todo */
+        align-items: flex-end; /* LA CLAVE: Todo apoya en la misma base */
         flex-wrap: wrap;
         margin-bottom: 20px;
     }
 
-    .search-container {
-        flex: 2;
-        min-width: 200px;
-        position: relative;
+    /* Etiquetas de texto arriba de los inputs */
+    .filtros-grid small {
+        display: block;
+        color: #64748b;
+        font-weight: 700;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+        font-size: 0.65rem;
+        letter-spacing: 0.5px;
     }
 
-    .fecha-inputs {
-        display: flex;
-        gap: 8px;
-        flex: 1.5;
-        min-width: 280px;
-    }
+    .search-container { flex: 2; min-width: 200px; position: relative; }
+    .fecha-inputs { display: flex; gap: 8px; flex: 1.5; min-width: 280px; }
 
-    /* Forzamos la misma altura para inputs y botones */
-    .form-control, .btn-export {
+    /* Unificamos altura de todo a 42px */
+    .form-control, .btn-export, .btn-limpiar {
         height: 42px !important; 
         box-sizing: border-box;
     }
@@ -86,24 +87,31 @@
         background: white;
     }
 
-    /* 4. BOTONES DE EXPORTACIÓN - Estilo compacto para la barra */
-    .btn-export {
+    /* Botones alineados y sin sombras raras */
+    .acciones-filtros { 
         display: flex; 
-        align-items: center; 
-        justify-content: center; 
-        padding: 0 15px; 
-        border-radius: 8px; 
-        border: none; 
-        font-weight: 700;
-        cursor: pointer; 
-        color: white; 
-        transition: 0.2s;
-        min-width: 42px; /* Cuadrados si no tienen texto */
+        gap: 8px; 
     }
 
-    /* Quitamos el box-shadow que los hacía más altos y "flotantes" */
+    .btn-export, .btn-limpiar {
+        width: 42px; /* Los hacemos cuadrados para que se vean prolijos */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: 0.2s;
+        color: white;
+    }
+
     .btn-excel { background: #10b981; }
     .btn-pdf { background: #ef4444; }
+    .btn-limpiar { 
+        background: white; 
+        border: 1px solid var(--border); 
+        color: #94a3b8; 
+    }
 
     .btn-export:hover {
         filter: brightness(0.9);
