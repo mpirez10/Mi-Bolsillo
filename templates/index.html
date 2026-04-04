@@ -317,7 +317,7 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // 1. INICIALIZACIÓN DEL GRÁFICO
+    // 1. GRÁFICO: Se asegura de recibir datos de Flask
     const ctx = document.getElementById('balanceChart');
     if (ctx) {
         new Chart(ctx, {
@@ -325,6 +325,7 @@
             data: {
                 labels: ['Gastos', 'Ingresos', 'Deudas'],
                 datasets: [{
+                    // Asegurate que estas variables lleguen desde tu ruta home.index en Python
                     data: [{{ egresos_total|default(0) }}, {{ ingresos_total|default(0) }}, {{ deudas_total|default(0) }}],
                     backgroundColor: ['#ef4444', '#10b981', '#f59e0b'],
                     borderWidth: 0
@@ -334,11 +335,11 @@
         });
     }
 
-    // 2. FUNCIÓN DE FILTRADO (Corregida para fechas con guiones)
+    // 2. FILTRADO DINÁMICO (A prueba de errores de formato)
     function filtrarMovimientos() {
         const texto = document.getElementById("busquedaMovimiento").value.toLowerCase();
-        const desde = document.getElementById("fechaDesde").value; // Formato AAAA-MM-DD
-        const hasta = document.getElementById("fechaHasta").value; // Formato AAAA-MM-DD
+        const desde = document.getElementById("fechaDesde").value; 
+        const hasta = document.getElementById("fechaHasta").value; 
         const filas = document.querySelectorAll("tbody tr");
         
         let sumaTotal = 0;
@@ -347,22 +348,31 @@
             const celdas = fila.getElementsByTagName("td");
             if (celdas.length < 5) return;
 
-            // La fecha en tu tabla ya es AAAA-MM-DD (ej: 2026-03-04)
-            const fechaISO = celdas[0].innerText.trim();
+            // NORMALIZAMOS LA FECHA DE LA TABLA:
+            // Si viene DD/MM/YY la pasamos a YYYY-MM-DD para comparar con el input date
+            let fechaTabla = celdas[0].innerText.trim();
+            if (fechaTabla.includes('/')) {
+                const partes = fechaTabla.split('/');
+                if (partes.length === 3) {
+                    // Asumimos DD/MM/YY o DD/MM/YYYY y lo damos vuelta
+                    let anio = partes[2].length === 2 ? "20" + partes[2] : partes[2];
+                    fechaTabla = `${anio}-${partes[1]}-${partes[0]}`;
+                }
+            }
+
             const tipoTexto = celdas[1].innerText.toUpperCase();
-            const montoTexto = celdas[2].innerText.replace(/[$,\s]/g, '');
-            const monto = parseFloat(montoTexto) || 0;
+            // Limpiamos el monto de símbolos para poder sumar
+            const montoTexto = celdas[2].innerText.replace(/[$.\s,]/g, '');
+            const monto = parseFloat(montoTexto) / 100 || 0; // Ajuste por si usás decimales
             
-            // Buscamos en CUENTA (3) y DETALLE (4)
             const contenidoBusqueda = (celdas[3].innerText + " " + celdas[4].innerText).toLowerCase();
 
-            let coincideTexto = contenidoBusqueda.includes(texto);
-            
-            // Comparación directa de strings (AAAA-MM-DD)
-            let coincideFecha = (!desde || fechaISO >= desde) && (!hasta || fechaISO <= hasta);
+            const coincideTexto = contenidoBusqueda.includes(texto);
+            const coincideFecha = (!desde || fechaTabla >= desde) && (!hasta || fechaTabla <= hasta);
 
             if (coincideTexto && coincideFecha) {
                 fila.style.display = window.innerWidth <= 768 ? "grid" : "table-row";
+                // Lógica de suma para el "Total Filtrado"
                 if (tipoTexto.includes("INGRESO")) sumaTotal += monto;
                 else if (tipoTexto.includes("EGRESO")) sumaTotal -= monto;
             } else {
@@ -370,17 +380,25 @@
             }
         });
 
+        // Actualizamos el display del total
         const elTotal = document.getElementById("sumaTotalFiltrada");
         if (elTotal) {
-            elTotal.innerText = "$ " + sumaTotal.toLocaleString('en-US', { minimumFractionDigits: 2 });
+            elTotal.innerText = "$ " + sumaTotal.toLocaleString('es-UY', { minimumFractionDigits: 2 });
             elTotal.style.color = sumaTotal >= 0 ? "#10b981" : "#ef4444";
         }
     }
 
-    // 3. EXPORTAR A EXCEL
+    // 3. EXPORTACIONES Y LIMPIEZA
+    function limpiarFiltros() {
+        document.getElementById("busquedaMovimiento").value = "";
+        document.getElementById("fechaDesde").value = "";
+        document.getElementById("fechaHasta").value = "";
+        filtrarMovimientos();
+    }
+
     function exportarAExcel() {
-        const filas = document.querySelectorAll("table tr");
         let csv = [];
+        const filas = document.querySelectorAll("table tr");
         filas.forEach(fila => {
             if (fila.style.display !== 'none') {
                 const cols = fila.querySelectorAll("td, th");
@@ -391,22 +409,15 @@
                 csv.push(filaData.join(","));
             }
         });
-        const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + csv.join("\n");
+        const blob = new Blob(["\uFEFF" + csv.join("\n")], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
-        link.setAttribute("href", encodeURI(csvContent));
-        link.setAttribute("download", "Movimientos_MiBolsillo.csv");
+        link.href = URL.createObjectURL(blob);
+        link.download = "Movimientos_MiBolsillo.csv";
         link.click();
     }
 
     function exportarAPDF() { window.print(); }
 
-    function limpiarFiltros() {
-        document.getElementById("busquedaMovimiento").value = "";
-        document.getElementById("fechaDesde").value = "";
-        document.getElementById("fechaHasta").value = "";
-        filtrarMovimientos();
-    }
-    
     document.addEventListener("DOMContentLoaded", filtrarMovimientos);
 </script>
 {% endblock %}
