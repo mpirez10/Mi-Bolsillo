@@ -254,18 +254,16 @@
             </div>
         </div>
 
-       <div class="fecha-inputs" style="flex: 0 1 auto; min-width: 300px;">
-    <div style="flex: 1;">
-        <small>Desde (DDMMYY)</small>
-        <input type="text" id="fechaDesde" onkeyup="filtrarMovimientos()" 
-               placeholder="290224" class="form-control" maxlength="6">
-    </div>
-    <div style="flex: 1;">
-        <small>Hasta (DDMMYY)</small>
-        <input type="text" id="fechaHasta" onkeyup="filtrarMovimientos()" 
-               placeholder="311224" class="form-control" maxlength="6">
-    </div>
-</div>
+        <div class="fecha-inputs" style="flex: 0 1 auto; min-width: 300px;">
+            <div style="flex: 1;">
+                <small>Desde</small>
+                <input type="date" id="fechaDesde" onchange="filtrarMovimientos()" class="form-control">
+            </div>
+            <div style="flex: 1;">
+                <small>Hasta</small>
+                <input type="date" id="fechaHasta" onchange="filtrarMovimientos()" class="form-control">
+            </div>
+        </div>
         
     </div>
 </div>
@@ -319,7 +317,7 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // 1. GRÁFICO: Se asegura de recibir datos de Flask
+    // 1. INICIALIZACIÓN DEL GRÁFICO (Doughnut)
     const ctx = document.getElementById('balanceChart');
     if (ctx) {
         new Chart(ctx, {
@@ -327,84 +325,123 @@
             data: {
                 labels: ['Gastos', 'Ingresos', 'Deudas'],
                 datasets: [{
-                    // Asegurate que estas variables lleguen desde tu ruta home.index en Python
                     data: [{{ egresos_total|default(0) }}, {{ ingresos_total|default(0) }}, {{ deudas_total|default(0) }}],
                     backgroundColor: ['#ef4444', '#10b981', '#f59e0b'],
-                    borderWidth: 0
+                    borderWidth: 0,
+                    hoverOffset: 10
                 }]
             },
-            options: { responsive: true, maintainAspectRatio: false, cutout: '70%' }
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                cutout: '70%',
+                plugins: { 
+                    legend: { 
+                        position: 'bottom', 
+                        labels: { boxWidth: 12, usePointStyle: true, font: { size: 11, weight: '600' } } 
+                    } 
+                } 
+            }
         });
     }
 
-    // 2. FILTRADO DINÁMICO (A prueba de errores de formato)
-  function filtrarMovimientos() {
-    const texto = document.getElementById("busquedaMovimiento").value.toLowerCase();
-    const desdeRaw = document.getElementById("fechaDesde").value; // Viene AAAA-MM-DD
-    const hastaRaw = document.getElementById("fechaHasta").value; // Viene AAAA-MM-DD
-    const filas = document.querySelectorAll("tbody tr");
-
-    // Convierte AAAA-MM-DD en un número YYMMDD para comparar
-    const calendarToComp = (f) => f ? f.replace(/-/g, '').substring(2) : null;
-    
-    // Convierte DD/MM/YY (de la tabla) en YYMMDD para comparar
-    const tableToComp = (f) => {
-        let p = f.split('/');
-        return p[2] + p[1] + p[0];
-    };
-
-    const desde = calendarToComp(desdeRaw);
-    const hasta = calendarToComp(hastaRaw);
-
-    filas.forEach((fila) => {
-        const celdas = fila.getElementsByTagName("td");
-        if (celdas.length < 1) return;
-
-        const fechaTabla = tableToComp(celdas[0].innerText.trim());
-        const contenido = (celdas[3].innerText + " " + celdas[4].innerText).toLowerCase();
-
-        let coincideFecha = true;
-        if (desde && fechaTabla < desde) coincideFecha = false;
-        if (hasta && fechaTabla > hasta) coincideFecha = false;
+    // 2. FUNCIÓN DE FILTRADO - La que hace la magia
+    function filtrarMovimientos() {
+        // Los inputs de fecha de HTML siempre devuelven "aaaa-mm-dd"
+        const texto = document.getElementById("busquedaMovimiento").value.toLowerCase();
+        const desde = document.getElementById("fechaDesde").value;
+        const hasta = document.getElementById("fechaHasta").value;
+        const filas = document.querySelectorAll("tbody tr");
         
-        const coincideTexto = contenido.includes(texto);
+        let sumaTotal = 0;
 
-        fila.style.display = (coincideTexto && coincideFecha) ? "" : "none";
-    });
-}
+        filas.forEach((fila) => {
+            const celdas = fila.getElementsByTagName("td");
+            if (celdas.length < 5) return;
 
-    document.getElementById("sumaTotalFiltrada").innerText = "$ " + sumaTotal.toLocaleString('en-US', { minimumFractionDigits: 2 });
-}
-    // 3. EXPORTACIONES Y LIMPIEZA
+            // Normalizamos la fecha de la tabla para que use guiones y sea ISO
+            const fechaTextoOriginal = celdas[0].innerText.trim();
+            const fechaISO = formatearAISO(fechaTextoOriginal);
+            
+            const tipoTexto = celdas[1].innerText.toUpperCase();
+            const montoTexto = celdas[2].innerText.replace(/[$,\s]/g, '');
+            const monto = parseFloat(montoTexto) || 0;
+            
+            // Buscamos en Cuenta (3) y Detalle (4)
+            const contenidoBusqueda = (celdas[3].innerText + " " + celdas[4].innerText).toLowerCase();
+
+            let coincideTexto = contenidoBusqueda.includes(texto);
+            
+            // Ahora que ambos son "aaaa-mm-dd", la comparación es perfecta
+            let coincideFecha = (!desde || fechaISO >= desde) && (!hasta || fechaISO <= hasta);
+
+            if (coincideTexto && coincideFecha) {
+                fila.style.display = window.innerWidth <= 768 ? "grid" : "table-row";
+                if (tipoTexto.includes("INGRESO")) sumaTotal += monto;
+                else if (tipoTexto.includes("EGRESO")) sumaTotal -= monto;
+            } else {
+                fila.style.display = "none";
+            }
+        });
+
+        const elTotal = document.getElementById("sumaTotalFiltrada");
+        if (elTotal) {
+            elTotal.innerText = "$ " + sumaTotal.toLocaleString('en-US', { minimumFractionDigits: 2 });
+            elTotal.style.color = sumaTotal >= 0 ? "#10b981" : "#ef4444";
+        }
+    }
+
+    // 3. NORMALIZADOR DE FECHAS - El "Traductor"
+    function formatearAISO(f) {
+        if (!f) return "";
+        
+        // 1. Cambiamos barras por guiones: "2026/04/04" -> "2026-04-04"
+        let limpio = f.trim().replace(/\//g, '-');
+        
+        // 2. Si por esas casualidades la fecha viene como "04-04-2026" (formato latino)
+        // la damos vuelta para que sea "2026-04-04"
+        const partes = limpio.split('-');
+        if (partes.length === 3 && partes[0].length === 2) {
+            return `${partes[2]}-${partes[1]}-${partes[0]}`;
+        }
+        
+        return limpio; // Retorna "aaaa-mm-dd"
+    }
+
+    // 4. EXPORTAR A EXCEL
+    function exportarAExcel() {
+        const filas = document.querySelectorAll("table tr");
+        let csv = [];
+        filas.forEach(fila => {
+            if (fila.style.display !== 'none') {
+                const cols = fila.querySelectorAll("td, th");
+                let filaData = [];
+                for (let i = 0; i < cols.length - 1; i++) {
+                    let limpio = cols[i].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
+                    filaData.push('"' + limpio + '"');
+                }
+                csv.push(filaData.join(","));
+            }
+        });
+        const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + csv.join("\n");
+        const link = document.createElement("a");
+        link.setAttribute("href", encodeURI(csvContent));
+        link.setAttribute("download", "Movimientos_MiBolsillo.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function exportarAPDF() { window.print(); }
+
     function limpiarFiltros() {
         document.getElementById("busquedaMovimiento").value = "";
         document.getElementById("fechaDesde").value = "";
         document.getElementById("fechaHasta").value = "";
         filtrarMovimientos();
     }
-
-    function exportarAExcel() {
-        let csv = [];
-        const filas = document.querySelectorAll("table tr");
-        filas.forEach(fila => {
-            if (fila.style.display !== 'none') {
-                const cols = fila.querySelectorAll("td, th");
-                let filaData = [];
-                for (let i = 0; i < cols.length - 1; i++) {
-                    filaData.push('"' + cols[i].innerText.trim().replace(/\n/g, " ") + '"');
-                }
-                csv.push(filaData.join(","));
-            }
-        });
-        const blob = new Blob(["\uFEFF" + csv.join("\n")], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "Movimientos_MiBolsillo.csv";
-        link.click();
-    }
-
-    function exportarAPDF() { window.print(); }
-
+    
+    // Ejecutamos al cargar para calcular el total inicial
     document.addEventListener("DOMContentLoaded", filtrarMovimientos);
 </script>
 {% endblock %}
