@@ -422,9 +422,24 @@
     }
 
     // UTILERÍAS
-    function formatearAISO(f) {
-        const p = f.split('/'); if (p.length !== 3) return null;
-        return `${p[2].length===2?'20'+p[2]:p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+   function formatearAISO(f) {
+        if (!f) return null;
+        
+        // Si la fecha ya viene como 2026-04-04 (ISO), la dejamos quieta
+        if (f.includes('-')) {
+            return f.trim();
+        }
+        
+        // Si por alguna razón viniera como DD/MM/AAAA, la damos vuelta
+        const p = f.split('/'); 
+        if (p.length === 3) {
+            const dia = p[0].padStart(2, '0');
+            const mes = p[1].padStart(2, '0');
+            const anio = p[2].length === 2 ? '20' + p[2] : p[2];
+            return `${anio}-${mes}-${dia}`;
+        }
+        
+        return null;
     }
 
     function limpiarFiltros() {
