@@ -26,10 +26,9 @@ def index():
     cursor.execute("""
         SELECT * FROM movimientos 
         WHERE usuario_id = %s 
-        ORDER BY fecha DESC, id DESC
+        ORDER BY id DESC
     """, (current_user.id,))
     movimientos = cursor.fetchall()
-
     # --- 3. DEUDAS ---
     cursor.execute("""
         SELECT * FROM deudas 
