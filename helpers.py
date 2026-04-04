@@ -28,6 +28,4 @@ def normalizar_fecha(fecha_str):
         fecha = datetime.date(anio, mes, dia)
     except ValueError:
         raise ValueError("Fecha inválida (día o mes incorrecto).")
-
-    # CAMBIO CLAVE: Retornar formato ISO AAAA-MM-DD
-    return fecha.strftime("%Y-%m-%d")
+        return f"{solo_numeros[0:2]}/{solo_numeros[2:4]}/{solo_numeros[4:6]}"
