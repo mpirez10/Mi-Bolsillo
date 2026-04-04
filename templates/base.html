@@ -10,21 +10,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
-    /* Usamos la imagen que pasaste como fondo */
-    background-image: url('Descargas/Patrón digital de bolsillos de mezclilla.jpg');
-    
-    /* Hacemos que el patrón se repita para cubrir toda la pantalla */
+    background-image: url("{{ url_for('static', filename='img/fondo_bolsillos.jpg') }}");
     background-repeat: repeat;
-    
-    /* Ajustamos el tamaño para que los bolsillos no queden gigantes ni muy chicos */
-    background-size: 300px; /* Podés jugar con este número según te guste */
-    
-    /* El truco para que siempre esté ahí aunque bajes en la página */
-    background-attachment: fixed;
-    
-    /* Un color de respaldo por si la imagen demora en cargar */
-    background-color: #f8fafc; 
-    
+    background-size: 250px; /* Probá con este tamaño, queda sutil */
+    background-attachment: fixed; /* Clave para que no se mueva al scrollear */
+    background-color: #f8fafc;
     margin: 0;
     padding: 0;
 }
