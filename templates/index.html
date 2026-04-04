@@ -284,7 +284,7 @@
                         {% for m in movimientos %}
                         <tr style="border-bottom: 1px solid #f1f5f9;">
                             <td style="padding: 10px; font-size: 0.8rem; color: #64748b;">
-    {{ m.fecha.strftime('%d/%m/%Y') if m.fecha.strftime else m.fecha }}
+    {{ m.fecha.strftime('%d/%m/%Y') }}
 </td>
                             <td>
                                 {% if m.tipo.lower() == 'ingreso' %}
@@ -354,51 +354,46 @@
     const hastaRaw = document.getElementById("fechaHasta").value; // Viene AAAA-MM-DD
     const filas = document.querySelectorAll("tbody tr");
 
-    // Convertimos AAAA-MM-DD a un número puro AAAAMMDD para comparar fácil
-    const toComp = (f) => f ? f.replace(/-/g, '') : null;
-
-    const desde = toComp(desdeRaw);
-    const hasta = toComp(hastaRaw);
+    // Función para convertir AAAA-MM-DD a número puro para comparar
+    const formatearFiltro = (f) => f ? f.replace(/-/g, '') : null;
+    const desde = formatearFiltro(desdeRaw);
+    const hasta = formatearFiltro(hastaRaw);
+    
     let sumaTotal = 0;
 
     filas.forEach((fila) => {
         const celdas = fila.getElementsByTagName("td");
         if (celdas.length < 5) return;
 
-        // 1. Manejo de Fecha
-        const fechaTablaRaw = celdas[0].innerText.trim(); 
-        const fechaTabla = toComp(fechaTablaRaw);
-        
-        // 2. Manejo de Monto (Mantenemos el punto decimal)
+        // --- LÓGICA DE FECHA (Crucial) ---
+        const fechaVisible = celdas[0].innerText.trim(); // "DD/MM/AAAA"
+        const p = fechaVisible.split('/');
+        // Convertimos DD/MM/AAAA -> AAAAMMDD
+        const fechaParaComparar = p.length === 3 ? p[2] + p[1] + p[0] : "0";
+
+        // --- LÓGICA DE TEXTO Y MONTO ---
         const tipoTexto = celdas[1].innerText.toUpperCase();
-        // Solo quitamos el "$" y la coma de miles, PERO dejamos el punto
         const montoStr = celdas[2].innerText.replace('$', '').replace(/,/g, '').trim();
         const monto = parseFloat(montoStr) || 0;
-        
         const contenidoBusqueda = (celdas[3].innerText + " " + celdas[4].innerText).toLowerCase();
 
-        // 3. Lógica de filtrado
+        // --- FILTRADO ---
         const coincideTexto = contenidoBusqueda.includes(texto);
         let coincideFecha = true;
-        if (desde && fechaTabla < desde) coincideFecha = false;
-        if (hasta && fechaTabla > hasta) coincideFecha = false;
+        if (desde && fechaParaComparar < desde) coincideFecha = false;
+        if (hasta && fechaParaComparar > hasta) coincideFecha = false;
 
         if (coincideTexto && coincideFecha) {
             fila.style.display = "";
-            // Sumamos ingresos y restamos egresos
-            if (tipoTexto.includes("INGRESO")) {
-                sumaTotal += monto;
-            } else if (tipoTexto.includes("EGRESO")) {
-                sumaTotal -= monto;
-            }
+            if (tipoTexto.includes("INGRESO")) sumaTotal += monto;
+            else if (tipoTexto.includes("EGRESO")) sumaTotal -= monto;
         } else {
             fila.style.display = "none";
         }
     });
 
-    // 4. Mostramos el total formateado (Uruguay usa punto para miles y coma para decimales)
     document.getElementById("sumaTotalFiltrada").innerText = "$ " + sumaTotal.toLocaleString('es-UY', { 
-        minimumFractionDigits: 2,
+        minimumFractionDigits: 2, 
         maximumFractionDigits: 2 
     });
 }
