@@ -317,7 +317,7 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // 1. GRÁFICO (Doughnut)
+    // 1. INICIALIZACIÓN DEL GRÁFICO
     const ctx = document.getElementById('balanceChart');
     if (ctx) {
         new Chart(ctx, {
@@ -334,25 +334,11 @@
         });
     }
 
-    // 2. EL TRADUCTOR DE FECHAS (La clave del problema)
-    function formatearAISO(f) {
-        if (!f) return "";
-        // Reemplaza barras por guiones y limpia espacios: "2026/04/04" -> "2026-04-04"
-        let fechaLimpia = f.trim().replace(/\//g, '-');
-        
-        // Si por alguna razón la fecha viene DD-MM-AAAA, la damos vuelta
-        const partes = fechaLimpia.split('-');
-        if (partes.length === 3 && partes[0].length === 2) {
-            return `${partes[2]}-${partes[1]}-${partes[0]}`;
-        }
-        return fechaLimpia; // Retorna AAAA-MM-DD
-    }
-
-    // 3. FUNCIÓN DE FILTRADO
+    // 2. FUNCIÓN DE FILTRADO (Corregida para fechas con guiones)
     function filtrarMovimientos() {
         const texto = document.getElementById("busquedaMovimiento").value.toLowerCase();
-        const desde = document.getElementById("fechaDesde").value; // Viene AAAA-MM-DD
-        const hasta = document.getElementById("fechaHasta").value; // Viene AAAA-MM-DD
+        const desde = document.getElementById("fechaDesde").value; // Formato AAAA-MM-DD
+        const hasta = document.getElementById("fechaHasta").value; // Formato AAAA-MM-DD
         const filas = document.querySelectorAll("tbody tr");
         
         let sumaTotal = 0;
@@ -361,23 +347,19 @@
             const celdas = fila.getElementsByTagName("td");
             if (celdas.length < 5) return;
 
-            // Procesamos la fecha de la celda 0
-            const fechaCelda = celdas[0].innerText;
-            const fechaISO = formatearAISO(fechaCelda);
-            
+            // La fecha en tu tabla ya es AAAA-MM-DD (ej: 2026-03-04)
+            const fechaISO = celdas[0].innerText.trim();
             const tipoTexto = celdas[1].innerText.toUpperCase();
             const montoTexto = celdas[2].innerText.replace(/[$,\s]/g, '');
             const monto = parseFloat(montoTexto) || 0;
             
-            // Buscamos en Cuenta (3) y Detalle (4)
+            // Buscamos en CUENTA (3) y DETALLE (4)
             const contenidoBusqueda = (celdas[3].innerText + " " + celdas[4].innerText).toLowerCase();
 
             let coincideTexto = contenidoBusqueda.includes(texto);
             
-            // Comparación de fechas (ahora sí, ambas con guiones)
-            let coincideFecha = true;
-            if (desde && fechaISO < desde) coincideFecha = false;
-            if (hasta && fechaISO > hasta) coincideFecha = false;
+            // Comparación directa de strings (AAAA-MM-DD)
+            let coincideFecha = (!desde || fechaISO >= desde) && (!hasta || fechaISO <= hasta);
 
             if (coincideTexto && coincideFecha) {
                 fila.style.display = window.innerWidth <= 768 ? "grid" : "table-row";
@@ -395,23 +377,16 @@
         }
     }
 
-    // 4. FUNCIONES DE APOYO
-    function limpiarFiltros() {
-        document.getElementById("busquedaMovimiento").value = "";
-        document.getElementById("fechaDesde").value = "";
-        document.getElementById("fechaHasta").value = "";
-        filtrarMovimientos();
-    }
-
+    // 3. EXPORTAR A EXCEL
     function exportarAExcel() {
-        let csv = [];
         const filas = document.querySelectorAll("table tr");
+        let csv = [];
         filas.forEach(fila => {
             if (fila.style.display !== 'none') {
                 const cols = fila.querySelectorAll("td, th");
                 let filaData = [];
                 for (let i = 0; i < cols.length - 1; i++) {
-                    filaData.push('"' + cols[i].innerText.replace(/\n/g, " ").trim() + '"');
+                    filaData.push('"' + cols[i].innerText.trim().replace(/\n/g, " ") + '"');
                 }
                 csv.push(filaData.join(","));
             }
@@ -425,7 +400,13 @@
 
     function exportarAPDF() { window.print(); }
 
-    // Iniciar al cargar
+    function limpiarFiltros() {
+        document.getElementById("busquedaMovimiento").value = "";
+        document.getElementById("fechaDesde").value = "";
+        document.getElementById("fechaHasta").value = "";
+        filtrarMovimientos();
+    }
+    
     document.addEventListener("DOMContentLoaded", filtrarMovimientos);
 </script>
 {% endblock %}
