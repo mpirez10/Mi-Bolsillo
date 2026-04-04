@@ -363,17 +363,19 @@
         const celdas = fila.getElementsByTagName("td");
         if (celdas.length < 5) return;
 
-        // Leemos la fecha de la tabla (que según tu captura es 2026-03-04)
+        // 1. Manejo de Fecha
         const fechaTablaRaw = celdas[0].innerText.trim(); 
         const fechaTabla = toComp(fechaTablaRaw);
         
+        // 2. Manejo de Monto (Mantenemos el punto decimal)
         const tipoTexto = celdas[1].innerText.toUpperCase();
-        const montoStr = celdas[2].innerText.replace(/[$.]/g, '').replace(',', '.');
+        // Solo quitamos el "$" y la coma de miles, PERO dejamos el punto
+        const montoStr = celdas[2].innerText.replace('$', '').replace(/,/g, '').trim();
         const monto = parseFloat(montoStr) || 0;
         
         const contenidoBusqueda = (celdas[3].innerText + " " + celdas[4].innerText).toLowerCase();
 
-        // Lógica de filtrado
+        // 3. Lógica de filtrado
         const coincideTexto = contenidoBusqueda.includes(texto);
         let coincideFecha = true;
         if (desde && fechaTabla < desde) coincideFecha = false;
@@ -381,17 +383,22 @@
 
         if (coincideTexto && coincideFecha) {
             fila.style.display = "";
-            // Sumamos o restamos según el tipo para el "Total Filtrado"
-            if (tipoTexto.includes("INGRESO")) sumaTotal += monto;
-            else if (tipoTexto.includes("EGRESO")) sumaTotal -= monto;
-            // Si es transferencia, no afecta el total general por ahora
+            // Sumamos ingresos y restamos egresos
+            if (tipoTexto.includes("INGRESO")) {
+                sumaTotal += monto;
+            } else if (tipoTexto.includes("EGRESO")) {
+                sumaTotal -= monto;
+            }
         } else {
             fila.style.display = "none";
         }
     });
 
-    // Actualizamos el globito verde de la captura
-    document.getElementById("sumaTotalFiltrada").innerText = "$ " + sumaTotal.toLocaleString('es-UY', { minimumFractionDigits: 2 });
+    // 4. Mostramos el total formateado (Uruguay usa punto para miles y coma para decimales)
+    document.getElementById("sumaTotalFiltrada").innerText = "$ " + sumaTotal.toLocaleString('es-UY', { 
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2 
+    });
 }
     // 4. EXPORTAR A EXCEL
     function exportarAExcel() {
