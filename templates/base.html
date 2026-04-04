@@ -8,155 +8,115 @@
     <title>Mi Bolsillo | Gestión de Finanzas y Negocios</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<style>
-    :root { 
-        /* Colores inspirados en tu logo */
-        --pocket-blue: #1e40af;       /* Azul institucional */
-        --pocket-blue-light: #eff6ff;
-        --money-green: #10b981;      /* Verde éxito/ingreso */
-        --money-green-dark: #059669;
+    <style>
+        :root { 
+            --pocket-blue: #1e40af; 
+            --money-green: #10b981; 
+            --primary: var(--pocket-blue); 
+            --accent: var(--money-green); 
+            --bg: #f1f5f9; 
+            --text: #0f172a; 
+            --card-bg: #ffffff; 
+            --border: #e2e8f0; 
+            --danger: #dc2626; 
+        }
         
-        --primary: var(--pocket-blue); 
-        --accent: var(--money-green); 
-        --bg: #f8fafc;               /* Un gris más sutil y limpio */
-        --text: #1e293b; 
-        --card-bg: #ffffff; 
-        --border: #e2e8f0; 
-        --danger: #ef4444; 
-    }
-    
-    body { 
-        font-family: 'Inter', sans-serif; 
-        margin: 0; 
-        padding: 15px; 
-        background-color: var(--bg); 
-        color: var(--text); 
-        line-height: 1.5;
-        padding-bottom: 90px; /* Espacio extra para el tab bar mobile */
-    }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; 
+            padding: 15px; 
+            background-color: var(--bg); 
+            color: var(--text); 
+            line-height: 1.5;
+            transition: padding 0.3s;
+        }
 
-    .container { max-width: 1050px; margin: 0 auto; }
-    
-    /* Barra de navegación pro */
-    .nav-bar { 
-        background: white; 
-        padding: 12px 24px; 
-        border-radius: 16px; 
-        margin-bottom: 25px; 
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center;
-        border: 1px solid var(--border);
-    }
+        .container { max-width: 1050px; margin: 0 auto; }
+        
+        /* Barra de navegación principal */
+        .nav-bar { 
+            background: white; 
+            padding: 10px 20px; 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+        }
 
-    .brand { display: flex; align-items: center; text-decoration: none; gap: 12px; }
-    .brand-logo-img { height: 40px; width: auto; transition: transform 0.3s ease; }
-    .brand:hover .brand-logo-img { transform: scale(1.05); }
-    
-    .brand-text { font-family: 'Poppins', sans-serif; line-height: 1; }
-    .text-mi { color: var(--money-green); font-weight: 800; font-size: 1.3rem; letter-spacing: -0.5px; }
-    .text-bolsillo { color: var(--pocket-blue); font-weight: 800; font-size: 1.3rem; letter-spacing: -0.5px; }
-    .brand-subtext { 
-        display: block; 
-        font-size: 0.6rem; 
-        color: #94a3b8; 
-        font-weight: 700; 
-        text-transform: uppercase; 
-        letter-spacing: 1.2px;
-        margin-top: 2px;
-    }
+        .brand { display: flex; align-items: center; text-decoration: none; gap: 10px; }
+        .brand-logo-img { height: 35px; width: auto; object-fit: contain; }
+        .brand-text { font-family: 'Poppins', sans-serif; line-height: 1.1; }
+        .text-mi { color: var(--money-green); font-weight: 700; font-size: 1.1rem; }
+        .text-bolsillo { color: var(--pocket-blue); font-weight: 700; font-size: 1.1rem; }
+        .brand-subtext { display: block; font-size: 0.55rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 
-    .nav-links { display: flex; gap: 12px; align-items: center; }
+        .nav-links { display: flex; gap: 10px; align-items: center; }
 
-    /* Botones mejorados */
-    .btn { 
-        padding: 10px 18px; 
-        border-radius: 10px; 
-        text-decoration: none; 
-        font-weight: 600; 
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
-        border: none; 
-        cursor: pointer; 
-        display: inline-flex; 
-        align-items: center; 
-        gap: 8px; 
-        font-size: 0.9rem; 
-    }
-    .btn-blue { 
-        background: var(--pocket-blue); 
-        color: white; 
-        box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.2);
-    }
-    .btn-blue:hover { background: #1e3a8a; transform: translateY(-1px); }
-    
-    .btn-green { 
-        background: var(--money-green); 
-        color: white; 
-        box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
-    }
-    .btn-green:hover { background: var(--money-green-dark); transform: translateY(-1px); }
+        .btn { padding: 8px 14px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.2s; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; }
+        .btn-blue { background: var(--pocket-blue); color: white; }
+        .btn-outline { border: 1px solid var(--border); color: var(--text); background: white; }
+        
+        /* Barra Inferior (Mobile Tab Bar) */
+        .mobile-tab-bar {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            height: 65px;
+            border-top: 1px solid var(--border);
+            grid-template-columns: repeat(4, 1fr);
+            z-index: 1000;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
 
-    .btn-outline { 
-        border: 1px solid var(--border); 
-        color: #475569; 
-        background: white; 
-    }
-    .btn-outline:hover { background: #f1f5f9; color: var(--pocket-blue); border-color: var(--pocket-blue); }
-    
-    /* Barra Inferior (Premium Feel) */
-    .mobile-tab-bar {
-        display: none;
-        position: fixed;
-        bottom: 15px;
-        left: 15px;
-        right: 15px;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        height: 70px;
-        border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        grid-template-columns: repeat(4, 1fr);
-        z-index: 1000;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-    }
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #64748b;
+            font-size: 0.7rem;
+            font-weight: 600;
+            gap: 4px;
+        }
 
-    .tab-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-decoration: none;
-        color: #94a3b8;
-        font-size: 0.75rem;
-        font-weight: 600;
-        gap: 4px;
-        transition: all 0.3s ease;
-    }
+        .tab-item i { font-size: 1.2rem; }
+        .tab-item.active { color: var(--pocket-blue); }
 
-    .tab-item i { font-size: 1.3rem; transition: transform 0.2s ease; }
-    .tab-item.active { color: var(--pocket-blue); }
-    .tab-item.active i { transform: translateY(-2px); color: var(--pocket-blue); }
+        /* Menú de usuario */
+        .user-menu-container { position: relative; }
+        .user-btn { background: #f8fafc; border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--text); padding: 8px 12px; border-radius: 8px; font-family: inherit; font-size: 0.85rem; }
+        
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 45px;
+            background: white;
+            min-width: 200px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            z-index: 1001;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .dropdown-menu a { color: var(--text); padding: 12px 16px; text-decoration: none; display: block; font-size: 0.85rem; }
+        .dropdown-divider { height: 1px; background: var(--border); margin: 0; }
 
-    /* Menú de usuario */
-    .user-btn { 
-        background: white; 
-        border: 1px solid var(--border); 
-        padding: 8px 16px; 
-        border-radius: 12px; 
-        font-weight: 600;
-        transition: all 0.2s;
-    }
-    .user-btn:hover { border-color: var(--pocket-blue); background: var(--pocket-blue-light); }
-
-    /* Ajustes Responsive */
-    @media (max-width: 768px) {
-        body { padding: 10px; padding-bottom: 100px; }
-        .nav-links { display: none; }
-        .nav-bar { margin-bottom: 20px; border-radius: 12px; }
-        .mobile-tab-bar { display: grid; }
-    }
-</style>
+        /* Ajustes Responsive */
+        @media (max-width: 768px) {
+            body { padding: 10px; padding-bottom: 80px; } /* Espacio para que el Tab Bar no tape nada */
+            .nav-links { display: none; } /* Escondemos los botones de arriba */
+            .nav-bar { justify-content: center; padding: 10px; margin-bottom: 15px; }
+            .mobile-tab-bar { display: grid; } /* Mostramos la barra de abajo */
+            .brand-logo-img { height: 30px; }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
