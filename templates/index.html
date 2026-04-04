@@ -162,34 +162,44 @@
 
 <div class="dashboard-layout">
     <aside>
-        <div class="card saldo-card">
-            <small style="opacity: 0.8; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Saldo Total</small>
-            <div class="saldo-monto">${{ "{:,.2f}".format(saldo_general) }}</div>
-        </div>
+        <div class="card" style="padding: 18px; margin-bottom: 20px; border: 2px solid var(--pocket-green); background-color: var(--pocket-blue); color: white;">
+    
+    <h3 style="margin: 0 0 15px 0; font-size: 1rem; color: var(--pocket-green);">
+        <i class="fas fa-university" style="color: var(--pocket-green);"></i> Mis Cuentas
+    </h3>
 
-        <div class="card" style="padding: 18px; margin-bottom: 20px; border: 2px solid var(--pocket-green);">
-            <h3 style="margin: 0 0 15px 0; font-size: 1rem; color: var(--pocket-blue);">
-                <i class="fas fa-university"></i> Mis Cuentas
-            </h3>
-            <div class="cuentas-lista">
-                {% for c in cuentas %}
-                <div class="cuenta-item">
-                    <div class="cuenta-info">
-                        <span style="font-weight: 600;">{{ c.nombre }}</span>
-                        <a href="{{ url_for('cuentas.eliminar_cuenta', id=c.id) }}" 
-                           class="btn-delete-small"
-                           onclick="return confirm('¿Borrar esta cuenta?')">
-                            <i class="fas fa-trash-alt"></i>
-                        </a>
-                    </div>
-                    <span style="font-weight: 700;">${{ "{:,.2f}".format(c.saldo) }}</span>
-                </div>
-                {% endfor %}
+    <div class="cuentas-lista">
+        {% for c in cuentas %}
+        <div class="cuenta-item" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+            <div class="cuenta-info">
+                <span style="font-weight: 600; color: white;">{{ c.nombre }}</span>
+                <a href="{{ url_for('cuentas.eliminar_cuenta', id=c.id) }}" 
+                   class="btn-delete-small"
+                   style="color: rgba(255,255,255,0.5);"
+                   onclick="return confirm('¿Borrar esta cuenta?')">
+                    <i class="fas fa-trash-alt"></i>
+                </a>
             </div>
-            <a href="/agregar_cuenta" class="btn btn-outline" style="width: 100%; justify-content: center; margin-top: 15px; font-size: 0.8rem; border: 2px solid var(--pocket-blue); color: var(--pocket-blue);">
-                <i class="fas fa-plus-circle"></i> Nueva Cuenta
-            </a>
+            
+            <span style="font-weight: 700; 
+                {% if c.saldo > 0 %} color: #2ecc71; 
+                {% elif c.saldo < 0 %} color: #ff4d4d; 
+                {% else %} color: white; {% endif %}">
+                ${{ "{:,.2f}".format(c.saldo) }}
+            </span>
         </div>
+        {% endfor %}
+    </div>
+
+    <div style="display: flex; justify-content: center;">
+        <a href="/agregar_cuenta" class="btn" 
+           style="width: auto; padding: 6px 15px; margin-top: 15px; font-size: 0.75rem; 
+                  background-color: var(--pocket-blue); border: 1px solid var(--pocket-green); 
+                  color: white; border-radius: 8px; text-decoration: none; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-plus-circle" style="color: var(--pocket-green);"></i> Nueva Cuenta
+        </a>
+    </div>
+</div>
 
         <div class="card" style="border: 2px solid var(--pocket-blue); border-top: 4px solid #f59e0b; padding: 18px;">
             <h3 style="margin: 0 0 12px 0; font-size: 1rem;">
