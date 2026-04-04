@@ -357,29 +357,32 @@
         let sumaTotal = 0;
 
         filas.forEach((fila) => {
-            const celdas = fila.getElementsByTagName("td");
-            if (celdas.length < 4) return;
+    const celdas = fila.getElementsByTagName("td");
+    if (celdas.length < 5) return; // Subimos a 5 para asegurar que llegue a Detalle
 
-            const fechaTexto = celdas[0].innerText.trim();
-            const tipoTexto = celdas[1].innerText.toUpperCase();
-            const montoTexto = celdas[2].innerText.replace(/[$,\s]/g, '');
-            const monto = parseFloat(montoTexto) || 0;
-            
-            // Buscamos en Detalle y Cuenta (celdas 3 y 4)
-            const contenidoBusqueda = (celdas[3].innerText + " " + celdas[4].innerText).toLowerCase();
+    const fechaTexto = celdas[0].innerText.trim(); // "2026-04-04"
+    const tipoTexto = celdas[1].innerText.toUpperCase();
+    const montoTexto = celdas[2].innerText.replace(/[$,\s]/g, '');
+    const monto = parseFloat(montoTexto) || 0;
+    
+    // celdas[3] es Cuenta, celdas[4] es Detalle/Motivo
+    const contenidoBusqueda = (celdas[3].innerText + " " + celdas[4].innerText).toLowerCase();
 
-            const fechaISO = formatearAISO(fechaTexto);
-            let coincideTexto = contenidoBusqueda.includes(texto);
-            let coincideFecha = (!desde || fechaISO >= desde) && (!hasta || fechaISO <= hasta);
+    const fechaISO = formatearAISO(fechaTexto); // Ahora devuelve "2026-04-04"
+    
+    let coincideTexto = contenidoBusqueda.includes(texto);
+    // Comparación directa de strings ISO (funciona perfecto en JS)
+    let coincideFecha = (!desde || fechaISO >= desde) && (!hasta || fechaISO <= hasta);
 
-            if (coincideTexto && coincideFecha) {
-                fila.style.display = window.innerWidth <= 768 ? "grid" : "table-row";
-                if (tipoTexto.includes("INGRESO")) sumaTotal += monto;
-                else if (tipoTexto.includes("EGRESO")) sumaTotal -= monto;
-            } else {
-                fila.style.display = "none";
-            }
-        });
+    if (coincideTexto && coincideFecha) {
+        fila.style.display = window.innerWidth <= 768 ? "grid" : "table-row";
+        // Sumamos si es ingreso, restamos si es egreso
+        if (tipoTexto.includes("INGRESO")) sumaTotal += monto;
+        else if (tipoTexto.includes("EGRESO")) sumaTotal -= monto;
+    } else {
+        fila.style.display = "none";
+    }
+});
 
         const elTotal = document.getElementById("sumaTotalFiltrada");
         if (elTotal) {
@@ -423,24 +426,11 @@
 
     // UTILERÍAS
    function formatearAISO(f) {
-        if (!f) return null;
-        
-        // Si la fecha ya viene como 2026-04-04 (ISO), la dejamos quieta
-        if (f.includes('-')) {
-            return f.trim();
-        }
-        
-        // Si por alguna razón viniera como DD/MM/AAAA, la damos vuelta
-        const p = f.split('/'); 
-        if (p.length === 3) {
-            const dia = p[0].padStart(2, '0');
-            const mes = p[1].padStart(2, '0');
-            const anio = p[2].length === 2 ? '20' + p[2] : p[2];
-            return `${anio}-${mes}-${dia}`;
-        }
-        
-        return null;
-    }
+    if (!f) return null;
+    // Si ya viene con guiones (2026-04-04), lo devolvemos tal cual
+    // Limpiamos espacios por las dudas con .trim()
+    return f.trim();
+}
 
     function limpiarFiltros() {
         document.getElementById("busquedaMovimiento").value = "";
