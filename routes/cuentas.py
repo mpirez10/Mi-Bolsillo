@@ -16,7 +16,7 @@ def agregar_cuenta():
         conn = get_db()
         cursor = conn.cursor()
 
-        # Verificamos si ya existe
+        # Verificamos si ya existe - El check 'if existe' sigue funcionando igual
         cursor.execute(
             "SELECT id FROM cuentas WHERE nombre = %s AND usuario_id = %s",
             (nombre, current_user.id)
@@ -24,6 +24,8 @@ def agregar_cuenta():
         existe = cursor.fetchone()
 
         if existe:
+            cursor.close()
+            conn.close()
             return "Error: Ya tenés una cuenta con ese nombre."
 
         try:
@@ -59,9 +61,11 @@ def eliminar_cuenta(id):
     cuenta = cursor.fetchone()
     
     if cuenta:
-        nombre_cuenta = cuenta[0]  # PostgreSQL devuelve tupla
+        # 🔥 CAMBIO CLAVE: Acceso por nombre de columna
+        nombre_cuenta = cuenta['nombre'] 
         
         try:
+            # Mantenemos tu lógica de integridad referencial manual
             cursor.execute("""
                 UPDATE movimientos 
                 SET cuenta_origen = 'ELIMINADA (' || %s || ')',
