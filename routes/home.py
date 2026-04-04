@@ -23,10 +23,12 @@ def index():
     ), 2)
 
     # --- 2. MOVIMIENTOS ---
+    # Usamos TO_DATE si es PostgreSQL (Render usa ese por defecto)
+    # Si usas SQLite cambiamos a DATE()
     cursor.execute("""
         SELECT * FROM movimientos 
         WHERE usuario_id = %s 
-        ORDER BY id DESC
+        ORDER BY TO_DATE(fecha, 'YYYY-MM-DD') DESC, id DESC
     """, (current_user.id,))
     movimientos = cursor.fetchall()
     # --- 3. DEUDAS ---
