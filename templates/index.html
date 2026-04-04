@@ -338,51 +338,40 @@
     }
 
     // 2. FILTRADO DINÁMICO (A prueba de errores de formato)
-   function filtrarMovimientos() {
+  function filtrarMovimientos() {
     const texto = document.getElementById("busquedaMovimiento").value.toLowerCase();
-    const desdeRaw = document.getElementById("fechaDesde").value;
-    const hastaRaw = document.getElementById("fechaHasta").value;
+    const desdeRaw = document.getElementById("fechaDesde").value; // Viene AAAA-MM-DD
+    const hastaRaw = document.getElementById("fechaHasta").value; // Viene AAAA-MM-DD
     const filas = document.querySelectorAll("tbody tr");
 
-    // Función interna para convertir "DD/MM/YY" o "DDMMYY" en un número comparable (YYMMDD)
-    const convertirAComparable = (f) => {
-        if (!f) return null;
-        let s = f.replace(/\//g, ''); // Quitamos las barras si las tiene
-        if (s.length !== 6) return null;
-        // Reordenamos a YYMMDD para que el orden alfabético sea igual al cronológico
-        return s.substring(4, 6) + s.substring(2, 4) + s.substring(0, 2);
+    // Convierte AAAA-MM-DD en un número YYMMDD para comparar
+    const calendarToComp = (f) => f ? f.replace(/-/g, '').substring(2) : null;
+    
+    // Convierte DD/MM/YY (de la tabla) en YYMMDD para comparar
+    const tableToComp = (f) => {
+        let p = f.split('/');
+        return p[2] + p[1] + p[0];
     };
 
-    const desde = convertirAComparable(desdeRaw);
-    const hasta = convertirAComparable(hastaRaw);
-    let sumaTotal = 0;
+    const desde = calendarToComp(desdeRaw);
+    const hasta = calendarToComp(hastaRaw);
 
     filas.forEach((fila) => {
         const celdas = fila.getElementsByTagName("td");
-        if (celdas.length < 5) return;
+        if (celdas.length < 1) return;
 
-        const fechaTablaRaw = celdas[0].innerText.trim();
-        const fechaTabla = convertirAComparable(fechaTablaRaw);
-        
-        const tipoTexto = celdas[1].innerText.toUpperCase();
-        const monto = parseFloat(celdas[2].innerText.replace(/[$,\s]/g, '')) || 0;
-        const contenidoBusqueda = (celdas[3].innerText + " " + celdas[4].innerText).toLowerCase();
+        const fechaTabla = tableToComp(celdas[0].innerText.trim());
+        const contenido = (celdas[3].innerText + " " + celdas[4].innerText).toLowerCase();
 
-        const coincideTexto = contenidoBusqueda.includes(texto);
-        
-        // La magia: comparamos los números YYMMDD
         let coincideFecha = true;
         if (desde && fechaTabla < desde) coincideFecha = false;
         if (hasta && fechaTabla > hasta) coincideFecha = false;
+        
+        const coincideTexto = contenido.includes(texto);
 
-        if (coincideTexto && coincideFecha) {
-            fila.style.display = window.innerWidth <= 768 ? "grid" : "table-row";
-            if (tipoTexto.includes("INGRESO")) sumaTotal += monto;
-            else if (tipoTexto.includes("EGRESO")) sumaTotal -= monto;
-        } else {
-            fila.style.display = "none";
-        }
+        fila.style.display = (coincideTexto && coincideFecha) ? "" : "none";
     });
+}
 
     document.getElementById("sumaTotalFiltrada").innerText = "$ " + sumaTotal.toLocaleString('en-US', { minimumFractionDigits: 2 });
 }
