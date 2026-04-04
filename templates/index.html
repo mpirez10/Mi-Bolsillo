@@ -167,7 +167,7 @@
             <div class="saldo-monto">${{ "{:,.2f}".format(saldo_general) }}</div>
         </div>
 
-        <div class="card" style="padding: 18px; margin-bottom: 20px;">
+        <div class="card" style="padding: 18px; margin-bottom: 20px; border: 2px solid var(--pocket-green);">
             <h3 style="margin: 0 0 15px 0; font-size: 1rem; color: var(--pocket-blue);">
                 <i class="fas fa-university"></i> Mis Cuentas
             </h3>
@@ -186,12 +186,12 @@
                 </div>
                 {% endfor %}
             </div>
-            <a href="/agregar_cuenta" class="btn btn-outline" style="width: 100%; justify-content: center; margin-top: 15px; font-size: 0.8rem;">
+            <a href="/agregar_cuenta" class="btn btn-outline" style="width: 100%; justify-content: center; margin-top: 15px; font-size: 0.8rem; border: 2px solid var(--pocket-blue); color: var(--pocket-blue);">
                 <i class="fas fa-plus-circle"></i> Nueva Cuenta
             </a>
         </div>
 
-        <div class="card" style="border-top: 4px solid #f59e0b; padding: 18px;">
+        <div class="card" style="border: 2px solid var(--pocket-blue); border-top: 4px solid #f59e0b; padding: 18px;">
             <h3 style="margin: 0 0 12px 0; font-size: 1rem;">
                 <i class="fas fa-hand-holding-dollar" style="color: #f59e0b;"></i> Deudas
             </h3>
@@ -213,7 +213,7 @@
             <div style="height: 200px;"><canvas id="balanceChart"></canvas></div>
         </div>
 
-        <div class="card" style="padding: 20px;">
+        <div class="card" style="padding: 20px; border: 2px solid var(--pocket-green);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h3 style="margin: 0; font-size: 1.1rem;"><i class="fas fa-exchange-alt"></i> Movimientos</h3>
                 <a href="/movimiento" class="btn btn-blue" style="padding: 6px 12px; font-size: 0.8rem;">
@@ -221,7 +221,7 @@
                 </a>
             </div>
 
-            <div style="background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 15px;">
+            <div style="background: #ffffff; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 15px;">
                 <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
                     <div style="background: white; padding: 8px; border-radius: 8px; border: 1px solid var(--border);">
                         <i class="fas fa-calculator" style="color: #3b82f6;"></i>
@@ -232,7 +232,7 @@
                     </div>
                 </div>
 
-              <div class="filtros-grid">
+              <div class="filtros-grid" style="border: 2px solid var(--pocket-blue); background: #ffffff;">
     <div class="search-container" style="width: 100%; margin-bottom: 15px;">
         <small>Buscar Movimiento</small>
         <i class="fas fa-search" style="position: absolute; left: 12px; bottom: 13px; color: #94a3b8;"></i>
