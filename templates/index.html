@@ -201,20 +201,30 @@
     </div>
 </div>
 
-        <div class="card" style="border: 2px solid var(--pocket-blue); border-top: 4px solid #f59e0b; padding: 18px;">
-            <h3 style="margin: 0 0 12px 0; font-size: 1rem;">
-                <i class="fas fa-hand-holding-dollar" style="color: #f59e0b;"></i> Deudas
-            </h3>
-            {% if deudas %}
-                {% for d in deudas[:3] %} <div style="display: flex; justify-content: space-between; font-size: 0.85rem; padding: 5px 0;">
-                    <span style="color: #64748b;">{{ d.deudor if d.deudor != 'YO' else 'A ' + d.acreedor }}</span>
-                    <span style="color: var(--danger); font-weight: 700;">${{ "{:,.2f}".format(d.monto) }}</span>
+       <div class="card" style="border: 2px solid var(--pocket-green); border-top: 4px solid var(--pocket-green); padding: 18px; background-color: #fef3c7; color: white;">
+    
+    <h3 style="margin: 0 0 12px 0; font-size: 1rem; color: white; display: flex; align-items: center; gap: 8px;">
+        <i class="fas fa-hand-holding-dollar" style="color: var(--pocket-blue);"></i> DEUDAS
+    </h3>
+
+    <div class="deudas-lista">
+        {% if deudas %}
+            {% for d in deudas[:3] %}
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <div class="deuda-info">
+                    <span style="color: #ff4d4d; font-weight: 600;">{{ d.deudor if d.deudor != 'YO' else 'A ' + d.acreedor }}</span>
                 </div>
-                {% endfor %}
-            {% else %}
-                <p style="font-size: 0.8rem; color: #94a3b8; text-align: center; margin: 0;">Todo al día 👍</p>
-            {% endif %}
-        </div>
+                
+                <span style="font-weight: 700; color: #ff4d4d;">
+                    ${{ "{:,.2f}".format(d.monto) }}
+                </span>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="font-size: 0.8rem; color: rgba(255,255,255,0.7); text-align: center; margin: 0;">Todo al día 👍</p>
+        {% endif %}
+    </div>
+</div>
     </aside>
 
     <main>
