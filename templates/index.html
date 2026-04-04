@@ -315,8 +315,6 @@
         </div>
     </main>
 </div>
-
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     // 1. INICIALIZACIÓN DEL GRÁFICO (Doughnut)
@@ -347,8 +345,9 @@
         });
     }
 
-    // 2. FUNCIÓN DE FILTRADO (Tu lógica original mejorada)
+    // 2. FUNCIÓN DE FILTRADO - La que hace la magia
     function filtrarMovimientos() {
+        // Los inputs de fecha de HTML siempre devuelven "aaaa-mm-dd"
         const texto = document.getElementById("busquedaMovimiento").value.toLowerCase();
         const desde = document.getElementById("fechaDesde").value;
         const hasta = document.getElementById("fechaHasta").value;
@@ -357,32 +356,33 @@
         let sumaTotal = 0;
 
         filas.forEach((fila) => {
-    const celdas = fila.getElementsByTagName("td");
-    if (celdas.length < 5) return; // Subimos a 5 para asegurar que llegue a Detalle
+            const celdas = fila.getElementsByTagName("td");
+            if (celdas.length < 5) return;
 
-    const fechaTexto = celdas[0].innerText.trim(); // "2026-04-04"
-    const tipoTexto = celdas[1].innerText.toUpperCase();
-    const montoTexto = celdas[2].innerText.replace(/[$,\s]/g, '');
-    const monto = parseFloat(montoTexto) || 0;
-    
-    // celdas[3] es Cuenta, celdas[4] es Detalle/Motivo
-    const contenidoBusqueda = (celdas[3].innerText + " " + celdas[4].innerText).toLowerCase();
+            // Normalizamos la fecha de la tabla para que use guiones y sea ISO
+            const fechaTextoOriginal = celdas[0].innerText.trim();
+            const fechaISO = formatearAISO(fechaTextoOriginal);
+            
+            const tipoTexto = celdas[1].innerText.toUpperCase();
+            const montoTexto = celdas[2].innerText.replace(/[$,\s]/g, '');
+            const monto = parseFloat(montoTexto) || 0;
+            
+            // Buscamos en Cuenta (3) y Detalle (4)
+            const contenidoBusqueda = (celdas[3].innerText + " " + celdas[4].innerText).toLowerCase();
 
-    const fechaISO = formatearAISO(fechaTexto); // Ahora devuelve "2026-04-04"
-    
-    let coincideTexto = contenidoBusqueda.includes(texto);
-    // Comparación directa de strings ISO (funciona perfecto en JS)
-    let coincideFecha = (!desde || fechaISO >= desde) && (!hasta || fechaISO <= hasta);
+            let coincideTexto = contenidoBusqueda.includes(texto);
+            
+            // Ahora que ambos son "aaaa-mm-dd", la comparación es perfecta
+            let coincideFecha = (!desde || fechaISO >= desde) && (!hasta || fechaISO <= hasta);
 
-    if (coincideTexto && coincideFecha) {
-        fila.style.display = window.innerWidth <= 768 ? "grid" : "table-row";
-        // Sumamos si es ingreso, restamos si es egreso
-        if (tipoTexto.includes("INGRESO")) sumaTotal += monto;
-        else if (tipoTexto.includes("EGRESO")) sumaTotal -= monto;
-    } else {
-        fila.style.display = "none";
-    }
-});
+            if (coincideTexto && coincideFecha) {
+                fila.style.display = window.innerWidth <= 768 ? "grid" : "table-row";
+                if (tipoTexto.includes("INGRESO")) sumaTotal += monto;
+                else if (tipoTexto.includes("EGRESO")) sumaTotal -= monto;
+            } else {
+                fila.style.display = "none";
+            }
+        });
 
         const elTotal = document.getElementById("sumaTotalFiltrada");
         if (elTotal) {
@@ -391,17 +391,31 @@
         }
     }
 
-    // 3. EXPORTAR A EXCEL (Solo lo que está visible en la tabla)
+    // 3. NORMALIZADOR DE FECHAS - El "Traductor"
+    function formatearAISO(f) {
+        if (!f) return "";
+        
+        // 1. Cambiamos barras por guiones: "2026/04/04" -> "2026-04-04"
+        let limpio = f.trim().replace(/\//g, '-');
+        
+        // 2. Si por esas casualidades la fecha viene como "04-04-2026" (formato latino)
+        // la damos vuelta para que sea "2026-04-04"
+        const partes = limpio.split('-');
+        if (partes.length === 3 && partes[0].length === 2) {
+            return `${partes[2]}-${partes[1]}-${partes[0]}`;
+        }
+        
+        return limpio; // Retorna "aaaa-mm-dd"
+    }
+
+    // 4. EXPORTAR A EXCEL
     function exportarAExcel() {
         const filas = document.querySelectorAll("table tr");
         let csv = [];
-        
         filas.forEach(fila => {
-            // Solo exportamos si la fila es visible (respeta tus filtros)
             if (fila.style.display !== 'none') {
                 const cols = fila.querySelectorAll("td, th");
                 let filaData = [];
-                // Recorremos hasta la penúltima columna (saltamos "Acciones")
                 for (let i = 0; i < cols.length - 1; i++) {
                     let limpio = cols[i].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
                     filaData.push('"' + limpio + '"');
@@ -409,7 +423,6 @@
                 csv.push(filaData.join(","));
             }
         });
-
         const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + csv.join("\n");
         const link = document.createElement("a");
         link.setAttribute("href", encodeURI(csvContent));
@@ -419,18 +432,7 @@
         document.body.removeChild(link);
     }
 
-    // 4. EXPORTAR A PDF (Usa la función de impresión del sistema)
-    function exportarAPDF() {
-        window.print();
-    }
-
-    // UTILERÍAS
-   function formatearAISO(f) {
-    if (!f) return null;
-    // Si ya viene con guiones (2026-04-04), lo devolvemos tal cual
-    // Limpiamos espacios por las dudas con .trim()
-    return f.trim();
-}
+    function exportarAPDF() { window.print(); }
 
     function limpiarFiltros() {
         document.getElementById("busquedaMovimiento").value = "";
@@ -439,6 +441,7 @@
         filtrarMovimientos();
     }
     
+    // Ejecutamos al cargar para calcular el total inicial
     document.addEventListener("DOMContentLoaded", filtrarMovimientos);
 </script>
 {% endblock %}
