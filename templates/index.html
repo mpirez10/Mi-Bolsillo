@@ -233,35 +233,38 @@
                     </div>
                 </div>
 
-               <div class="filtros-grid">
-    <div class="search-container">
-        <small>Buscar</small>
+              <div class="filtros-grid">
+    <div class="search-container" style="width: 100%; margin-bottom: 15px;">
+        <small>Buscar Movimiento</small>
         <i class="fas fa-search" style="position: absolute; left: 12px; bottom: 13px; color: #94a3b8;"></i>
         <input type="text" id="busquedaMovimiento" onkeyup="filtrarMovimientos()" 
-               placeholder="Detalle o cuenta..." class="form-control" style="padding-left: 35px;">
+               placeholder="Detalle, cuenta o motivo..." class="form-control" style="padding-left: 35px;">
     </div>
     
-    <div class="fecha-inputs">
-        <div style="flex: 1;">
-            <small>Desde</small>
-            <input type="date" id="fechaDesde" onchange="filtrarMovimientos()" class="form-control">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; width: 100%; flex-wrap: wrap; gap: 15px;">
+        
+        <div class="acciones-filtros">
+            <div>
+                <small>Reportes</small>
+                <div style="display: flex; gap: 8px;">
+                    <button onclick="exportarAExcel()" class="btn-export btn-excel" title="Excel"><i class="fas fa-file-excel"></i></button>
+                    <button onclick="exportarAPDF()" class="btn-export btn-pdf" title="PDF"><i class="fas fa-file-pdf"></i></button>
+                    <button onclick="limpiarFiltros()" class="btn-limpiar" title="Limpiar"><i class="fas fa-sync-alt"></i></button>
+                </div>
+            </div>
         </div>
-        <div style="flex: 1;">
-            <small>Hasta</small>
-            <input type="date" id="fechaHasta" onchange="filtrarMovimientos()" class="form-control">
-        </div>
-    </div>
 
-    <div class="acciones-filtros">
-        <button onclick="exportarAExcel()" class="btn-export btn-excel" title="Exportar a Excel">
-            <i class="fas fa-file-excel"></i>
-        </button>
-        <button onclick="exportarAPDF()" class="btn-export btn-pdf" title="Imprimir PDF">
-            <i class="fas fa-file-pdf"></i>
-        </button>
-        <button onclick="limpiarFiltros()" class="btn-limpiar" title="Limpiar Filtros">
-            <i class="fas fa-sync-alt"></i>
-        </button>
+        <div class="fecha-inputs" style="flex: 0 1 auto; min-width: 300px;">
+            <div style="flex: 1;">
+                <small>Desde</small>
+                <input type="date" id="fechaDesde" onchange="filtrarMovimientos()" class="form-control">
+            </div>
+            <div style="flex: 1;">
+                <small>Hasta</small>
+                <input type="date" id="fechaHasta" onchange="filtrarMovimientos()" class="form-control">
+            </div>
+        </div>
+        
     </div>
 </div>
             
