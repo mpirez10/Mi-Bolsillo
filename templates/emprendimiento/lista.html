@@ -1,18 +1,81 @@
 {% extends "base.html" %}
+
 {% block content %}
-<div class="card">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2><i class="fas fa-rocket"></i> Mis Emprendimientos</h2>
+<style>
+    .titulo-emprendimientos {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+    }
+
+    /* Icono en VERDE y Texto en AZUL (como pediste antes) */
+    .icon-emprendimiento { color: var(--money-green) !important; font-size: 1.5rem; }
+    .text-emprendimiento { 
+        color: var(--pocket-blue) !important; 
+        font-family: 'Poppins', sans-serif; 
+        font-weight: 700; 
+        font-size: 1.2rem; 
+    }
+
+    /* LA CARD: Relleno Azul y Contorno Verde */
+    .card-negocio {
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        padding: 20px; 
+        background-color: var(--pocket-blue) !important; /* Relleno Azul */
+        border: 3px solid var(--money-green) !important; /* Contorno Verde */
+        border-radius: 12px; 
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    /* Nombre del emprendimiento en BLANCO */
+    .nombre-negocio {
+        font-size: 1.2em;
+        color: white !important;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    /* BOTÓN INGRESAR: Fondo Verde y Texto Blanco */
+    .btn-ingresar {
+        background-color: var(--money-green) !important;
+        color: white !important;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 800;
+        text-decoration: none;
+        transition: transform 0.2s;
+    }
+
+    .btn-ingresar:hover {
+        transform: scale(1.05);
+        filter: brightness(1.1);
+    }
+</style>
+
+<div class="card" style="background: white; padding: 20px; border-radius: 15px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+        <h2 class="titulo-emprendimientos">
+            <i class="fa-solid fa-store icon-emprendimiento"></i> 
+            <span class="text-emprendimiento">Mis Emprendimientos</span>
+        </h2>
         <a href="/emprendimiento/crear" class="btn btn-blue"><i class="fas fa-plus"></i> Crear Nuevo</a>
     </div>
     
-    <div style="display: grid; gap: 15px;">
+    <div style="display: grid; gap: 20px;">
         {% for e in emprendimientos %}
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border: 1px solid var(--border); border-radius: 12px; background: white;">
-            <strong style="font-size: 1.1em;">{{ e.nombre }}</strong>
-            <div style="display: flex; gap: 10px;">
-                <a href="/emprendimiento/resumen/{{ e.id }}" class="btn btn-blue">Ingresar</a>
-                <a href="/emprendimiento/eliminar/{{ e.id }}" class="btn" style="color: var(--danger);" onclick="return confirm('¿Borrar todo?')">
+        <div class="card-negocio">
+            <span class="nombre-negocio">{{ e.nombre }}</span>
+            
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <a href="/emprendimiento/resumen/{{ e.id }}" class="btn-ingresar">
+                    INGRESAR
+                </a>
+                
+                <a href="/emprendimiento/eliminar/{{ e.id }}" style="color: #ff9999; font-size: 1.1rem;" onclick="return confirm('¿Borrar todo?')">
                     <i class="fas fa-trash"></i>
                 </a>
             </div>
