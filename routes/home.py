@@ -17,10 +17,8 @@ def index():
     )
     cuentas = cursor.fetchall()
 
-    # 🔥 Compatible dict o tuple
-    saldo_general = round(sum(
-        (c['saldo'] if isinstance(c, dict) else c[2]) for c in cuentas
-    ), 2)
+    # Suma directa, sin preguntar nada. ¡Un placer!
+    saldo_general = round(sum(c['saldo'] for c in cuentas), 2)
 
     # --- 2. MOVIMIENTOS ---
     cursor.execute("""
@@ -29,6 +27,7 @@ def index():
         ORDER BY fecha DESC, id DESC
     """, (current_user.id,))
     movimientos = cursor.fetchall()
+
     # --- 3. DEUDAS ---
     cursor.execute("""
         SELECT * FROM deudas 
@@ -37,41 +36,17 @@ def index():
     """, (current_user.id,))
     deudas_list = cursor.fetchall()
 
-    # --- 4. TOTALES (🔥 FIX KEYERROR) ---
-    def get_value(row):
-        if not row:
-            return 0
-        return row[0] if not isinstance(row, dict) else list(row.values())[0]
+    # --- 4. TOTALES (Usando ALIAS en SQL para más limpieza) ---
+    def fetch_sum(query):
+        cursor.execute(query, (current_user.id,))
+        res = cursor.fetchone()
+        return res['total'] if res and res['total'] else 0
 
-    cursor.execute("""
-        SELECT SUM(monto) FROM movimientos 
-        WHERE usuario_id = %s AND LOWER(tipo) = 'ingreso'
-    """, (current_user.id,))
-    ingresos_total = get_value(cursor.fetchone()) or 0
-
-    cursor.execute("""
-        SELECT SUM(monto) FROM movimientos 
-        WHERE usuario_id = %s AND LOWER(tipo) = 'egreso'
-    """, (current_user.id,))
-    egresos_total = get_value(cursor.fetchone()) or 0
-
-    cursor.execute("""
-        SELECT SUM(monto) FROM deudas 
-        WHERE usuario_id = %s AND estado = 'pendiente'
-    """, (current_user.id,))
-    deudas_total = get_value(cursor.fetchone()) or 0
-
-    cursor.execute(
-        "SELECT SUM(precio_total) FROM ventas WHERE usuario_id = %s",
-        (current_user.id,)
-    )
-    ganancia_mes = get_value(cursor.fetchone()) or 0
-
-    cursor.execute(
-        "SELECT SUM(monto) FROM gastos WHERE usuario_id = %s",
-        (current_user.id,)
-    )
-    gasto_mes = get_value(cursor.fetchone()) or 0
+    ingresos_total = fetch_sum("SELECT SUM(monto) AS total FROM movimientos WHERE usuario_id = %s AND LOWER(tipo) = 'ingreso'")
+    egresos_total = fetch_sum("SELECT SUM(monto) AS total FROM movimientos WHERE usuario_id = %s AND LOWER(tipo) = 'egreso'")
+    deudas_total = fetch_sum("SELECT SUM(monto) AS total FROM deudas WHERE usuario_id = %s AND estado = 'pendiente'")
+    ganancia_mes = fetch_sum("SELECT SUM(precio_total) AS total FROM ventas WHERE usuario_id = %s")
+    gasto_mes = fetch_sum("SELECT SUM(monto) AS total FROM gastos WHERE usuario_id = %s")
 
     cursor.close()
     conn.close()
@@ -89,7 +64,6 @@ def index():
         gasto_mes=gasto_mes
     )
 
-
 @bp.route("/eliminar_movimiento/<int:mid>")
 @login_required
 def eliminar_movimiento(mid):
@@ -103,46 +77,23 @@ def eliminar_movimiento(mid):
     movimiento = cursor.fetchone()
 
     if movimiento:
-        # 🔥 Compatibilidad dict/tuple
-        if isinstance(movimiento, dict):
-            monto = movimiento['monto']
-            tipo = movimiento['tipo'].lower()
-            cuenta = movimiento['cuenta_origen']
-            cuenta_destino = movimiento.get('cuenta_destino')
-        else:
-            monto = movimiento[3]
-            tipo = movimiento[2].lower()
-            cuenta = movimiento[4]
-            cuenta_destino = movimiento[5]
+        # Acceso directo por clave. Si es 'transferencia' usamos .get() por las dudas
+        monto = movimiento['monto']
+        tipo = movimiento['tipo'].lower()
+        cuenta = movimiento['cuenta_origen']
+        cuenta_destino = movimiento.get('cuenta_destino')
 
         if tipo == 'ingreso':
-            cursor.execute(
-                "UPDATE cuentas SET saldo = saldo - %s WHERE nombre = %s AND usuario_id = %s",
-                (monto, cuenta, current_user.id)
-            )
+            cursor.execute("UPDATE cuentas SET saldo = saldo - %s WHERE nombre = %s AND usuario_id = %s", (monto, cuenta, current_user.id))
         elif tipo == 'egreso':
-            cursor.execute(
-                "UPDATE cuentas SET saldo = saldo + %s WHERE nombre = %s AND usuario_id = %s",
-                (monto, cuenta, current_user.id)
-            )
+            cursor.execute("UPDATE cuentas SET saldo = saldo + %s WHERE nombre = %s AND usuario_id = %s", (monto, cuenta, current_user.id))
         elif tipo == 'transferencia':
-            cursor.execute(
-                "UPDATE cuentas SET saldo = saldo + %s WHERE nombre = %s AND usuario_id = %s",
-                (monto, cuenta, current_user.id)
-            )
-            cursor.execute(
-                "UPDATE cuentas SET saldo = saldo - %s WHERE nombre = %s AND usuario_id = %s",
-                (monto, cuenta_destino, current_user.id)
-            )
+            cursor.execute("UPDATE cuentas SET saldo = saldo + %s WHERE nombre = %s AND usuario_id = %s", (monto, cuenta, current_user.id))
+            cursor.execute("UPDATE cuentas SET saldo = saldo - %s WHERE nombre = %s AND usuario_id = %s", (monto, cuenta_destino, current_user.id))
 
-        cursor.execute(
-            "DELETE FROM movimientos WHERE id=%s",
-            (mid,)
-        )
-
+        cursor.execute("DELETE FROM movimientos WHERE id=%s", (mid,))
         conn.commit()
 
     cursor.close()
     conn.close()
-
     return redirect(url_for("home.index"))
