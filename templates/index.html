@@ -31,8 +31,10 @@
 
     /* 2. SIDEBAR Y SALDO - Lo que ves a la izquierda */
     .saldo-card { 
-        background: linear-gradient(135deg, var(--pocket-blue), #1d4ed8); 
-        color: white; padding: 24px; text-align: center; border: none;
+    background: linear-gradient(135deg, var(--pocket-blue), var(--pocket-green)); 
+    color: white; 
+    box-shadow: 0 4px 15px rgba(0, 86, 179, 0.3);
+}
     }
     .saldo-monto { font-size: 2.2rem; font-weight: 800; margin-top: 5px; letter-spacing: -1px; }
 
@@ -56,6 +58,10 @@
         flex-wrap: wrap;
         margin-bottom: 20px;
     }
+    /* Agregá esto a tu CSS */
+.tr-ingreso { border-left: 5px solid var(--pocket-green) !important; }
+.tr-egreso { border-left: 5px solid #dc3545 !important; } /* Mantenemos el rojo para alertas */
+.tr-transf { border-left: 5px solid var(--pocket-blue) !important; }
 
     /* Etiquetas de texto arriba de los inputs */
     .filtros-grid small {
