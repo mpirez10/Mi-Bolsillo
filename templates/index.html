@@ -254,16 +254,18 @@
             </div>
         </div>
 
-        <div class="fecha-inputs" style="flex: 0 1 auto; min-width: 300px;">
-            <div style="flex: 1;">
-                <small>Desde</small>
-                <input type="date" id="fechaDesde" onchange="filtrarMovimientos()" class="form-control">
-            </div>
-            <div style="flex: 1;">
-                <small>Hasta</small>
-                <input type="date" id="fechaHasta" onchange="filtrarMovimientos()" class="form-control">
-            </div>
-        </div>
+       <div class="fecha-inputs" style="flex: 0 1 auto; min-width: 300px;">
+    <div style="flex: 1;">
+        <small>Desde (DDMMYY)</small>
+        <input type="text" id="fechaDesde" onkeyup="filtrarMovimientos()" 
+               placeholder="290224" class="form-control" maxlength="6">
+    </div>
+    <div style="flex: 1;">
+        <small>Hasta (DDMMYY)</small>
+        <input type="text" id="fechaHasta" onkeyup="filtrarMovimientos()" 
+               placeholder="311224" class="form-control" maxlength="6">
+    </div>
+</div>
         
     </div>
 </div>
@@ -336,58 +338,54 @@
     }
 
     // 2. FILTRADO DINÁMICO (A prueba de errores de formato)
-    function filtrarMovimientos() {
-        const texto = document.getElementById("busquedaMovimiento").value.toLowerCase();
-        const desde = document.getElementById("fechaDesde").value; 
-        const hasta = document.getElementById("fechaHasta").value; 
-        const filas = document.querySelectorAll("tbody tr");
+   function filtrarMovimientos() {
+    const texto = document.getElementById("busquedaMovimiento").value.toLowerCase();
+    const desdeRaw = document.getElementById("fechaDesde").value;
+    const hastaRaw = document.getElementById("fechaHasta").value;
+    const filas = document.querySelectorAll("tbody tr");
+
+    // Función interna para convertir "DD/MM/YY" o "DDMMYY" en un número comparable (YYMMDD)
+    const convertirAComparable = (f) => {
+        if (!f) return null;
+        let s = f.replace(/\//g, ''); // Quitamos las barras si las tiene
+        if (s.length !== 6) return null;
+        // Reordenamos a YYMMDD para que el orden alfabético sea igual al cronológico
+        return s.substring(4, 6) + s.substring(2, 4) + s.substring(0, 2);
+    };
+
+    const desde = convertirAComparable(desdeRaw);
+    const hasta = convertirAComparable(hastaRaw);
+    let sumaTotal = 0;
+
+    filas.forEach((fila) => {
+        const celdas = fila.getElementsByTagName("td");
+        if (celdas.length < 5) return;
+
+        const fechaTablaRaw = celdas[0].innerText.trim();
+        const fechaTabla = convertirAComparable(fechaTablaRaw);
         
-        let sumaTotal = 0;
+        const tipoTexto = celdas[1].innerText.toUpperCase();
+        const monto = parseFloat(celdas[2].innerText.replace(/[$,\s]/g, '')) || 0;
+        const contenidoBusqueda = (celdas[3].innerText + " " + celdas[4].innerText).toLowerCase();
 
-        filas.forEach((fila) => {
-            const celdas = fila.getElementsByTagName("td");
-            if (celdas.length < 5) return;
+        const coincideTexto = contenidoBusqueda.includes(texto);
+        
+        // La magia: comparamos los números YYMMDD
+        let coincideFecha = true;
+        if (desde && fechaTabla < desde) coincideFecha = false;
+        if (hasta && fechaTabla > hasta) coincideFecha = false;
 
-            // NORMALIZAMOS LA FECHA DE LA TABLA:
-            // Si viene DD/MM/YY la pasamos a YYYY-MM-DD para comparar con el input date
-            let fechaTabla = celdas[0].innerText.trim();
-            if (fechaTabla.includes('/')) {
-                const partes = fechaTabla.split('/');
-                if (partes.length === 3) {
-                    // Asumimos DD/MM/YY o DD/MM/YYYY y lo damos vuelta
-                    let anio = partes[2].length === 2 ? "20" + partes[2] : partes[2];
-                    fechaTabla = `${anio}-${partes[1]}-${partes[0]}`;
-                }
-            }
-
-            const tipoTexto = celdas[1].innerText.toUpperCase();
-            // Limpiamos el monto de símbolos para poder sumar
-            const montoTexto = celdas[2].innerText.replace(/[$.\s,]/g, '');
-            const monto = parseFloat(montoTexto) / 100 || 0; // Ajuste por si usás decimales
-            
-            const contenidoBusqueda = (celdas[3].innerText + " " + celdas[4].innerText).toLowerCase();
-
-            const coincideTexto = contenidoBusqueda.includes(texto);
-            const coincideFecha = (!desde || fechaTabla >= desde) && (!hasta || fechaTabla <= hasta);
-
-            if (coincideTexto && coincideFecha) {
-                fila.style.display = window.innerWidth <= 768 ? "grid" : "table-row";
-                // Lógica de suma para el "Total Filtrado"
-                if (tipoTexto.includes("INGRESO")) sumaTotal += monto;
-                else if (tipoTexto.includes("EGRESO")) sumaTotal -= monto;
-            } else {
-                fila.style.display = "none";
-            }
-        });
-
-        // Actualizamos el display del total
-        const elTotal = document.getElementById("sumaTotalFiltrada");
-        if (elTotal) {
-            elTotal.innerText = "$ " + sumaTotal.toLocaleString('es-UY', { minimumFractionDigits: 2 });
-            elTotal.style.color = sumaTotal >= 0 ? "#10b981" : "#ef4444";
+        if (coincideTexto && coincideFecha) {
+            fila.style.display = window.innerWidth <= 768 ? "grid" : "table-row";
+            if (tipoTexto.includes("INGRESO")) sumaTotal += monto;
+            else if (tipoTexto.includes("EGRESO")) sumaTotal -= monto;
+        } else {
+            fila.style.display = "none";
         }
-    }
+    });
 
+    document.getElementById("sumaTotalFiltrada").innerText = "$ " + sumaTotal.toLocaleString('en-US', { minimumFractionDigits: 2 });
+}
     // 3. EXPORTACIONES Y LIMPIEZA
     function limpiarFiltros() {
         document.getElementById("busquedaMovimiento").value = "";
