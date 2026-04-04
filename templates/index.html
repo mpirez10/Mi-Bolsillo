@@ -347,67 +347,52 @@
 
     // 2. FUNCIÓN DE FILTRADO - La que hace la magia
     function filtrarMovimientos() {
-        // Los inputs de fecha de HTML siempre devuelven "aaaa-mm-dd"
-        const texto = document.getElementById("busquedaMovimiento").value.toLowerCase();
-        const desde = document.getElementById("fechaDesde").value;
-        const hasta = document.getElementById("fechaHasta").value;
-        const filas = document.querySelectorAll("tbody tr");
+    const texto = document.getElementById("busquedaMovimiento").value.toLowerCase();
+    const desdeRaw = document.getElementById("fechaDesde").value; // Viene AAAA-MM-DD
+    const hastaRaw = document.getElementById("fechaHasta").value; // Viene AAAA-MM-DD
+    const filas = document.querySelectorAll("tbody tr");
+
+    // Convertimos AAAA-MM-DD a un número puro AAAAMMDD para comparar fácil
+    const toComp = (f) => f ? f.replace(/-/g, '') : null;
+
+    const desde = toComp(desdeRaw);
+    const hasta = toComp(hastaRaw);
+    let sumaTotal = 0;
+
+    filas.forEach((fila) => {
+        const celdas = fila.getElementsByTagName("td");
+        if (celdas.length < 5) return;
+
+        // Leemos la fecha de la tabla (que según tu captura es 2026-03-04)
+        const fechaTablaRaw = celdas[0].innerText.trim(); 
+        const fechaTabla = toComp(fechaTablaRaw);
         
-        let sumaTotal = 0;
+        const tipoTexto = celdas[1].innerText.toUpperCase();
+        const montoStr = celdas[2].innerText.replace(/[$.]/g, '').replace(',', '.');
+        const monto = parseFloat(montoStr) || 0;
+        
+        const contenidoBusqueda = (celdas[3].innerText + " " + celdas[4].innerText).toLowerCase();
 
-        filas.forEach((fila) => {
-            const celdas = fila.getElementsByTagName("td");
-            if (celdas.length < 5) return;
+        // Lógica de filtrado
+        const coincideTexto = contenidoBusqueda.includes(texto);
+        let coincideFecha = true;
+        if (desde && fechaTabla < desde) coincideFecha = false;
+        if (hasta && fechaTabla > hasta) coincideFecha = false;
 
-            // Normalizamos la fecha de la tabla para que use guiones y sea ISO
-            const fechaTextoOriginal = celdas[0].innerText.trim();
-            const fechaISO = formatearAISO(fechaTextoOriginal);
-            
-            const tipoTexto = celdas[1].innerText.toUpperCase();
-            const montoTexto = celdas[2].innerText.replace(/[$,\s]/g, '');
-            const monto = parseFloat(montoTexto) || 0;
-            
-            // Buscamos en Cuenta (3) y Detalle (4)
-            const contenidoBusqueda = (celdas[3].innerText + " " + celdas[4].innerText).toLowerCase();
-
-            let coincideTexto = contenidoBusqueda.includes(texto);
-            
-            // Ahora que ambos son "aaaa-mm-dd", la comparación es perfecta
-            let coincideFecha = (!desde || fechaISO >= desde) && (!hasta || fechaISO <= hasta);
-
-            if (coincideTexto && coincideFecha) {
-                fila.style.display = window.innerWidth <= 768 ? "grid" : "table-row";
-                if (tipoTexto.includes("INGRESO")) sumaTotal += monto;
-                else if (tipoTexto.includes("EGRESO")) sumaTotal -= monto;
-            } else {
-                fila.style.display = "none";
-            }
-        });
-
-        const elTotal = document.getElementById("sumaTotalFiltrada");
-        if (elTotal) {
-            elTotal.innerText = "$ " + sumaTotal.toLocaleString('en-US', { minimumFractionDigits: 2 });
-            elTotal.style.color = sumaTotal >= 0 ? "#10b981" : "#ef4444";
+        if (coincideTexto && coincideFecha) {
+            fila.style.display = "";
+            // Sumamos o restamos según el tipo para el "Total Filtrado"
+            if (tipoTexto.includes("INGRESO")) sumaTotal += monto;
+            else if (tipoTexto.includes("EGRESO")) sumaTotal -= monto;
+            // Si es transferencia, no afecta el total general por ahora
+        } else {
+            fila.style.display = "none";
         }
-    }
+    });
 
-    // 3. NORMALIZADOR DE FECHAS - El "Traductor"
-    function formatearAISO(f) {
-        if (!f) return "";
-        
-        // 1. Cambiamos barras por guiones: "2026/04/04" -> "2026-04-04"
-        let limpio = f.trim().replace(/\//g, '-');
-        
-        // 2. Si por esas casualidades la fecha viene como "04-04-2026" (formato latino)
-        // la damos vuelta para que sea "2026-04-04"
-        const partes = limpio.split('-');
-        if (partes.length === 3 && partes[0].length === 2) {
-            return `${partes[2]}-${partes[1]}-${partes[0]}`;
-        }
-        
-        return limpio; // Retorna "aaaa-mm-dd"
-    }
-
+    // Actualizamos el globito verde de la captura
+    document.getElementById("sumaTotalFiltrada").innerText = "$ " + sumaTotal.toLocaleString('es-UY', { minimumFractionDigits: 2 });
+}
     // 4. EXPORTAR A EXCEL
     function exportarAExcel() {
         const filas = document.querySelectorAll("table tr");
