@@ -233,16 +233,23 @@
                     </div>
                 </div>
 
-                <div class="filtros-grid">
+               <div class="filtros-grid">
     <div class="search-container">
-        <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+        <small>Buscar</small>
+        <i class="fas fa-search" style="position: absolute; left: 12px; bottom: 13px; color: #94a3b8;"></i>
         <input type="text" id="busquedaMovimiento" onkeyup="filtrarMovimientos()" 
-               placeholder="Buscar movimiento..." class="form-control" style="padding-left: 35px;">
+               placeholder="Detalle o cuenta..." class="form-control" style="padding-left: 35px;">
     </div>
     
     <div class="fecha-inputs">
-        <input type="date" id="fechaDesde" onchange="filtrarMovimientos()" class="form-control">
-        <input type="date" id="fechaHasta" onchange="filtrarMovimientos()" class="form-control">
+        <div style="flex: 1;">
+            <small>Desde</small>
+            <input type="date" id="fechaDesde" onchange="filtrarMovimientos()" class="form-control">
+        </div>
+        <div style="flex: 1;">
+            <small>Hasta</small>
+            <input type="date" id="fechaHasta" onchange="filtrarMovimientos()" class="form-control">
+        </div>
     </div>
 
     <div class="acciones-filtros">
