@@ -2,16 +2,20 @@
 
 {% block content %}
 <div class="card" style="max-width: 500px; margin: 0 auto;">
-    <h2><i class="fas fa-plus-circle"></i> Nueva Cuenta</h2>
+    <h2 style="margin-bottom: 25px; color: white !important; display: flex; align-items: center; gap: 10px; font-family: 'Poppins', sans-serif; font-weight: 700;">
+    <i class="fas fa-plus-circle" style="color: var(--money-green);"></i> 
+    Nueva Cuenta
+</h2>
     <form method="post">
         <div style="margin-bottom: 15px;">
-            <label style="display: block; margin-bottom: 5px;">Nombre de la cuenta:</label>
+            <label style="display: block; margin-bottom: 8px; color: var(--pocket-blue); font-weight: 700; font-family: 'Poppins', sans-serif; font-size: 0.9rem; text-transform: uppercase;">
+                Nombre de la cuenta:</label>
             <input type="text" name="nombre" required placeholder="Ej: BROU, Galpón, Efectivo..." 
                    style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
         </div>
         <button type="submit" class="btn btn-blue" style="width: 100%;">Guardar Cuenta</button>
     </form>
     <br>
-    <a href="/" style="color: #64748b; text-decoration: none;"><i class="fas fa-arrow-left"></i> Volver al inicio</a>
+    <a href="/" style="color: var(--pocket-blue); text-decoration: none;"><i class="fas fa-arrow-left"></i> Volver al inicio</a>
 </div>
 {% endblock %}
