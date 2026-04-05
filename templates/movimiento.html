@@ -2,53 +2,95 @@
 
 {% block content %}
 <div class="card" style="max-width: 600px; margin: 0 auto;">
-    <h2><i class="fas fa-exchange-alt"></i> Registrar Movimiento</h2>
-    
+<h2 style="margin-bottom: 25px; color: var(--money-green) !important; display: flex; align-items: center; gap: 10px; font-family: 'Poppins', sans-serif; font-weight: 700;">
+    <i class="fas fa-exchange-alt" style="color: var(--pocket-blue);"></i> 
+    Registrar Movimiento
+</h2>    
     <form method="post">
         <div style="margin-bottom: 15px;">
-            <label>Tipo de Movimiento:</label>
-            <select name="tipo" id="tipo" required onchange="toggleDestino()" 
-                    style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
-                <option value="Ingreso">↑ Ingreso</option>
-                <option value="Egreso">↓ Egreso</option>
-                <option value="Transferencia">⇄ Transferencia</option>
-            </select>
-        </div>
+    <label style="display: block; margin-bottom: 8px; color: var(--pocket-blue); font-weight: 700; font-family: 'Poppins', sans-serif;">
+        Tipo de Movimiento:
+    </label>
+    
+    <select name="tipo" id="tipo" required onchange="toggleDestino()" 
+            style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid var(--border); font-weight: 600; color: var(--text); cursor: pointer;">
+        
+        <option value="Ingreso" style="color: var(--money-green); font-weight: 700;">
+            ↑ Ingreso
+        </option>
+        
+        <option value="Egreso" style="color: var(--danger); font-weight: 700;">
+            ↓ Egreso
+        </option>
+        
+        <option value="Transferencia" style="color: var(--pocket-blue); font-weight: 700;">
+            ⇄ Transferencia
+        </option>
+        
+    </select>
+</div>
+      
+        <div style="margin-bottom: 15px;">
+    <label style="display: block; margin-bottom: 8px; color: var(--pocket-blue); font-weight: 700; font-family: 'Poppins', sans-serif;">
+        Monto ($):
+    </label>
+    
+    <input type="number" name="monto" step="0.01" required placeholder="0.00"
+           style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid var(--border); font-size: 1rem; color: var(--text); outline: none; transition: border-color 0.2s;"
+           onfocus="this.style.borderColor='var(--pocket-blue)'" 
+           onblur="this.style.borderColor='var(--border)'">
+</div>
 
         <div style="margin-bottom: 15px;">
-            <label>Monto ($):</label>
-            <input type="number" name="monto" step="0.01" required placeholder="0.00"
-                   style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
-        </div>
-
-        <div style="margin-bottom: 15px;">
-            <label>Cuenta Origen:</label>
-            <select name="cuenta_origen" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
-                {% for c in cuentas %}
-                    <option value="{{c.nombre}}">{{c.nombre}}</option>
-                {% endfor %}
-            </select>
-        </div>
+    <label style="display: block; margin-bottom: 8px; color: var(--pocket-blue); font-weight: 700; font-family: 'Poppins', sans-serif;">
+        Cuenta Origen:
+    </label>
+    
+    <select name="cuenta_origen" required 
+            style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid var(--border); font-size: 1rem; color: var(--text); background-color: white; cursor: pointer; outline: none;"
+            onfocus="this.style.borderColor='var(--pocket-blue)'" 
+            onblur="this.style.borderColor='var(--border)'">
+        
+        {% for c in cuentas %}
+            <option value="{{c.nombre}}">{{c.nombre}}</option>
+        {% endfor %}
+        
+    </select>
+</div>
 
         <div id="div_destino" style="margin-bottom: 15px; display: none;">
-            <label>Cuenta Destino:</label>
-            <select name="cuenta_destino" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
-                <option value="">-- Seleccionar destino --</option>
-                {% for c in cuentas %}
-                    <option value="{{c.nombre}}">{{c.nombre}}</option>
-                {% endfor %}
-            </select>
-        </div>
+    <label style="display: block; margin-bottom: 8px; color: var(--pocket-blue); font-weight: 700; font-family: 'Poppins', sans-serif;">
+        Cuenta Destino:
+    </label>
+    
+    <select name="cuenta_destino" 
+            style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid var(--border); font-size: 1rem; color: var(--text); background-color: white; cursor: pointer; outline: none;"
+            onfocus="this.style.borderColor='var(--pocket-blue)'" 
+            onblur="this.style.borderColor='var(--border)'">
+        
+        <option value="">-- Seleccionar destino --</option>
+        {% for c in cuentas %}
+            <option value="{{c.nombre}}">{{c.nombre}}</option>
+        {% endfor %}
+        
+    </select>
+</div>
 
-        <div style="margin-bottom: 15px;">
-            <label>Motivo / Detalle:</label>
-            <input type="text" name="motivo" placeholder="Ej: Compra de materiales, Venta..."
-                   style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
-        </div>
+       <div style="margin-bottom: 15px;">
+    <label style="display: block; margin-bottom: 8px; color: var(--pocket-blue); font-weight: 700; font-family: 'Poppins', sans-serif;">
+        Motivo / Detalle:
+    </label>
+    
+    <input type="text" name="motivo" placeholder="Ej: Compra de materiales, Venta..."
+           style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid var(--border); font-size: 1rem; color: var(--text); outline: none; transition: border-color 0.2s;"
+           onfocus="this.style.borderColor='var(--pocket-blue)'" 
+           onblur="this.style.borderColor='var(--border)'">
+</div>
 
         <div style="margin-bottom: 20px;">
-    <label style="display: block; margin-bottom: 8px; color: #64748b; font-weight: 700; font-size: 0.85rem; text-transform: uppercase;">
-        <i class="fas fa-calendar-alt" style="color: #2563eb; margin-right: 5px;"></i> Fecha de Movimiento
+    <label style="display: block; margin-bottom: 8px; color: var(--pocket-green); font-weight: 700; font-family: 'Poppins', sans-serif; font-size: 0.9rem; text-transform: uppercase;">
+        <i class="fas fa-calendar-alt" style="color: var(--pocket-blue); margin-right: 8px;"></i> 
+        Fecha de Movimiento
     </label>
     <input type="date" name="fecha" required 
            class="form-control"
