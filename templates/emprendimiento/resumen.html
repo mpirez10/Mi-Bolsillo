@@ -348,23 +348,33 @@
     // Calculamos el total inicial apenas carga la página
     setTimeout(filtrarMovimientos, 100);
 
-   const ctx = document.getElementById('graficaIngresos').getContext('2d');
-new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: {{ labels_ingresos | tojson }},
-        datasets: [{
-            label: 'Ventas',
-            data: {{ valores_ingresos | tojson }},
-            // Usamos el verde de la plata (money-green)
-            borderColor: '#10b981', 
-            backgroundColor: 'rgba(16, 185, 129, 0.2)',
-            fill: true,
-            tension: 0.4,
-            borderWidth: 3,
-            pointBackgroundColor: '#10b981'
-        }]
-    },
+   document.addEventListener('DOMContentLoaded', function() {
+    const canvas = document.getElementById('graficaIngresos');
+    
+    // Chequeo de seguridad: si no existe el canvas, no hace nada
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    
+    // Verificamos en la consola si llegan datos (apretá F12 en el navegador para ver)
+    console.log("Labels:", {{ labels_ingresos | tojson }});
+    console.log("Valores:", {{ valores_ingresos | tojson }});
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ labels_ingresos | tojson }},
+            datasets: [{
+                label: 'Ventas',
+                data: {{ valores_ingresos | tojson }},
+                borderColor: '#10b981', 
+                backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                fill: true,
+                tension: 0.4,
+                borderWidth: 3,
+                pointBackgroundColor: '#10b981'
+            }]
+        },
     options: { 
         responsive: true, 
         maintainAspectRatio: false,
