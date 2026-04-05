@@ -4,50 +4,152 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agenda {{ nombre }} - MiBolsillo</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <style>
-        body { background-color: #f8f9fa; }
-        .bg-orange { background-color: #fd7e14 !important; color: white; }
-        .btn-orange { background-color: #fd7e14; color: white; border: none; }
-        .btn-orange:hover { background-color: #e36a07; color: white; }
-        .accordion-button:not(.collapsed) { background-color: #e7f1ff; color: #0c63e4; }
-        .card-turno { border-left: 5px solid #ffc107; transition: 0.3s; }
-        .estado-pago { border-left-color: #198754; }
-        .estado-falto { border-left-color: #dc3545; }
-        .estado-nopago { border-left-color: #fd7e14; }
-        .acciones-chicas button { font-size: 0.8rem; padding: 2px 5px; }
+        :root {
+            --pocket-blue: #1e3a8a;
+            --money-green: #10b981;
+            --bg-light: #f8fafc;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+        }
+
+        body { 
+            background-color: var(--bg-light); 
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-dark);
+        }
+
+        /* Botones Generales */
+        .btn-blue { background-color: var(--pocket-blue); color: white; font-weight: 600; border-radius: 8px; }
+        .btn-blue:hover { background-color: #172554; color: white; }
+        .btn-green { background-color: var(--money-green); color: white; font-weight: 600; border-radius: 8px; }
+        .btn-green:hover { background-color: #059669; color: white; }
+        
+        /* Cabecera */
+        .agenda-header {
+            background: white;
+            padding: 20px 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            border-bottom: 3px solid var(--pocket-blue);
+            margin-bottom: 25px;
+        }
+
+        /* Acordeón Personalizado */
+        .accordion-item {
+            border: none;
+            border-radius: 16px !important;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            overflow: hidden;
+        }
+        .accordion-button {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--pocket-blue);
+            background-color: white;
+            padding: 15px 20px;
+        }
+        .accordion-button:not(.collapsed) {
+            background-color: #eff6ff;
+            color: var(--pocket-blue);
+            box-shadow: inset 0 -1px 0 rgba(0,0,0,0.05);
+        }
+        .accordion-button::after {
+            filter: grayscale(100%) brightness(0%); /* Flecha oscura */
+        }
+
+        /* Tarjetas de Turnos */
+        .card-turno { 
+            border: none;
+            border-left: 6px solid #e2e8f0; 
+            border-radius: 12px;
+            margin-bottom: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            transition: all 0.2s ease;
+        }
+        .card-turno:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-2px); }
+        
+        /* Colores de Estado (Borde Izquierdo) */
+        .estado-pago { border-left-color: var(--money-green); }
+        .estado-falto { border-left-color: #ef4444; }
+        .estado-nopago { border-left-color: #f97316; }
+        .estado-pendiente { border-left-color: #eab308; }
+
+        /* Badges */
+        .badge-hora { background-color: var(--pocket-blue); font-size: 1rem; padding: 6px 12px; border-radius: 8px; }
+        .badge-estado { font-weight: 600; padding: 6px 12px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase; font-size: 0.7rem; }
+        
+        .bg-orange { background-color: #f97316 !important; color: white; }
+        
+        /* Botones de Acción (Pago, Faltó, etc) */
+        .btn-estado { font-size: 0.8rem; font-weight: 600; border-radius: 6px; padding: 6px 0; text-transform: uppercase; }
+        
+        /* Acciones chicas (Editar/Borrar) */
+        .btn-action-icon {
+            color: var(--text-muted);
+            background: #f1f5f9;
+            border-radius: 8px;
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .btn-action-icon:hover { background: #e2e8f0; color: var(--pocket-blue); }
+        .btn-action-delete:hover { background: #fee2e2; color: #ef4444; }
+
     </style>
 </head>
 <body>
 
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2> 📖 Agenda {{ nombre }}</h2>
-        <a href="{{ url_for('emprendimiento.resumen', eid=emprendimiento_id) }}" class="btn btn-outline-secondary btn-sm">Volver</a>
+<div class="container py-4" style="max-width: 800px;">
+    
+    <div class="agenda-header d-flex justify-content-between align-items-center">
+        <div>
+            <h2 style="margin: 0; font-size: 1.5rem; font-weight: 800; color: var(--pocket-blue); text-transform: uppercase;">
+                <i class="fas fa-calendar-alt" style="color: var(--money-green); margin-right: 10px;"></i> 
+                AGENDA
+            </h2>
+            <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem; font-weight: 600; margin-top: 4px;">
+                {{ nombre }} - Gestión de Turnos
+            </p>
+        </div>
+        <a href="{{ url_for('emprendimiento.resumen', eid=emprendimiento_id) }}" class="btn btn-outline-secondary" style="border-radius: 10px; font-weight: 600;">
+            <i class="fas fa-chevron-left me-1"></i> Volver
+        </a>
     </div>
 
-    <button class="btn btn-dark w-100 mb-4" data-bs-toggle="modal" data-bs-target="#modalDia">
-        🗓️ AGREGAR AGENDA (Día)
+    <button class="btn btn-blue w-100 mb-4 py-3" data-bs-toggle="modal" data-bs-target="#modalDia" style="font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px;">
+        <i class="fas fa-calendar-plus me-2"></i> Abrir Nuevo Día
     </button>
 
     <div class="accordion" id="accordionAgenda">
         {% for agenda in agendas %}
-        <div class="accordion-item shadow-sm mb-2">
+        <div class="accordion-item">
             <h2 class="accordion-header d-flex align-items-center">
-    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ agenda.id }}" style="flex: 1;">
-        <strong>{{ agenda.fecha.strftime('%d/%m/%Y') }}</strong>
-    </button>
-    <button class="btn btn-sm text-danger px-3" 
-            onclick="event.stopPropagation(); borrarDia({{ agenda.id }})" 
-            title="Eliminar día completo">
-        <i class="fas fa-trash-alt"></i> 🗑️
-    </button>
-</h2>
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ agenda.id }}" style="flex: 1;">
+                    <i class="far fa-calendar-check me-2 text-muted"></i> 
+                    {{ agenda.fecha.strftime('%d/%m/%Y') }}
+                </button>
+                <button class="btn text-danger px-3" 
+                        onclick="event.stopPropagation(); borrarDia({{ agenda.id }})" 
+                        title="Eliminar día completo" style="background: white; border: none;">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </h2>
+            
             <div id="collapse{{ agenda.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionAgenda">
-                <div class="accordion-body">
+                <div class="accordion-body" style="background-color: #f8fafc; padding: 20px;">
                     
-                    <button class="btn btn-primary btn-sm mb-3" onclick="prepararTurno({{ agenda.id }})">
-                        + AGREGAR TURNO
+                    <button class="btn btn-green w-100 mb-3 py-2" onclick="prepararTurno({{ agenda.id }})">
+                        <i class="fas fa-plus me-1"></i> AGREGAR TURNO
                     </button>
 
                     <div class="list-group">
@@ -55,36 +157,46 @@
                         <div class="list-group-item card-turno 
                             {{ 'estado-pago' if turno.estado == 'Pago' }}
                             {{ 'estado-falto' if turno.estado == 'Faltó' }}
-                            {{ 'estado-nopago' if turno.estado == 'No Pago' }}">
+                            {{ 'estado-nopago' if turno.estado == 'No Pago' }}
+                            {{ 'estado-pendiente' if turno.estado == 'Pendiente' }}">
                             
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <span class="badge bg-dark">{{ turno.hora.strftime('%H:%M') }}</span>
-                                    <span class="h6 mb-0 ms-1">{{ turno.cliente }}</span>
-                                    
-                                    <span class="acciones-chicas ms-2">
-                                        <button class="btn btn-link text-decoration-none p-0" onclick="editarTurno('{{ turno.id }}', '{{ turno.cliente }}', '{{ turno.monto }}', '{{ turno.detalle }}')">✏️</button>
-                                        <button class="btn btn-link text-danger text-decoration-none p-0" onclick="borrarTurno({{ turno.id }})">🗑️</button>
-                                    </span>
-
-                                    <p class="mb-1 text-muted small">{{ turno.detalle }}</p>
-                                    <strong class="text-primary">${{ turno.monto }}</strong>
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="d-flex align-items-center">
+                                    <span class="badge badge-hora text-white">{{ turno.hora.strftime('%H:%M') }}</span>
+                                    <div class="ms-3">
+                                        <h6 class="mb-0" style="font-weight: 700; font-size: 1.1rem; color: var(--pocket-blue);">{{ turno.cliente }}</h6>
+                                        <p class="mb-0 text-muted" style="font-size: 0.85rem;"><i class="fas fa-cut me-1"></i> {{ turno.detalle }}</p>
+                                    </div>
                                 </div>
                                 
-                                <span class="badge 
-                                    {{ 'bg-warning' if turno.estado == 'Pendiente' }}
-                                    {{ 'bg-success' if turno.estado == 'Pago' }}
-                                    {{ 'bg-danger' if turno.estado == 'Faltó' }}
-                                    {{ 'bg-orange' if turno.estado == 'No Pago' }}">
-                                    {{ turno.estado }}
-                                </span>
+                                <div class="text-end d-flex flex-column align-items-end">
+                                    <span class="badge badge-estado mb-2
+                                        {{ 'bg-warning text-dark' if turno.estado == 'Pendiente' }}
+                                        {{ 'bg-success' if turno.estado == 'Pago' }}
+                                        {{ 'bg-danger' if turno.estado == 'Faltó' }}
+                                        {{ 'bg-orange' if turno.estado == 'No Pago' }}">
+                                        {{ turno.estado }}
+                                    </span>
+                                    <strong style="color: var(--money-green); font-size: 1.2rem; font-weight: 800;">${{ turno.monto }}</strong>
+                                </div>
                             </div>
 
-                            <div class="mt-3 d-flex gap-2">
-                                <button class="btn btn-sm btn-success flex-grow-1" onclick="cambiarEstado({{ turno.id }}, 'Pago')">Pago</button>
-                                <button class="btn btn-sm btn-danger flex-grow-1" onclick="cambiarEstado({{ turno.id }}, 'Faltó')">Faltó</button>
-                                <button class="btn btn-sm btn-orange flex-grow-1" onclick="cambiarEstado({{ turno.id }}, 'No Pago')">No Pago</button>
+                            <div class="d-flex justify-content-between align-items-center mt-3 pt-3" style="border-top: 1px dashed #cbd5e1;">
+                                <div class="d-flex gap-2 w-75">
+                                    <button class="btn btn-outline-success btn-estado flex-grow-1" onclick="cambiarEstado({{ turno.id }}, 'Pago')"><i class="fas fa-check me-1"></i> Pago</button>
+                                    <button class="btn btn-outline-danger btn-estado flex-grow-1" onclick="cambiarEstado({{ turno.id }}, 'Faltó')"><i class="fas fa-times me-1"></i> Faltó</button>
+                                    <button class="btn btn-outline-warning text-dark btn-estado flex-grow-1" style="border-color: #f97316; color: #f97316 !important;" onclick="cambiarEstado({{ turno.id }}, 'No Pago')"><i class="fas fa-exclamation-triangle me-1"></i> Debe</button>
+                                </div>
+                                <div class="d-flex gap-1">
+                                    <button class="btn btn-action-icon text-decoration-none border-0" onclick="editarTurno('{{ turno.id }}', '{{ turno.cliente }}', '{{ turno.monto }}', '{{ turno.detalle }}')" title="Editar">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
+                                    <button class="btn btn-action-icon btn-action-delete text-decoration-none border-0" onclick="borrarTurno({{ turno.id }})" title="Borrar">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
                             </div>
+
                         </div>
                         {% endfor %}
                     </div>
@@ -96,50 +208,55 @@
 </div>
 
 <div class="modal fade" id="modalDia" tabindex="-1">
-    <div class="modal-dialog">
-        <form action="/agregar_dia" method="POST" class="modal-content">
-            <div class="modal-header"><h5>Nuevo Día de Agenda</h5></div>
-            <div class="modal-body">
-                <input type="hidden" name="emprendimiento_id" value="{{ emprendimiento_id }}">
-                
-                <label>Seleccionar Fecha:</label>
-                <input type="date" name="fecha" class="form-control" required>
+    <div class="modal-dialog modal-dialog-centered">
+        <form action="/agregar_dia" method="POST" class="modal-content" style="border-radius: 16px; border: none;">
+            <div class="modal-header" style="background: var(--pocket-blue); color: white; border-radius: 16px 16px 0 0;">
+                <h5 class="modal-title" style="font-weight: 700;"><i class="fas fa-calendar-plus me-2"></i> Nuevo Día de Agenda</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">Crear Día</button>
+            <div class="modal-body p-4">
+                <input type="hidden" name="emprendimiento_id" value="{{ emprendimiento_id }}">
+                <label style="font-weight: 600; color: var(--text-dark); margin-bottom: 8px;">Seleccionar Fecha:</label>
+                <input type="date" name="fecha" class="form-control form-control-lg" required style="border-radius: 10px;">
+            </div>
+            <div class="modal-footer" style="border-top: none;">
+                <button type="submit" class="btn btn-blue w-100 py-2">Crear Día</button>
             </div>
         </form>
     </div>
 </div>
 
 <div class="modal fade" id="modalTurno" tabindex="-1">
-    <div class="modal-dialog">
-        <form id="formTurno" action="/guardar_turno" method="POST" class="modal-content">
-            <div class="modal-header"><h5 id="tituloModal">Nuevo Turno</h5></div>
-            <div class="modal-body">
+    <div class="modal-dialog modal-dialog-centered">
+        <form id="formTurno" action="/guardar_turno" method="POST" class="modal-content" style="border-radius: 16px; border: none;">
+            <div class="modal-header" style="background: var(--pocket-blue); color: white; border-radius: 16px 16px 0 0;">
+                <h5 class="modal-title" id="tituloModal" style="font-weight: 700;"><i class="fas fa-user-clock me-2"></i> Nuevo Turno</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
                 <input type="hidden" name="emprendimiento_id" value="{{ emprendimiento_id }}">
                 <input type="hidden" name="agenda_id" id="agenda_id_input">
                 <input type="hidden" name="turno_id" id="turno_id_input">
                 
                 <div class="mb-3">
-                    <label>Hora:</label>
-                    <input type="time" name="hora" id="edit_hora" class="form-control" required>
+                    <label style="font-weight: 600; margin-bottom: 5px;">Hora:</label>
+                    <input type="time" name="hora" id="edit_hora" class="form-control" required style="border-radius: 8px;">
                 </div>
                 <div class="mb-3">
-                    <label>Cliente:</label>
-                    <input type="text" name="cliente" id="edit_cliente" class="form-control" placeholder="Nombre del cliente" required>
+                    <label style="font-weight: 600; margin-bottom: 5px;">Cliente:</label>
+                    <input type="text" name="cliente" id="edit_cliente" class="form-control" placeholder="Nombre del cliente" required style="border-radius: 8px;">
                 </div>
                 <div class="mb-3">
-                    <label>Detalle (Servicios):</label>
-                    <input type="text" name="detalle" id="edit_detalle" class="form-control" placeholder="Corte, Barba, etc.">
+                    <label style="font-weight: 600; margin-bottom: 5px;">Detalle (Servicios):</label>
+                    <input type="text" name="detalle" id="edit_detalle" class="form-control" placeholder="Corte, Barba, etc." style="border-radius: 8px;">
                 </div>
                 <div class="mb-3">
-                    <label>Monto ($):</label>
-                    <input type="number" name="monto" id="edit_monto" class="form-control" placeholder="0.00">
+                    <label style="font-weight: 600; margin-bottom: 5px;">Monto ($):</label>
+                    <input type="number" name="monto" id="edit_monto" class="form-control" placeholder="0.00" style="border-radius: 8px;">
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-success">Guardar Turno</button>
+            <div class="modal-footer" style="border-top: none;">
+                <button type="submit" class="btn btn-green w-100 py-2">Guardar Turno</button>
             </div>
         </form>
     </div>
@@ -153,7 +270,7 @@
         document.getElementById('formTurno').reset();
         document.getElementById('agenda_id_input').value = agendaId;
         document.getElementById('turno_id_input').value = "";
-        document.getElementById('tituloModal').innerText = "Nuevo Turno";
+        document.getElementById('tituloModal').innerHTML = '<i class="fas fa-user-clock me-2"></i> Nuevo Turno';
         new bootstrap.Modal(document.getElementById('modalTurno')).show();
     }
 
@@ -163,33 +280,34 @@
         document.getElementById('edit_cliente').value = cliente;
         document.getElementById('edit_monto').value = monto;
         document.getElementById('edit_detalle').value = detalle;
-        document.getElementById('tituloModal').innerText = "Editar Turno";
+        document.getElementById('tituloModal').innerHTML = '<i class="fas fa-user-edit me-2"></i> Editar Turno';
         new bootstrap.Modal(document.getElementById('modalTurno')).show();
     }
 
     // Borrar con AJAX
     function borrarTurno(id) {
-        if(confirm('¿Tas seguro de borrar este turno, bo?')) {
+        if(confirm('¿Estás seguro de borrar este turno?')) {
             fetch(`/borrar_turno/${id}`, { method: 'POST' })
             .then(() => location.reload());
         }
     }
 
     // Borrar Día Completo
-function borrarDia(id) {
-    if(confirm('¿Tas seguro de borrar el día entero con todos sus turnos? Mira que no hay vuelta atrás, bo.')) {
-        fetch(`/borrar_dia/${id}`, { 
-            method: 'POST' 
-        })
-        .then(response => {
-            if (response.ok) {
-                location.reload();
-            } else {
-                alert("Hubo un error al borrar el día.");
-            }
-        });
+    function borrarDia(id) {
+        if(confirm('¿Estás seguro de borrar el día entero con todos sus turnos? Esta acción no se puede deshacer.')) {
+            fetch(`/borrar_dia/${id}`, { 
+                method: 'POST' 
+            })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert("Hubo un error al borrar el día.");
+                }
+            });
+        }
     }
-}
+
     // Cambiar estado con AJAX (Pago, Faltó, etc)
     function cambiarEstado(id, nuevoEstado) {
         fetch(`/actualizar_estado/${id}`, {
