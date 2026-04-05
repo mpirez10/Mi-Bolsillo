@@ -68,20 +68,20 @@
             <i class="fas fa-save"></i>
         </button>
     </form>
-    <p style="color: var(--pocket-green); margin: 5px 0 0 0;"><i class="fas fa-chart-pie"></i> Panel de Negocio</p>
+    <p style="color: var(--money-green); margin: 5px 0 0 0;"><i class="fas fa-chart-pie"></i> Panel de Negocio</p>
 </div>
 
 <div class="action-grid">
-    <a href="/emprendimiento/stock/{{ eid }}" class="btn-action" style="background: var(--pocket-blue); color: brown;">
+    <a href="/emprendimiento/stock/{{ eid }}" class="btn-action" style="background: var(--pocket-blue); color:#6f4e37;">
         <i class="fas fa-boxes"></i> STOCK
     </a>
-    <a href="{{ url_for('ver_agenda', id=eid) }}" class="btn-action" style="background: #f8fafc; color: #1e293b;">
+    <a href="{{ url_for('ver_agenda', id=eid) }}" class="btn-action" style="background: var(--pocket-blue); color: white;">
         <i class="fas fa-calendar-alt"></i> AGENDA
     </a>
-    <button onclick="document.getElementById('formMovimiento').style.display='block'" class="btn-action" style="background: #f0fdf4; color: #16a34a;">
+    <button onclick="document.getElementById('formMovimiento').style.display='block'" class="btn-action" style="background:var(--pocket-blue); color:var(--money-green) ;">
         <i class="fas fa-plus-circle"></i> NUEVO
     </button>
-    <a href="/emprendimiento" class="btn-action" style="background: #fff1f2; color: #e11d48;">
+    <a href="/emprendimiento" class="btn-action" style="background:var(--pocket-blue); color:white;">
         <i class="fas fa-chevron-left"></i> VOLVER
     </a>
 </div>
