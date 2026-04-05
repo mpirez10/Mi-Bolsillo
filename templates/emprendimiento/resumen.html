@@ -334,85 +334,66 @@
     function toggleProductoSelector() {
         const concepto = document.getElementById('tipo_concepto').value;
         const wrapper = document.getElementById('wrapper_producto');
-        wrapper.style.display = (concepto === 'INGRESO') ? 'block' : 'none';
+        if (wrapper) {
+            wrapper.style.display = (concepto === 'INGRESO') ? 'block' : 'none';
+        }
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-    // Seteamos la fecha de hoy en el modal de nuevo movimiento
-    const hoy = new Date();
-    const fechaInput = document.getElementById('fecha_input');
-    if(fechaInput) {
-        fechaInput.value = hoy.toISOString().split('T')[0];
-    }
-
-    // Calculamos el total inicial apenas carga la página
-    setTimeout(filtrarMovimientos, 100);
-
-   document.addEventListener('DOMContentLoaded', function() {
-    const canvas = document.getElementById('graficaIngresos');
-    
-    // Chequeo de seguridad: si no existe el canvas, no hace nada
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    
-    // Verificamos en la consola si llegan datos (apretá F12 en el navegador para ver)
-    console.log("Labels:", {{ labels_ingresos | tojson }});
-    console.log("Valores:", {{ valores_ingresos | tojson }});
-
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: {{ labels_ingresos | tojson }},
-            datasets: [{
-                label: 'Ventas',
-                data: {{ valores_ingresos | tojson }},
-                borderColor: '#10b981', 
-                backgroundColor: 'rgba(16, 185, 129, 0.2)',
-                fill: true,
-                tension: 0.4,
-                borderWidth: 3,
-                pointBackgroundColor: '#10b981'
-            }]
-        },
-    options: { 
-        responsive: true, 
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false // Lo sacamos para que quede más limpio, ya dice "Ventas Diarias" arriba
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                grid: {
-                    color: 'rgba(255, 255, 255, 0.1)', // Líneas horizontales muy sutiles
-                    drawBorder: false
-                },
-                ticks: {
-                    color: 'white', // Números del eje Y en blanco
-                    font: {
-                        family: 'Poppins',
-                        size: 11
-                    }
-                }
-            },
-            x: {
-                grid: {
-                    display: false // Sacamos las líneas verticales para que no saturen
-                },
-                ticks: {
-                    color: 'white', // Fechas del eje X en blanco
-                    font: {
-                        family: 'Poppins',
-                        size: 11
-                    }
-                }
-            }
+        // 1. Seteamos la fecha de hoy
+        const hoy = new Date();
+        const fechaInput = document.getElementById('fecha_input');
+        if (fechaInput) {
+            fechaInput.value = hoy.toISOString().split('T')[0];
         }
-    }
-});
+
+        // 2. Filtramos movimientos iniciales
+        setTimeout(filtrarMovimientos, 100);
+
+        // 3. Lógica de la Gráfica (¡Ahora sí se dispara!)
+        const canvas = document.getElementById('graficaIngresos');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            
+            // Esto es para que vos veas en la consola (F12) si llegan los datos
+            console.log("Datos cargando...");
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: {{ labels_ingresos | tojson }},
+                    datasets: [{
+                        label: 'Ventas',
+                        data: {{ valores_ingresos | tojson }},
+                        borderColor: '#10b981', 
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#10b981'
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.1)', drawBorder: false },
+                            ticks: { color: 'white', font: { family: 'Poppins', size: 11 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: 'white', font: { family: 'Poppins', size: 11 } }
+                        }
+                    }
+                }
+            });
+        }
+    });
 function filtrarMovimientos() {
     const desdeInput = document.getElementById("fechaDesde").value;
     const hastaInput = document.getElementById("fechaHasta").value;
