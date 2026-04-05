@@ -63,22 +63,22 @@
     }
 </style>
 
-<div class="stock-header" style="margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;">
+<div class="stock-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;">
     <div>
         <h2 style="margin: 0; font-size: 1.6rem; color: var(--pocket-blue); font-weight: 800; font-family: 'Poppins', sans-serif; text-transform: uppercase;">
             <i class="fas fa-boxes" style="color: #d2b48c; margin-right: 10px;"></i> 
             STOCK
         </h2>
-        <p style="color: var(--money-green); font-size: 0.95rem; font-weight: 600; margin-top: 5px; font-family: 'Poppins', sans-serif;">
+        <p style="color: var(--money-green); font-size: 0.95rem; font-weight: 600; margin-top: 5px; font-family: 'Poppins', sans-serif; margin-bottom: 0;">
             {{ nombre }} - Gestión de artículos
         </p>
     </div>
-</div>
-    <div style="display: flex; gap: 8px;">
-        <a href="/emprendimiento/resumen/{{ eid }}" class="btn btn-outline" style="padding: 10px;">
+
+    <div style="display: flex; gap: 8px; align-items: center;">
+        <a href="/emprendimiento/resumen/{{ eid }}" class="btn btn-outline" style="padding: 10px; display: flex; align-items: center; justify-content: center; height: 42px; width: 42px;">
             <i class="fas fa-chevron-left"></i>
         </a>
-        <button class="btn btn-blue" onclick="document.getElementById('formStock').style.display='block'">
+        <button class="btn btn-blue" onclick="document.getElementById('formStock').style.display='block'" style="font-weight: 700; font-family: 'Poppins', sans-serif; height: 42px; padding: 0 20px;">
             <i class="fas fa-plus"></i> NUEVO
         </button>
     </div>
@@ -116,11 +116,11 @@
     <table class="stock-table" style="width: 100%; border-collapse: collapse;">
         <thead style="background: white; border-bottom: 2px solid var(--pocket-blue);">
     <tr style="text-transform: uppercase; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 0.8rem; color: var(--pocket-blue);">
-        <th style="padding: 15px 12px; text-align: left; border-bottom: 1px solid var(--pocket-blue);">PRODUCTO</th>
-        <th style="padding: 15px 12px; text-align: left; border-bottom: 1px solid var(--pocket-blue);">DETALLE</th>
-        <th style="padding: 15px 12px; text-align: center; border-bottom: 1px solid var(--pocket-blue);">PRECIO</th>
-        <th style="padding: 15px 12px; text-align: center; border-bottom: 1px solid var(--pocket-blue);">CANT.</th>
-        <th style="padding: 15px 12px; text-align: center; border-bottom: 1px solid var(--pocket-blue);"></th>
+        <th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--pocket-blue);">PRODUCTO</th>
+        <th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--pocket-blue);">DETALLE</th>
+        <th style="padding: 12px; text-align: center; border-bottom: 1px solid var(--pocket-blue);">PRECIO</th>
+        <th style="padding: 12px; text-align: center; border-bottom: 1px solid var(--pocket-blue);">CANT.</th>
+        <th style="padding: 12px; text-align: center; border-bottom: 1px solid var(--pocket-blue);"></th>
     </tr>
 </thead>
         <tbody>
