@@ -247,18 +247,21 @@
     </div>
 </div>
 
-    <div class="card seccion-card" style="padding: 24px; border-radius: 16px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+<div class="card seccion-card" style="padding: 24px; border-radius: 16px; background: var(--pocket-blue); border: 2px solid var(--money-green); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h3 style="margin: 0; font-size: 1rem; color: #1e293b; font-weight: 700;">
-            <i class="fas fa-chart-line" style="color: #10b981; margin-right: 8px;"></i> Ventas Diarias
+        <h3 style="margin: 0; font-size: 1.1rem; color: white; font-weight: 700; font-family: 'Poppins', sans-serif; text-transform: uppercase;">
+            <i class="fas fa-chart-line" style="color: white; margin-right: 8px;"></i> 
+            Ventas Diarias
         </h3>
-        <span style="font-size: 0.75rem; color: #64748b; background: #f1f5f9; padding: 4px 10px; border-radius: 20px; font-weight: 600;">
+        <span style="font-size: 0.75rem; color: white; background: var(--money-green); padding: 6px 12px; border-radius: 20px; font-weight: 700; text-transform: uppercase;">
             Últimos días
         </span>
     </div>
+
     <div style="height: 250px; position: relative;">
         <canvas id="graficaIngresos"></canvas>
     </div>
+</div>
 </div>
 
 </div>
@@ -345,24 +348,61 @@
     // Calculamos el total inicial apenas carga la página
     setTimeout(filtrarMovimientos, 100);
 
-    // Gráfico (mantené tu lógica de Chart.js que ya funciona)
-    const ctx = document.getElementById('graficaIngresos').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: {{ labels_ingresos | tojson }},
-            datasets: [{
-                data: {{ valores_ingresos | tojson }},
-                borderColor: '#10b981',
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                fill: true,
-                tension: 0.4
-            }]
+   const ctx = document.getElementById('graficaIngresos').getContext('2d');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: {{ labels_ingresos | tojson }},
+        datasets: [{
+            label: 'Ventas',
+            data: {{ valores_ingresos | tojson }},
+            // Usamos el verde de la plata (money-green)
+            borderColor: '#10b981', 
+            backgroundColor: 'rgba(16, 185, 129, 0.2)',
+            fill: true,
+            tension: 0.4,
+            borderWidth: 3,
+            pointBackgroundColor: '#10b981'
+        }]
+    },
+    options: { 
+        responsive: true, 
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false // Lo sacamos para que quede más limpio, ya dice "Ventas Diarias" arriba
+            }
         },
-        options: { responsive: true, maintainAspectRatio: false }
-    });
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: 'rgba(255, 255, 255, 0.1)', // Líneas horizontales muy sutiles
+                    drawBorder: false
+                },
+                ticks: {
+                    color: 'white', // Números del eje Y en blanco
+                    font: {
+                        family: 'Poppins',
+                        size: 11
+                    }
+                }
+            },
+            x: {
+                grid: {
+                    display: false // Sacamos las líneas verticales para que no saturen
+                },
+                ticks: {
+                    color: 'white', // Fechas del eje X en blanco
+                    font: {
+                        family: 'Poppins',
+                        size: 11
+                    }
+                }
+            }
+        }
+    }
 });
-
 function filtrarMovimientos() {
     const desdeInput = document.getElementById("fechaDesde").value;
     const hastaInput = document.getElementById("fechaHasta").value;
