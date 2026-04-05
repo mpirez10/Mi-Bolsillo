@@ -170,6 +170,11 @@
            style="background: var(--money-green); color: white; padding: 6px 20px; border-radius: 8px; text-decoration: none; display: flex; align-items: center; gap: 8px; font-weight: 700; font-family: 'Poppins', sans-serif; transition: 0.3s; border: none;">
             <i class="fas fa-file-excel" style="color: white;"></i> Exportar
         </a>
+        <a href="{{ url_for('emprendimiento.exportar_movimientos_pdf', eid=eid, desde=request.args.get('desde'), hasta=request.args.get('hasta')) }}" 
+   style="background: var(--danger); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; display: flex; align-items: center; gap: 8px; font-weight: 700; font-family: 'Poppins', sans-serif; transition: 0.3s; border: none;">
+    <i class="fas fa-file-pdf" style="color: white;"></i> 
+    Exportar PDF
+</a>
     </form>
 </div>
         </div>
