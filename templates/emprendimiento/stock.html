@@ -63,13 +63,17 @@
     }
 </style>
 
-<div class="stock-header">
+<div class="stock-header" style="margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;">
     <div>
-        <h2 style="margin: 0; font-size: 1.5rem;">
-            <i class="fas fa-boxes" style="color: var(--primary);"></i> Stock
+        <h2 style="margin: 0; font-size: 1.6rem; color: var(--pocket-blue); font-weight: 800; font-family: 'Poppins', sans-serif; text-transform: uppercase;">
+            <i class="fas fa-boxes" style="color: #d2b48c; margin-right: 10px;"></i> 
+            STOCK
         </h2>
-        <p style="color: #64748b; font-size: 0.9rem;">{{ nombre }} - Gestión de artículos</p>
+        <p style="color: var(--money-green); font-size: 0.95rem; font-weight: 600; margin-top: 5px; font-family: 'Poppins', sans-serif;">
+            {{ nombre }} - Gestión de artículos
+        </p>
     </div>
+</div>
     <div style="display: flex; gap: 8px;">
         <a href="/emprendimiento/resumen/{{ eid }}" class="btn btn-outline" style="padding: 10px;">
             <i class="fas fa-chevron-left"></i>
@@ -80,7 +84,7 @@
     </div>
 </div>
 
-<div id="formStock" class="card" style="display:none; background: #f0f7ff; border: 2px solid var(--primary); margin-bottom: 20px;">
+<div id="formStock" class="card" style="display:none; background: #f0f7ff; border: 1px solid var(--primary); margin-bottom: 20px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
         <h4 style="margin:0;">Nuevo Artículo</h4>
         <button type="button" onclick="document.getElementById('formStock').style.display='none'" style="background:none; border:none; color:#64748b;">
@@ -105,20 +109,20 @@
     <i class="fas fa-search" style="position: absolute; left: 15px; top: 12px; color: #94a3b8;"></i>
     <input type="text" id="busquedaStock" onkeyup="filtrarStock()" 
            placeholder="Buscar producto, talle..." 
-           style="width: 100%; padding: 10px 10px 10px 40px; border-radius: 12px; border: 1px solid #e2e8f0; outline: none;">
+           style="width: 100%; padding: 10px 10px 10px 40px; border-radius: 12px; border: 1px solid  var(--pocket-blue); outline: none;">
 </div>
 
 <div class="card" style="padding: 0; border: none; background: transparent;">
     <table class="stock-table" style="width: 100%; border-collapse: collapse;">
-        <thead style="background: #f8fafc;">
-            <tr>
-                <th style="padding: 12px; text-align: left; font-size: 0.75rem; color: #64748b;">PRODUCTO</th>
-                <th style="padding: 12px; text-align: left; font-size: 0.75rem; color: #64748b;">DETALLE</th>
-                <th style="padding: 12px; text-align: center; font-size: 0.75rem; color: #64748b;">PRECIO</th>
-                <th style="padding: 12px; text-align: center; font-size: 0.75rem; color: #64748b;">CANT.</th>
-                <th style="padding: 12px; text-align: center;"></th>
-            </tr>
-        </thead>
+        <thead style="background: white; border-bottom: 2px solid var(--pocket-blue);">
+    <tr style="text-transform: uppercase; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 0.8rem; color: var(--pocket-blue);">
+        <th style="padding: 15px 12px; text-align: left; border-bottom: 1px solid var(--pocket-blue);">PRODUCTO</th>
+        <th style="padding: 15px 12px; text-align: left; border-bottom: 1px solid var(--pocket-blue);">DETALLE</th>
+        <th style="padding: 15px 12px; text-align: center; border-bottom: 1px solid var(--pocket-blue);">PRECIO</th>
+        <th style="padding: 15px 12px; text-align: center; border-bottom: 1px solid var(--pocket-blue);">CANT.</th>
+        <th style="padding: 15px 12px; text-align: center; border-bottom: 1px solid var(--pocket-blue);"></th>
+    </tr>
+</thead>
         <tbody>
             {% for p in productos %}
 <tr>
