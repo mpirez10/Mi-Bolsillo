@@ -72,7 +72,7 @@
 </div>
 
 <div class="action-grid">
-    <a href="/emprendimiento/stock/{{ eid }}" class="btn-action" style="background: var(--pocket-blue); color:#6f4e37;">
+    <a href="/emprendimiento/stock/{{ eid }}" class="btn-action" style="background: var(--pocket-blue); color:#d2b48c;">
         <i class="fas fa-boxes"></i> STOCK
     </a>
     <a href="{{ url_for('ver_agenda', id=eid) }}" class="btn-action" style="background: var(--pocket-blue); color: white;">
@@ -87,16 +87,26 @@
 </div>
 
 <div class="stats-container">
-    <div class="stat-mini-card" style="border-color: var(--primary);">
-        <small style="color: #64748b; font-weight: 700;">SALDO</small>
-        <div style="font-size: 1.4rem; font-weight: 800;">${{ "{:,.2f}".format(saldo) }}</div>
+    <div class="stat-mini-card" style="border-top: 4px solid var(--pocket-blue); background-color: var(--money-green); padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <small style="color: white; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-family: 'Poppins', sans-serif;">
+        SALDO
+    </small>
+    
+    <div style="font-size: 1.6rem; font-weight: 800; color: white; margin-top: 5px; font-family: 'Poppins', sans-serif;">
+        ${{ "{:,.2f}".format(saldo) }}
     </div>
-    <div class="stat-mini-card" style="border-color: var(--success);">
-        <small style="color: #64748b; font-weight: 700;">VENTAS</small>
-        <div style="font-size: 1.4rem; font-weight: 800; color: var(--success);">+${{ "{:,.2f}".format(ingresos) }}</div>
+</div>
+    <div class="stat-mini-card" style="border-top: 4px solid var(--money-green); background-color: var(--pocket-blue); padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <small style="color: var(--money-green); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; font-family: 'Poppins', sans-serif;">
+        VENTAS
+    </small>
+    
+    <div style="font-size: 1.6rem; font-weight: 800; color: var(--money-green); margin-top: 5px; font-family: 'Poppins', sans-serif;">
+        +${{ "{:,.2f}".format(ingresos) }}
     </div>
+</div>
     <div class="stat-mini-card" style="border-color: var(--danger);">
-        <small style="color: #64748b; font-weight: 700;">GASTOS</small>
+        <small style="color: var(--danger); font-weight: 700;">GASTOS</small>
         <div style="font-size: 1.4rem; font-weight: 800; color: var(--danger);">-${{ "{:,.2f}".format(gastos) }}</div>
     </div>
 </div>
