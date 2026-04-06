@@ -545,10 +545,22 @@ function formatearAISO(fechaStr) {
 }
 
 function limpiarFiltros() {
-    document.getElementById("busquedaMovimiento").value = "";
-    document.getElementById("fechaDesde").value = "";
-    if(document.getElementById("fechaHasta")) document.getElementById("fechaHasta").value = "";
-    filtrarMovimientos();
+    // Buscamos los elementos
+    const busqueda = document.getElementById("busquedaMovimiento");
+    const desde = document.getElementById("fechaDesde");
+    const hasta = document.getElementById("fechaHasta");
+
+    // Limpiamos solo si existen en la página actual, así no se rompe el script
+    if (busqueda) busqueda.value = "";
+    if (desde) desde.value = "";
+    if (hasta) hasta.value = "";
+
+    // Refrescamos la tabla
+    if (typeof filtrarMovimientos === "function") {
+        filtrarMovimientos();
+    } else {
+        console.warn("¡Ojo! La función filtrarMovimientos no está definida.");
+    }
 }
 function exportarAPDF() {
     // 1. Scrapping de balances (Saldo, Ventas, Gastos) por posición
