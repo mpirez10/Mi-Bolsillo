@@ -495,132 +495,82 @@
     }
 
    function exportarAPDF() {
-    // 1. Capturamos el Total y la Fecha de Emisión
+    // 1. Datos de cabecera
     const totalFiltrado = document.getElementById('sumaTotalFiltrada')?.innerText || '$ 0.00';
     const fechaEmision = new Date().toLocaleString('es-UY');
 
-    // 2. Procesamos las filas recorriendo el HTML que me pasaste
+    // 2. Procesar filas (Blindado contra espacios en blanco de Jinja)
     let filasHtml = '';
     const filas = document.querySelectorAll(".movimientos-table tbody tr");
     
     filas.forEach(fila => {
-        // Solo si la fila no está oculta por los filtros de fecha
+        // Solo filas visibles por el filtro
         if (fila.style.display !== "none") {
-            const c = fila.getElementsByTagName("td");
+            const c = fila.cells; // Usamos .cells que es más rápido y directo
             
-            // Verificamos que tenga las celdas (Fecha, Tipo, Monto, Cuenta, Detalle, Basura)
             if (c.length >= 5) { 
-                const fecha   = c[0].innerText.trim();
-                const tipo    = c[1].innerText.trim();
-                const monto   = c[2].innerText.trim();
-                const cuenta  = c[3].innerText.trim();
-                const detalle = c[4].innerText.trim();
+                // Limpiamos espacios, saltos de línea y tabulaciones con trim()
+                const fecha   = c[0].innerText.replace(/\s+/g, ' ').trim();
+                const tipo    = c[1].innerText.replace(/\s+/g, ' ').trim();
+                const monto   = c[2].innerText.replace(/\s+/g, ' ').trim();
+                const cuenta  = c[3].innerText.replace(/\s+/g, ' ').trim();
+                const detalle = c[4].innerText.replace(/\s+/g, ' ').trim();
 
-                // Detectamos si es ingreso o egreso para el color (buscando el texto en el span)
-                const tipoUpper = tipo.toUpperCase();
-                const esIngreso = tipoUpper.includes("INGRESO");
-                const esEgreso = tipoUpper.includes("EGRESO");
-                
-                let colorClase = '';
-                if (esIngreso) colorClase = 'text-success';
-                else if (esEgreso) colorClase = 'text-danger';
+                // Detección de color por contenido de texto
+                const t = tipo.toUpperCase();
+                let claseMonto = '';
+                if (t.includes("INGRESO")) claseMonto = 'text-success';
+                else if (t.includes("EGRESO")) claseMonto = 'text-danger';
 
                 filasHtml += `
                     <tr>
-                        <td>${fecha}</td>
-                        <td style="font-size: 8pt; font-weight: bold;">${tipo}</td>
-                        <td class="${colorClase}">${monto}</td>
-                        <td>${cuenta}</td>
-                        <td style="text-transform: uppercase;">${detalle}</td>
+                        <td style="white-space: nowrap;">${fecha}</td>
+                        <td style="font-size: 7.5pt; font-weight: bold; color: #64748b;">${tipo}</td>
+                        <td class="${claseMonto}" style="white-space: nowrap;">${monto}</td>
+                        <td style="color: #475569;">${cuenta}</td>
+                        <td style="text-transform: uppercase; font-size: 8pt;">${detalle}</td>
                     </tr>
                 `;
             }
         }
     });
 
-    // 3. Construimos el reporte para la impresora
+    // Si no hay filas, avisamos en el PDF
+    if (!filasHtml) {
+        filasHtml = '<tr><td colspan="5" style="text-align:center; padding: 20px;">No hay movimientos registrados en este período.</td></tr>';
+    }
+
+    // 3. Crear el contenedor del reporte
     const reporte = document.createElement('div');
     reporte.id = 'reporte-impresion-formal';
     
     reporte.innerHTML = `
         <div class="pdf-header">
-            <div class="pdf-logo-section">
+            <div>
                 <div class="pdf-logo-text">MI BOLSILLO</div>
                 <div class="pdf-tagline">Software de Gestión de Finanzas y Negocios</div>
             </div>
-            <div class="pdf-title-section">
-                <h1>REPORTE FORMAL DE MOVIMIENTOS</h1>
-                <p>Fecha de emisión: ${fechaEmision}</p>
+            <div style="text-align: right;">
+                <h1 style="font-size: 14pt; margin: 0; color: #0f172a;">REPORTE DE MOVIMIENTOS</h1>
+                <p style="font-size: 9pt; color: #64748b; margin: 5px 0 0 0;">Emitido: ${fechaEmision}</p>
             </div>
         </div>
 
         <div class="pdf-summary-bar">
-            <div class="summary-item">
-                <span>TOTAL FILTRADO</span>
-                <strong>${totalFiltrado}</strong>
+            <div style="text-align: center;">
+                <span style="font-size: 8pt; font-weight: 800; color: #64748b; display: block; text-transform: uppercase;">Total Filtrado</span>
+                <strong style="font-size: 20pt; color: #0f172a;">${totalFiltrado}</strong>
             </div>
         </div>
 
-        <h3 style="font-size: 11pt; margin-bottom: 10px; border-left: 4px solid #0f172a; padding-left: 10px;">DETALLE DE TRANSACCIONES</h3>
         <table class="pdf-table">
             <thead>
                 <tr>
-                    <th style="width: 15%;">Fecha</th>
-                    <th style="width: 12%;">Tipo</th>
-                    <th style="width: 15%;">Monto</th>
-                    <th style="width: 18%;">Cuenta</th>
-                    <th style="width: 40%;">Detalle</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${filasHtml || '<tr><td colspan="5" style="text-align:center;">No se encontraron movimientos.</td></tr>'}
-            </tbody>
-        </table>
-
-        <div class="pdf-footer">
-            <p>Documento digital generado automáticamente por Mi Bolsillo.</p>
-            <p>Artigas, Uruguay</p>
-        </div>
-    `;
-
-    // 4. Mandamos a imprimir y limpiamos el DOM
-    document.body.appendChild(reporte);
-    window.print();
-    reporte.remove();
-}
-
-    // 3. Creamos el contenedor del reporte
-    const reporte = document.createElement('div');
-    reporte.id = 'reporte-impresion-formal';
-    
-    reporte.innerHTML = `
-        <div class="pdf-header">
-            <div class="pdf-logo-section">
-                <div class="pdf-logo-text">MI BOLSILLO</div>
-                <div class="pdf-tagline">Software de Gestión de Finanzas y Negocios</div>
-            </div>
-            <div class="pdf-title-section">
-                <h1>RESUMEN FORMAL DE CUENTAS</h1>
-                <p>Emitido: ${fechaEmision}</p>
-            </div>
-        </div>
-
-        <div class="pdf-summary-bar">
-            <div class="summary-item">
-                <span>TOTAL FILTRADO</span>
-                <strong>${totalFiltrado}</strong>
-            </div>
-        </div>
-
-        <h3 class="section-title">MOVIMIENTOS</h3>
-        <table class="pdf-table">
-            <thead>
-                <tr>
-                    <th>Fecha</th>
-                    <th>Tipo</th>
-                    <th>Monto</th>
-                    <th>Cuenta</th>
-                    <th>Detalle</th>
+                    <th style="width: 12%;">FECHA</th>
+                    <th style="width: 12%;">TIPO</th>
+                    <th style="width: 15%;">MONTO</th>
+                    <th style="width: 18%;">CUENTA</th>
+                    <th style="width: 43%;">DETALLE</th>
                 </tr>
             </thead>
             <tbody>
@@ -629,16 +579,16 @@
         </table>
 
         <div class="pdf-footer">
-            <p>Documento generado por el Sistema de Gestión Mi Bolsillo - Artigas, Uruguay</p>
+            <p>Reporte generado desde el Panel de Negocio - Mi Bolsillo</p>
+            <p>Artigas, Uruguay</p>
         </div>
     `;
 
-    // 4. Inyectamos, imprimimos y limpiamos
+    // 4. Imprimir
     document.body.appendChild(reporte);
     window.print();
     reporte.remove();
 }
-
     function limpiarFiltros() {
         document.getElementById("busquedaMovimiento").value = "";
         document.getElementById("fechaDesde").value = "";
