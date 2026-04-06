@@ -147,31 +147,29 @@
     </form>
 </div>
 
-<div style="background: var(--pocket-blue); padding: 15px; border-radius: 15px; border: 2px solid var(--money-green); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); margin-bottom: 25px;">
-    <form method="GET" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+<div style="background: var(--pocket-blue); padding: 12px 20px; border-radius: 15px; border: 2px solid var(--money-green); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); margin: 0 auto 25px auto; width: fit-content;">
+    <form method="GET" style="display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: nowrap;">
         
-        <div style="display: flex; gap: 10px; align-items: center;">
-            <input type="date" id="fechaDesde" onchange="filtrarMovimientos()" 
-                   style="flex: 1; padding: 6px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; font-family: 'Poppins', sans-serif;">
-            
-            <input type="date" id="fechaHasta" onchange="filtrarMovimientos()" 
-                   style="flex: 1; padding: 6px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; font-family: 'Poppins', sans-serif;">
-            
-            <button type="button" onclick="limpiarFiltros()" 
-                    style="background: white; border: none; padding: 6px 15px; border-radius: 8px; cursor: pointer; transition: 0.3s;">
-                <i class="fas fa-eraser" style="color: var(--danger); font-size: 1.1rem;"></i>
-            </button>
-        </div>
+        <input type="date" id="fechaDesde" onchange="filtrarMovimientos()" 
+               style="width: 140px; padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; font-family: 'Poppins', sans-serif;">
+        
+        <input type="date" id="fechaHasta" onchange="filtrarMovimientos()" 
+               style="width: 140px; padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; font-family: 'Poppins', sans-serif;">
+
+        <button type="button" onclick="limpiarFiltros()" 
+                style="background: white; border: none; padding: 6px 20px; border-radius: 8px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-eraser" style="color: var(--danger); font-size: 1.1rem;"></i>
+        </button>
 
         <a href="{{ url_for('emprendimiento.exportar_movimientos_excel', eid=eid, desde=request.args.get('desde'), hasta=request.args.get('hasta')) }}" 
-           style="background: var(--money-green); color: white; padding: 6px 20px; border-radius: 8px; text-decoration: none; display: flex; align-items: center; gap: 8px; font-weight: 700; font-family: 'Poppins', sans-serif; transition: 0.3s; border: none;">
-            <i class="fas fa-file-excel" style="color: white;"></i>
+           style="background: var(--money-green); color: white; padding: 6px 20px; border-radius: 8px; text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 700; font-family: 'Poppins', sans-serif; transition: 0.3s;">
+            <i class="fas fa-file-excel"></i>
         </a>
-        <button onclick="exportarAPDF()" 
-            style="background: var(--danger); color: white; padding: 6px 20px; border-radius: 8px; text-decoration: none; display: flex; align-items: center; gap: 8px; font-weight: 700; font-family: 'Poppins', sans-serif; transition: 0.3s; border: none; cursor: pointer;">
-        <i class="fas fa-file-pdf"></i>
-    </button>
-</div>
+
+        <button type="button" onclick="exportarAPDF()" 
+                style="background: var(--danger); color: white; padding: 6px 20px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s;">
+            <i class="fas fa-file-pdf"></i>
+        </button>
     </form>
 </div>
         </div>
