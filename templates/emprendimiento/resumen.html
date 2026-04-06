@@ -64,9 +64,6 @@
 <div class="header-section">
     <form action="{{ url_for('emprendimiento.editar_nombre', eid=eid) }}" method="post" style="display: flex; align-items: center; gap: 10px;">
         <input type="text" name="nuevo_nombre" value="{{ nombre }}" class="title-input">
-        <button type="submit" class="btn btn-outline" style="border-radius: 50%; width: 40px; height: 40px; padding:0;">
-            <i class="fas fa-save"></i>
-        </button>
     </form>
     <p style="color: var(--money-green); margin: 5px 0 0 0;"><i class="fas fa-chart-pie"></i> Panel de Negocio</p>
 </div>
