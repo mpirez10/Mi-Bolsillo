@@ -494,42 +494,100 @@
         document.body.removeChild(link);
     }
 
-    function exportarAPDF() {
-    // 1. Capturamos los datos clave de la pantalla
+   function exportarAPDF() {
+    // 1. Capturamos el Total y la Fecha de Emisión
     const totalFiltrado = document.getElementById('sumaTotalFiltrada')?.innerText || '$ 0.00';
-    const fechaEmision = new Date().toLocaleString('es-UY', { 
-        year: 'numeric', month: '2-digit', day: '2-digit', 
-        hour: '2-digit', minute: '2-digit', second: '2-digit' 
-    });
+    const fechaEmision = new Date().toLocaleString('es-UY');
 
-    // 2. Procesamos las filas de la tabla (ajustado a 5 columnas: Fecha, Tipo, Monto, Cuenta, Detalle)
+    // 2. Procesamos las filas recorriendo el HTML que me pasaste
     let filasHtml = '';
     const filas = document.querySelectorAll(".movimientos-table tbody tr");
     
     filas.forEach(fila => {
+        // Solo si la fila no está oculta por los filtros de fecha
         if (fila.style.display !== "none") {
             const c = fila.getElementsByTagName("td");
-            if (c.length >= 4) { // Ajustamos según la estructura de tu tabla
-                const fecha = c[0].innerText.trim();
-                const tipo = c[1].innerText.trim();
-                const detalle = c[2].innerText.trim();
-                const monto = c[3].innerText.trim();
-                const cuenta = c[4] ? c[4].innerText.trim() : 'General'; // Por si la cuenta está en la 5ta col
+            
+            // Verificamos que tenga las celdas (Fecha, Tipo, Monto, Cuenta, Detalle, Basura)
+            if (c.length >= 5) { 
+                const fecha   = c[0].innerText.trim();
+                const tipo    = c[1].innerText.trim();
+                const monto   = c[2].innerText.trim();
+                const cuenta  = c[3].innerText.trim();
+                const detalle = c[4].innerText.trim();
 
-                const esIngreso = tipo.toUpperCase().includes("INGRESO");
+                // Detectamos si es ingreso o egreso para el color (buscando el texto en el span)
+                const tipoUpper = tipo.toUpperCase();
+                const esIngreso = tipoUpper.includes("INGRESO");
+                const esEgreso = tipoUpper.includes("EGRESO");
+                
+                let colorClase = '';
+                if (esIngreso) colorClase = 'text-success';
+                else if (esEgreso) colorClase = 'text-danger';
 
                 filasHtml += `
                     <tr>
                         <td>${fecha}</td>
-                        <td>${tipo}</td>
-                        <td class="${esIngreso ? 'text-success' : 'text-danger'}">${monto}</td>
+                        <td style="font-size: 8pt; font-weight: bold;">${tipo}</td>
+                        <td class="${colorClase}">${monto}</td>
                         <td>${cuenta}</td>
-                        <td>${detalle}</td>
+                        <td style="text-transform: uppercase;">${detalle}</td>
                     </tr>
                 `;
             }
         }
     });
+
+    // 3. Construimos el reporte para la impresora
+    const reporte = document.createElement('div');
+    reporte.id = 'reporte-impresion-formal';
+    
+    reporte.innerHTML = `
+        <div class="pdf-header">
+            <div class="pdf-logo-section">
+                <div class="pdf-logo-text">MI BOLSILLO</div>
+                <div class="pdf-tagline">Software de Gestión de Finanzas y Negocios</div>
+            </div>
+            <div class="pdf-title-section">
+                <h1>REPORTE FORMAL DE MOVIMIENTOS</h1>
+                <p>Fecha de emisión: ${fechaEmision}</p>
+            </div>
+        </div>
+
+        <div class="pdf-summary-bar">
+            <div class="summary-item">
+                <span>TOTAL FILTRADO</span>
+                <strong>${totalFiltrado}</strong>
+            </div>
+        </div>
+
+        <h3 style="font-size: 11pt; margin-bottom: 10px; border-left: 4px solid #0f172a; padding-left: 10px;">DETALLE DE TRANSACCIONES</h3>
+        <table class="pdf-table">
+            <thead>
+                <tr>
+                    <th style="width: 15%;">Fecha</th>
+                    <th style="width: 12%;">Tipo</th>
+                    <th style="width: 15%;">Monto</th>
+                    <th style="width: 18%;">Cuenta</th>
+                    <th style="width: 40%;">Detalle</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${filasHtml || '<tr><td colspan="5" style="text-align:center;">No se encontraron movimientos.</td></tr>'}
+            </tbody>
+        </table>
+
+        <div class="pdf-footer">
+            <p>Documento digital generado automáticamente por Mi Bolsillo.</p>
+            <p>Artigas, Uruguay</p>
+        </div>
+    `;
+
+    // 4. Mandamos a imprimir y limpiamos el DOM
+    document.body.appendChild(reporte);
+    window.print();
+    reporte.remove();
+}
 
     // 3. Creamos el contenedor del reporte
     const reporte = document.createElement('div');
