@@ -270,44 +270,90 @@
 
 <style>
 @media print {
-    /* Configuración de Hoja */
+    /* Configuración de Hoja A4 */
     @page { size: A4 portrait; margin: 1.5cm; }
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
-    /* Ocultar Interfaz */
-    nav, aside, .btn, .filtros-grid, .chart-card, .btn-delete-small, .no-print { 
-        display: none !important; 
+    /* Ocultamos toda la interfaz de la app para que no ensucie */
+    body > *:not(#reporte-formal-pdf) { display: none !important; }
+    
+    /* Contenedor del Reporte */
+    #reporte-formal-pdf { 
+        display: block !important; 
+        width: 100%; 
+        font-family: 'Segoe UI', Helvetica, Arial, sans-serif; 
+        color: #1e293b;
     }
 
-    /* Estructura del Reporte */
-    #reporte-formal-pdf { display: block !important; margin-bottom: 20px; font-family: 'Segoe UI', sans-serif; }
-    
-    .pdf-header { display: flex; justify-content: space-between; border-bottom: 2px solid #0f172a; padding-bottom: 15px; margin-bottom: 25px; }
-    .pdf-header h2 { margin: 0; color: #0f172a; font-size: 16pt; }
-    .subtitle { margin: 0; color: #64748b; font-size: 10pt; font-style: italic; }
+    /* Encabezado Nivel Ingeniería */
+    .pdf-header { 
+        display: flex; 
+        justify-content: space-between; 
+        border-bottom: 3px solid #0f172a; 
+        padding-bottom: 15px; 
+        margin-bottom: 25px; 
+        align-items: flex-end; 
+    }
+    .pdf-header .logo-box h1 { margin: 0; font-size: 28px; color: #0f172a; font-weight: 800; }
+    .pdf-header h2 { margin: 0; font-size: 14pt; color: #1e293b; text-transform: uppercase; letter-spacing: 1px; }
 
-    /* Estilo de Tarjetas Saldo/Ventas/Gastos */
-    .pdf-balances { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px; }
-    .balance-item { border: 1px solid #e2e8f0; padding: 15px; text-align: center; border-radius: 8px; }
-    .balance-item span { display: block; font-size: 9pt; color: #64748b; margin-bottom: 5px; font-weight: bold; }
-    .balance-item strong { font-size: 14pt; color: #1e293b; }
+    /* Fila de Balances: Saldo, Ventas, Gastos */
+    .pdf-balances { 
+        display: grid; 
+        grid-template-columns: repeat(3, 1fr); 
+        gap: 20px; 
+        margin-bottom: 30px; 
+    }
+    .pdf-card { 
+        border: 1px solid #e2e8f0; 
+        padding: 15px; 
+        text-align: center; 
+        border-radius: 10px; 
+        background-color: #f8fafc !important; 
+    }
+    .pdf-card span { display: block; font-size: 9pt; font-weight: 700; color: #64748b; margin-bottom: 5px; text-transform: uppercase; }
+    .pdf-card strong { font-size: 15pt; color: #0f172a; }
 
-    /* Cabecera de Tabla y Total Filtrado */
-    .pdf-movimientos-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .total-badge { background: #f1f5f9; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 10pt; }
+    /* Sección Movimientos y Total Filtrado */
+    .pdf-section-title { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        border-bottom: 1px solid #eee; 
+        padding-bottom: 8px; 
+        margin-bottom: 15px; 
+    }
+    .pdf-section-title h3 { margin: 0; font-size: 12pt; color: #0f172a; font-weight: 700; }
+    .total-badge-pdf { 
+        background: #0f172a !important; 
+        color: white !important; 
+        padding: 5px 15px; 
+        border-radius: 5px; 
+        font-weight: bold; 
+        font-size: 10pt; 
+    }
 
-    /* LA TABLA: Fecha | Tipo | Detalle | Monto */
-    table { width: 100% !important; border-collapse: collapse !important; table-layout: fixed; }
-    th { background-color: #0f172a !important; color: white !important; text-align: left; padding: 10px; font-size: 10pt; }
-    td { padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 9.5pt; overflow: hidden; text-overflow: ellipsis; }
+    /* Tabla Pro: Fecha | Tipo | Detalle | Monto */
+    .pdf-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .pdf-table th { 
+        background: #f1f5f9 !important; 
+        color: #0f172a !important; 
+        text-align: left; 
+        padding: 12px 10px; 
+        font-size: 9pt; 
+        border-bottom: 2px solid #0f172a; 
+        text-transform: uppercase; 
+    }
+    .pdf-table td { padding: 10px; border-bottom: 1px solid #e2e8f0; font-size: 9.5pt; }
 
-    /* Anchos de columnas específicos */
-    th:nth-child(1), td:nth-child(1) { width: 15%; } /* Fecha */
-    th:nth-child(2), td:nth-child(2) { width: 12%; } /* Tipo */
-    th:nth-child(3), td:nth-child(3) { width: 53%; } /* Detalle */
-    th:nth-child(4), td:nth-child(4) { width: 20%; text-align: right !important; font-weight: bold; } /* Monto */
+    /* Anchos de columna */
+    .pdf-table th:nth-child(1), .pdf-table td:nth-child(1) { width: 15%; } /* Fecha */
+    .pdf-table th:nth-child(2), .pdf-table td:nth-child(2) { width: 15%; } /* Tipo */
+    .pdf-table th:nth-child(3), .pdf-table td:nth-child(3) { width: 50%; } /* Detalle */
+    .pdf-table th:nth-child(4), .pdf-table td:nth-child(4) { width: 20%; text-align: right !important; font-weight: bold; }
 
-    tr:nth-child(even) { background-color: #f8fafc !important; }
+    .ingreso-text { color: #10b981 !important; }
+    .egreso-text { color: #ef4444 !important; }
 }
 @media (max-width: 768px) {
     /* 1. La Card: Ajustamos el padding lateral a 24px para alinear con el cabezal */
@@ -506,57 +552,93 @@ function limpiarFiltros() {
     if(document.getElementById("fechaHasta")) document.getElementById("fechaHasta").value = "";
     filtrarMovimientos();
 }
-
 function exportarAPDF() {
-    // 1. Capturamos los datos actuales de la interfaz
-    const saldo = document.querySelector('.card-saldo .monto')?.innerText || '$0.00';
-    const ventas = document.querySelector('.card-ventas .monto')?.innerText || '$0.00';
-    const gastos = document.querySelector('.card-gastos .monto')?.innerText || '$0.00';
-    const totalFiltrado = document.querySelector('.total-filtrado-valor')?.innerText || '$0.00';
+    // 1. Scrapping de balances (Saldo, Ventas, Gastos) por posición
+    const cards = document.querySelectorAll('.stat-mini-card div[style*="font-size"]');
+    const saldo = cards[0]?.innerText || '$ 0.00';
+    const ventas = cards[1]?.innerText || '$ 0.00';
+    const gastos = cards[2]?.innerText || '$ 0.00';
+    const totalFiltrado = document.getElementById('sumaTotalFiltrada')?.innerText || '$ 0.00';
     
-    const hoy = new Date();
-    const fechaArchivo = hoy.toLocaleDateString('es-UY').replace(/\//g, '-');
-    const tituloOriginal = document.title;
-    document.title = `Reporte_MiBolsillo_${fechaArchivo}`;
+    // 2. Procesar filas de la tabla (solo las visibles y solo 4 columnas)
+    let filasHtml = '';
+    document.querySelectorAll(".movimientos-table tbody tr").forEach(fila => {
+        if (fila.style.display !== "none") {
+            const celdas = fila.getElementsByTagName("td");
+            if (celdas.length >= 4) {
+                const fecha = celdas[0].innerText.trim();
+                const tipo = celdas[1].innerText.trim();
+                const detalle = celdas[2].innerText.trim();
+                const monto = celdas[3].innerText.trim();
+                const esIngreso = tipo.toUpperCase().includes("INGRESO");
 
-    // 2. Creamos el contenedor del reporte formal
-    const main = document.querySelector('main');
-    const reporteContainer = document.createElement('div');
-    reporteContainer.id = 'reporte-formal-pdf';
+                filasHtml += `
+                    <tr>
+                        <td>${fecha}</td>
+                        <td>${tipo}</td>
+                        <td>${detalle}</td>
+                        <td class="${esIngreso ? 'ingreso-text' : 'egreso-text'}">${monto}</td>
+                    </tr>
+                `;
+            }
+        }
+    });
+
+    const hoy = new Date();
+    const fechaEmision = hoy.toLocaleString('es-UY');
+
+    // 3. Crear el contenedor temporal del reporte
+    const reporte = document.createElement('div');
+    reporte.id = 'reporte-formal-pdf';
+    reporte.style.display = 'none'; // Solo el @media print lo mostrará
     
-    reporteContainer.innerHTML = `
+    reporte.innerHTML = `
         <div class="pdf-header">
-            <div class="col-left">
-                <div class="logo-area">
-                    <img src="/static/img/loguito.png" alt="Logo" style="height: 40px; margin-bottom: 5px;">
-                    <h1 style="margin:0; font-size: 24px; color: #1e293b;">MI BOLSILLO</h1>
-                </div>
-                <p class="subtitle">Software de Gestión de Finanzas y Negocios</p>
+            <div class="logo-box">
+                <img src="/static/img/loguito.png" alt="Logo" style="height: 50px; display: block; margin-bottom: 5px;">
+                <h1>MI BOLSILLO</h1>
+                <p style="margin:0; font-size: 11px; color: #64748b; font-weight: 600;">Software de Gestión de Finanzas y negocios</p>
             </div>
-            <div class="col-right">
+            <div class="info-box">
                 <h2>RESUMEN FORMAL DE CUENTAS</h2>
-                <p><strong>Emitido:</strong> ${hoy.toLocaleString('es-UY')}</p>
-                <p>Estado: Documento Digital Oficial</p>
+                <p style="margin:5px 0 0 0; font-size: 10px; color: #64748b;">Emitido: ${fechaEmision}</p>
+                <p style="margin:0; font-size: 9px; color: #94a3b8;">Estado: Documento Digital Oficial</p>
             </div>
         </div>
 
         <div class="pdf-balances">
-            <div class="balance-item"><span>SALDO</span><strong>${saldo}</strong></div>
-            <div class="balance-item"><span>VENTAS</span><strong>${ventas}</strong></div>
-            <div class="balance-item"><span>GASTOS</span><strong>${gastos}</strong></div>
+            <div class="pdf-card"><span>SALDO</span><strong>${saldo}</strong></div>
+            <div class="pdf-card"><span>VENTAS</span><strong>${ventas}</strong></div>
+            <div class="pdf-card"><span>GASTOS</span><strong>${gastos}</strong></div>
         </div>
 
-        <div class="pdf-movimientos-header">
-            <h3>MOVIMIENTOS</h3>
-            <div class="total-badge">TOTAL FILTRADO: ${totalFiltrado}</div>
+        <div class="pdf-section-title">
+            <h3>MOVIMIENTOS DETALLADOS</h3>
+            <div class="total-badge-pdf">TOTAL FILTRADO: ${totalFiltrado}</div>
+        </div>
+
+        <table class="pdf-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th>Detalle</th>
+                    <th style="text-align: right;">Monto</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${filasHtml}
+            </tbody>
+        </table>
+        <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 10px; text-align: center; font-size: 8pt; color: #94a3b8;">
+            Este reporte fue generado automáticamente por el sistema Mi Bolsillo.
         </div>
     `;
 
-    // 3. Inyectamos, imprimimos y limpiamos
-    main.prepend(reporteContainer);
+    // 4. Inyectar, imprimir y remover
+    document.body.appendChild(reporte);
     window.print();
-    reporteContainer.remove();
-    document.title = tituloOriginal;
+    reporte.remove();
 }
 function exportarAExcel() {
     const datosParaExcel = [];
