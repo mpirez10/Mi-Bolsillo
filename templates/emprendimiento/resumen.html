@@ -270,58 +270,44 @@
 
 <style>
 @media print {
-    /* Configuración de página A4 con márgenes elegantes */
-    @page { size: A4 portrait; margin: 1.5cm 1cm; }
-    
-    /* Forzamos que se vean los colores de los balances */
+    /* Configuración de Hoja */
+    @page { size: A4 portrait; margin: 1.5cm; }
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
-    /* Ocultamos todo lo que es "software" y no "reporte" */
-    nav, aside, .btn, .btn-export, .filtros-grid, .chart-card, .btn-delete-small, .btn-limpiar, .no-print { 
+    /* Ocultar Interfaz */
+    nav, aside, .btn, .filtros-grid, .chart-card, .btn-delete-small, .no-print { 
         display: none !important; 
     }
 
-    /* Layout a ancho completo */
-    .dashboard-layout { display: block !important; width: 100% !important; }
-    main { width: 100% !important; margin: 0 !important; padding: 0 !important; }
+    /* Estructura del Reporte */
+    #reporte-formal-pdf { display: block !important; margin-bottom: 20px; font-family: 'Segoe UI', sans-serif; }
     
-    /* LA TABLA PRO: Fecha | Tipo | Detalle | Monto */
-    table { 
-        width: 100% !important; 
-        border-collapse: collapse !important; 
-        margin-top: 25px;
-        table-layout: fixed; /* Mantiene los anchos de columna rígidos */
-    }
+    .pdf-header { display: flex; justify-content: space-between; border-bottom: 2px solid #0f172a; padding-bottom: 15px; margin-bottom: 25px; }
+    .pdf-header h2 { margin: 0; color: #0f172a; font-size: 16pt; }
+    .subtitle { margin: 0; color: #64748b; font-size: 10pt; font-style: italic; }
 
-    th { 
-        background-color: #0f172a !important; /* Azul Oxford muy profesional */
-        color: white !important; 
-        padding: 12px 8px !important; 
-        font-size: 10pt !important;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        text-align: left !important;
-        border: 1px solid #0f172a !important;
-    }
+    /* Estilo de Tarjetas Saldo/Ventas/Gastos */
+    .pdf-balances { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px; }
+    .balance-item { border: 1px solid #e2e8f0; padding: 15px; text-align: center; border-radius: 8px; }
+    .balance-item span { display: block; font-size: 9pt; color: #64748b; margin-bottom: 5px; font-weight: bold; }
+    .balance-item strong { font-size: 14pt; color: #1e293b; }
 
-    td { 
-        padding: 10px 8px !important; 
-        border-bottom: 1px solid #e2e8f0 !important; 
-        font-size: 9.5pt !important;
-        color: #1e293b !important;
-    }
+    /* Cabecera de Tabla y Total Filtrado */
+    .pdf-movimientos-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .total-badge { background: #f1f5f9; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 10pt; }
 
-    /* Definimos anchos exactos para las 4 columnas */
-    th:nth-child(1), td:nth-child(1) { width: 18%; } /* Fecha */
+    /* LA TABLA: Fecha | Tipo | Detalle | Monto */
+    table { width: 100% !important; border-collapse: collapse !important; table-layout: fixed; }
+    th { background-color: #0f172a !important; color: white !important; text-align: left; padding: 10px; font-size: 10pt; }
+    td { padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 9.5pt; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Anchos de columnas específicos */
+    th:nth-child(1), td:nth-child(1) { width: 15%; } /* Fecha */
     th:nth-child(2), td:nth-child(2) { width: 12%; } /* Tipo */
-    th:nth-child(3), td:nth-child(3) { width: 50%; } /* Detalle */
+    th:nth-child(3), td:nth-child(3) { width: 53%; } /* Detalle */
     th:nth-child(4), td:nth-child(4) { width: 20%; text-align: right !important; font-weight: bold; } /* Monto */
 
-    /* Cebra para no perderse en las filas */
     tr:nth-child(even) { background-color: #f8fafc !important; }
-
-    /* Evitamos que una fila se corte entre dos carillas */
-    tr { page-break-inside: avoid; }
 }
 @media (max-width: 768px) {
     /* 1. La Card: Ajustamos el padding lateral a 24px para alinear con el cabezal */
@@ -522,33 +508,54 @@ function limpiarFiltros() {
 }
 
 function exportarAPDF() {
-    // Nombre del archivo: Reporte_MiBolsillo_DD-MM-YYYY.pdf
+    // 1. Capturamos los datos actuales de la interfaz
+    const saldo = document.querySelector('.card-saldo .monto')?.innerText || '$0.00';
+    const ventas = document.querySelector('.card-ventas .monto')?.innerText || '$0.00';
+    const gastos = document.querySelector('.card-gastos .monto')?.innerText || '$0.00';
+    const totalFiltrado = document.querySelector('.total-filtrado-valor')?.innerText || '$0.00';
+    
     const hoy = new Date();
-    const fechaStr = hoy.toLocaleDateString('es-UY').replace(/\//g, '-');
+    const fechaArchivo = hoy.toLocaleDateString('es-UY').replace(/\//g, '-');
     const tituloOriginal = document.title;
-    document.title = `Reporte_Movimientos_${fechaStr}`;
+    document.title = `Reporte_MiBolsillo_${fechaArchivo}`;
 
-    // Inyectamos el encabezado pro solo para el momento de imprimir
+    // 2. Creamos el contenedor del reporte formal
     const main = document.querySelector('main');
-    const header = document.createElement('div');
-    header.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #0f172a; padding-bottom: 10px; margin-bottom: 30px;">
-            <div>
-                <h1 style="margin:0; font-size: 26px; color: #0f172a;">MI BOLSILLO</h1>
-                <p style="margin:0; color: #64748b; font-size: 13px;">Software de Gestión de Finanzas e Ingeniería</p>
+    const reporteContainer = document.createElement('div');
+    reporteContainer.id = 'reporte-formal-pdf';
+    
+    reporteContainer.innerHTML = `
+        <div class="pdf-header">
+            <div class="col-left">
+                <div class="logo-area">
+                    <img src="/static/img/loguito.png" alt="Logo" style="height: 40px; margin-bottom: 5px;">
+                    <h1 style="margin:0; font-size: 24px; color: #1e293b;">MI BOLSILLO</h1>
+                </div>
+                <p class="subtitle">Software de Gestión de Finanzas y Negocios</p>
             </div>
-            <div style="text-align: right;">
-                <p style="margin:0; font-weight: bold; font-size: 14px;">RESUMEN FORMAL DE CUENTAS</p>
-                <p style="margin:0; font-size: 11px; color: #64748b;">Emitido: ${hoy.toLocaleString('es-UY')}</p>
+            <div class="col-right">
+                <h2>RESUMEN FORMAL DE CUENTAS</h2>
+                <p><strong>Emitido:</strong> ${hoy.toLocaleString('es-UY')}</p>
+                <p>Estado: Documento Digital Oficial</p>
             </div>
         </div>
+
+        <div class="pdf-balances">
+            <div class="balance-item"><span>SALDO</span><strong>${saldo}</strong></div>
+            <div class="balance-item"><span>VENTAS</span><strong>${ventas}</strong></div>
+            <div class="balance-item"><span>GASTOS</span><strong>${gastos}</strong></div>
+        </div>
+
+        <div class="pdf-movimientos-header">
+            <h3>MOVIMIENTOS</h3>
+            <div class="total-badge">TOTAL FILTRADO: ${totalFiltrado}</div>
+        </div>
     `;
-    main.prepend(header);
 
+    // 3. Inyectamos, imprimimos y limpiamos
+    main.prepend(reporteContainer);
     window.print();
-
-    // Limpieza post-impresión
-    header.remove();
+    reporteContainer.remove();
     document.title = tituloOriginal;
 }
 function exportarAExcel() {
