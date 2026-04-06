@@ -495,28 +495,27 @@
     }
 
    function exportarAPDF() {
-    // 1. Datos de cabecera
+    // 1. Capturamos los datos de cabecera
     const totalFiltrado = document.getElementById('sumaTotalFiltrada')?.innerText || '$ 0.00';
     const fechaEmision = new Date().toLocaleString('es-UY');
 
-    // 2. Procesar filas (Blindado contra espacios en blanco de Jinja)
+    // 2. Procesar filas (Igualito a tu función de Excel)
     let filasHtml = '';
-    const filas = document.querySelectorAll(".movimientos-table tbody tr");
+    const filas = document.querySelectorAll("table tr"); // Usamos el mismo selector que tu Excel
     
-    filas.forEach(fila => {
-        // Solo filas visibles por el filtro
-        if (fila.style.display !== "none") {
-            const c = fila.cells; // Usamos .cells que es más rápido y directo
+    filas.forEach((fila, index) => {
+        // Saltamos el encabezado de la tabla original y las filas ocultas
+        if (index > 0 && fila.style.display !== 'none') {
+            const cols = fila.querySelectorAll("td");
             
-            if (c.length >= 5) { 
-                // Limpiamos espacios, saltos de línea y tabulaciones con trim()
-                const fecha   = c[0].innerText.replace(/\s+/g, ' ').trim();
-                const tipo    = c[1].innerText.replace(/\s+/g, ' ').trim();
-                const monto   = c[2].innerText.replace(/\s+/g, ' ').trim();
-                const cuenta  = c[3].innerText.replace(/\s+/g, ' ').trim();
-                const detalle = c[4].innerText.replace(/\s+/g, ' ').trim();
+            // Verificamos que tenga las celdas necesarias (Fecha, Tipo, Monto, Cuenta, Detalle)
+            if (cols.length >= 5) {
+                const fecha   = cols[0].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
+                const tipo    = cols[1].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
+                const monto   = cols[2].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
+                const cuenta  = cols[3].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
+                const detalle = cols[4].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
 
-                // Detección de color por contenido de texto
                 const t = tipo.toUpperCase();
                 let claseMonto = '';
                 if (t.includes("INGRESO")) claseMonto = 'text-success';
@@ -527,7 +526,7 @@
                         <td style="white-space: nowrap;">${fecha}</td>
                         <td style="font-size: 7.5pt; font-weight: bold; color: #64748b;">${tipo}</td>
                         <td class="${claseMonto}" style="white-space: nowrap;">${monto}</td>
-                        <td style="color: #475569;">${cuenta}</td>
+                        <td>${cuenta}</td>
                         <td style="text-transform: uppercase; font-size: 8pt;">${detalle}</td>
                     </tr>
                 `;
@@ -535,12 +534,11 @@
         }
     });
 
-    // Si no hay filas, avisamos en el PDF
     if (!filasHtml) {
-        filasHtml = '<tr><td colspan="5" style="text-align:center; padding: 20px;">No hay movimientos registrados en este período.</td></tr>';
+        filasHtml = '<tr><td colspan="5" style="text-align:center; padding: 20px;">No hay movimientos para mostrar.</td></tr>';
     }
 
-    // 3. Crear el contenedor del reporte
+    // 3. Crear el contenedor del reporte formal
     const reporte = document.createElement('div');
     reporte.id = 'reporte-impresion-formal';
     
@@ -566,11 +564,11 @@
         <table class="pdf-table">
             <thead>
                 <tr>
-                    <th style="width: 12%;">FECHA</th>
+                    <th style="width: 15%;">FECHA</th>
                     <th style="width: 12%;">TIPO</th>
                     <th style="width: 15%;">MONTO</th>
                     <th style="width: 18%;">CUENTA</th>
-                    <th style="width: 43%;">DETALLE</th>
+                    <th style="width: 40%;">DETALLE</th>
                 </tr>
             </thead>
             <tbody>
@@ -580,11 +578,10 @@
 
         <div class="pdf-footer">
             <p>Reporte generado desde el Panel de Negocio - Mi Bolsillo</p>
-            <p>Artigas, Uruguay</p>
+            <p>TUTUCODE-UY</p>
         </div>
     `;
 
-    // 4. Imprimir
     document.body.appendChild(reporte);
     window.print();
     reporte.remove();
