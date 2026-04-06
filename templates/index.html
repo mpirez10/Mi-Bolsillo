@@ -146,18 +146,77 @@
     }
 
     /* 6. MODO IMPRESIÓN - Para que el PDF salga prolijo */
-    @media print {
-        @page { size: landscape; margin: 1cm; }
-        nav, aside, .btn, .btn-export, .filtros-grid, .chart-card, .btn-delete-small { display: none !important; }
-        .dashboard-layout { display: block !important; }
-        .card { border: none !important; box-shadow: none !important; }
-        table { display: table !important; width: 100% !important; border-collapse: collapse !important; }
-        thead { display: table-header-group !important; }
-        tr { display: table-row !important; border-bottom: 1px solid #eee !important; }
-        th, td { display: table-cell !important; padding: 8px !important; border: 1px solid #eee !important; font-size: 9pt !important; }
-        td:nth-child(4), th:nth-child(4) { display: table-cell !important; }
-        body { background: white !important; color: black !important; }
+   @media print {
+    /* Ocultamos todo lo que no sea el reporte nuevo */
+    body > *:not(#reporte-impresion-formal) { display: none !important; }
+    
+    #reporte-impresion-formal { 
+        display: block !important; 
+        font-family: 'Segoe UI', Arial, sans-serif;
+        color: #1a202c;
+        width: 100%;
     }
+
+    @page { size: A4 portrait; margin: 1.5cm; }
+
+    /* Encabezado Estilo Ingeniería */
+    .pdf-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 2px solid #0f172a;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+    }
+
+    .pdf-logo-text { font-size: 24pt; font-weight: 800; color: #0f172a; line-height: 1; }
+    .pdf-tagline { font-size: 9pt; color: #64748b; font-weight: 600; text-transform: uppercase; margin-top: 5px; }
+
+    .pdf-title-section { text-align: right; }
+    .pdf-title-section h1 { font-size: 14pt; margin: 0; color: #1e293b; letter-spacing: 1px; }
+    .pdf-title-section p { font-size: 9pt; color: #64748b; margin: 5px 0 0 0; }
+
+    /* Barra de Total */
+    .pdf-summary-bar {
+        background: #f8fafc !important;
+        border: 1px solid #e2e8f0;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: center;
+    }
+    .summary-item { text-align: center; }
+    .summary-item span { display: block; font-size: 8pt; font-weight: 800; color: #64748b; }
+    .summary-item strong { font-size: 18pt; color: #0f172a; }
+
+    /* Tabla de Movimientos */
+    .section-title { font-size: 11pt; border-left: 4px solid #0f172a; padding-left: 10px; margin-bottom: 15px; }
+    
+    .pdf-table { width: 100%; border-collapse: collapse; }
+    .pdf-table th { 
+        background: #0f172a !important; 
+        color: white !important; 
+        text-align: left; 
+        padding: 10px; 
+        font-size: 9pt; 
+        text-transform: uppercase;
+    }
+    .pdf-table td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; font-size: 9pt; }
+
+    /* Colores de montos */
+    .text-success { color: #10b981 !important; font-weight: bold; }
+    .text-danger { color: #ef4444 !important; font-weight: bold; }
+
+    .pdf-footer {
+        margin-top: 40px;
+        text-align: center;
+        font-size: 8pt;
+        color: #94a3b8;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 10px;
+    }
+}
 </style>
 
 <div class="dashboard-layout">
@@ -435,7 +494,92 @@
         document.body.removeChild(link);
     }
 
-    function exportarAPDF() { window.print(); }
+    function exportarAPDF() {
+    // 1. Capturamos los datos clave de la pantalla
+    const totalFiltrado = document.getElementById('sumaTotalFiltrada')?.innerText || '$ 0.00';
+    const fechaEmision = new Date().toLocaleString('es-UY', { 
+        year: 'numeric', month: '2-digit', day: '2-digit', 
+        hour: '2-digit', minute: '2-digit', second: '2-digit' 
+    });
+
+    // 2. Procesamos las filas de la tabla (ajustado a 5 columnas: Fecha, Tipo, Monto, Cuenta, Detalle)
+    let filasHtml = '';
+    const filas = document.querySelectorAll(".movimientos-table tbody tr");
+    
+    filas.forEach(fila => {
+        if (fila.style.display !== "none") {
+            const c = fila.getElementsByTagName("td");
+            if (c.length >= 4) { // Ajustamos según la estructura de tu tabla
+                const fecha = c[0].innerText.trim();
+                const tipo = c[1].innerText.trim();
+                const detalle = c[2].innerText.trim();
+                const monto = c[3].innerText.trim();
+                const cuenta = c[4] ? c[4].innerText.trim() : 'General'; // Por si la cuenta está en la 5ta col
+
+                const esIngreso = tipo.toUpperCase().includes("INGRESO");
+
+                filasHtml += `
+                    <tr>
+                        <td>${fecha}</td>
+                        <td>${tipo}</td>
+                        <td class="${esIngreso ? 'text-success' : 'text-danger'}">${monto}</td>
+                        <td>${cuenta}</td>
+                        <td>${detalle}</td>
+                    </tr>
+                `;
+            }
+        }
+    });
+
+    // 3. Creamos el contenedor del reporte
+    const reporte = document.createElement('div');
+    reporte.id = 'reporte-impresion-formal';
+    
+    reporte.innerHTML = `
+        <div class="pdf-header">
+            <div class="pdf-logo-section">
+                <div class="pdf-logo-text">MI BOLSILLO</div>
+                <div class="pdf-tagline">Software de Gestión de Finanzas y Negocios</div>
+            </div>
+            <div class="pdf-title-section">
+                <h1>RESUMEN FORMAL DE CUENTAS</h1>
+                <p>Emitido: ${fechaEmision}</p>
+            </div>
+        </div>
+
+        <div class="pdf-summary-bar">
+            <div class="summary-item">
+                <span>TOTAL FILTRADO</span>
+                <strong>${totalFiltrado}</strong>
+            </div>
+        </div>
+
+        <h3 class="section-title">MOVIMIENTOS</h3>
+        <table class="pdf-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th>Monto</th>
+                    <th>Cuenta</th>
+                    <th>Detalle</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${filasHtml}
+            </tbody>
+        </table>
+
+        <div class="pdf-footer">
+            <p>Documento generado por el Sistema de Gestión Mi Bolsillo - Artigas, Uruguay</p>
+        </div>
+    `;
+
+    // 4. Inyectamos, imprimimos y limpiamos
+    document.body.appendChild(reporte);
+    window.print();
+    reporte.remove();
+}
 
     function limpiarFiltros() {
         document.getElementById("busquedaMovimiento").value = "";
