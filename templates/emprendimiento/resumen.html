@@ -270,37 +270,57 @@
 
 <style>
 @media print {
-    /* Configuramos la hoja A4 */
-    @page { size: portrait; margin: 1.5cm; }
+    /* Configuración de página A4 con márgenes elegantes */
+    @page { size: A4 portrait; margin: 1.5cm 1cm; }
     
-    /* Forzamos que salgan los colores (Ingresos verdes / Egresos rojos) */
+    /* Forzamos que se vean los colores de los balances */
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
-    /* Ocultamos lo que no va en un papel */
-    nav, aside, .btn, .btn-export, .filtros-grid, .chart-card, .btn-delete-small, .btn-limpiar { 
+    /* Ocultamos todo lo que es "software" y no "reporte" */
+    nav, aside, .btn, .btn-export, .filtros-grid, .chart-card, .btn-delete-small, .btn-limpiar, .no-print { 
         display: none !important; 
     }
 
-    /* Estiramos el contenido al 100% de la hoja */
+    /* Layout a ancho completo */
     .dashboard-layout { display: block !important; width: 100% !important; }
     main { width: 100% !important; margin: 0 !important; padding: 0 !important; }
     
-    /* Tabla estilo profesional */
-    table { width: 100% !important; border-collapse: collapse !important; margin-top: 10px; }
-    th { 
-        background-color: #0056b3 !important; 
-        color: white !important; 
-        padding: 12px !important; 
-        font-size: 10pt !important;
-        border: 1px solid #004494 !important;
-    }
-    td { 
-        padding: 10px !important; 
-        border: 1px solid #eee !important; 
-        font-size: 9pt !important; 
+    /* LA TABLA PRO: Fecha | Tipo | Detalle | Monto */
+    table { 
+        width: 100% !important; 
+        border-collapse: collapse !important; 
+        margin-top: 25px;
+        table-layout: fixed; /* Mantiene los anchos de columna rígidos */
     }
 
-    /* Evitamos que una fila se corte a la mitad entre dos páginas */
+    th { 
+        background-color: #0f172a !important; /* Azul Oxford muy profesional */
+        color: white !important; 
+        padding: 12px 8px !important; 
+        font-size: 10pt !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-align: left !important;
+        border: 1px solid #0f172a !important;
+    }
+
+    td { 
+        padding: 10px 8px !important; 
+        border-bottom: 1px solid #e2e8f0 !important; 
+        font-size: 9.5pt !important;
+        color: #1e293b !important;
+    }
+
+    /* Definimos anchos exactos para las 4 columnas */
+    th:nth-child(1), td:nth-child(1) { width: 18%; } /* Fecha */
+    th:nth-child(2), td:nth-child(2) { width: 12%; } /* Tipo */
+    th:nth-child(3), td:nth-child(3) { width: 50%; } /* Detalle */
+    th:nth-child(4), td:nth-child(4) { width: 20%; text-align: right !important; font-weight: bold; } /* Monto */
+
+    /* Cebra para no perderse en las filas */
+    tr:nth-child(even) { background-color: #f8fafc !important; }
+
+    /* Evitamos que una fila se corte entre dos carillas */
     tr { page-break-inside: avoid; }
 }
 @media (max-width: 768px) {
@@ -502,40 +522,35 @@ function limpiarFiltros() {
 }
 
 function exportarAPDF() {
-    // 1. Nombre de archivo pro con la fecha actual
-    const fecha = new Date().toLocaleDateString('es-UY').replace(/\//g, '-');
+    // Nombre del archivo: Reporte_MiBolsillo_DD-MM-YYYY.pdf
+    const hoy = new Date();
+    const fechaStr = hoy.toLocaleDateString('es-UY').replace(/\//g, '-');
     const tituloOriginal = document.title;
-    document.title = `Reporte_Movimientos_${fecha}`;
+    document.title = `Reporte_Movimientos_${fechaStr}`;
 
-    // 2. Creamos el encabezado que SOLO se verá en el PDF
-    const headerPDF = document.createElement('div');
-    headerPDF.id = 'pdf-header-extra';
-    headerPDF.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #28a745; padding-bottom: 15px; margin-bottom: 25px;">
+    // Inyectamos el encabezado pro solo para el momento de imprimir
+    const main = document.querySelector('main');
+    const header = document.createElement('div');
+    header.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #0f172a; padding-bottom: 10px; margin-bottom: 30px;">
             <div>
-                <h1 style="color: #0056b3; margin: 0; font-family: 'Poppins', sans-serif; font-size: 28px;">MI BOLSILLO</h1>
-                <p style="margin: 0; color: #64748b; font-size: 13px;">Sistema de Gestión de Finanzas e Ingeniería</p>
+                <h1 style="margin:0; font-size: 26px; color: #0f172a;">MI BOLSILLO</h1>
+                <p style="margin:0; color: #64748b; font-size: 13px;">Software de Gestión de Finanzas e Ingeniería</p>
             </div>
-            <div style="text-align: right; color: #1e293b;">
-                <h3 style="margin: 0; font-size: 16px;">REPORTE FORMAL DE MOVIMIENTOS</h3>
-                <p style="margin: 0; font-size: 12px;">Fecha de emisión: ${new Date().toLocaleString('es-UY')}</p>
-                <p style="margin: 0; font-size: 12px;">Estado: Documento Digital Oficial</p>
+            <div style="text-align: right;">
+                <p style="margin:0; font-weight: bold; font-size: 14px;">RESUMEN FORMAL DE CUENTAS</p>
+                <p style="margin:0; font-size: 11px; color: #64748b;">Emitido: ${hoy.toLocaleString('es-UY')}</p>
             </div>
         </div>
     `;
+    main.prepend(header);
 
-    // 3. Lo metemos arriba de todo en el Main
-    const main = document.querySelector('main');
-    main.prepend(headerPDF);
-
-    // 4. Mandamos a imprimir
     window.print();
 
-    // 5. Limpiamos: borramos el encabezado y restauramos el título de la pestaña
-    headerPDF.remove();
+    // Limpieza post-impresión
+    header.remove();
     document.title = tituloOriginal;
 }
-
 function exportarAExcel() {
     const datosParaExcel = [];
     const encabezados = [];
