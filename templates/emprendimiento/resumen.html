@@ -269,6 +269,40 @@
 </div>
 
 <style>
+@media print {
+    /* Configuramos la hoja A4 */
+    @page { size: portrait; margin: 1.5cm; }
+    
+    /* Forzamos que salgan los colores (Ingresos verdes / Egresos rojos) */
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+    /* Ocultamos lo que no va en un papel */
+    nav, aside, .btn, .btn-export, .filtros-grid, .chart-card, .btn-delete-small, .btn-limpiar { 
+        display: none !important; 
+    }
+
+    /* Estiramos el contenido al 100% de la hoja */
+    .dashboard-layout { display: block !important; width: 100% !important; }
+    main { width: 100% !important; margin: 0 !important; padding: 0 !important; }
+    
+    /* Tabla estilo profesional */
+    table { width: 100% !important; border-collapse: collapse !important; margin-top: 10px; }
+    th { 
+        background-color: #0056b3 !important; 
+        color: white !important; 
+        padding: 12px !important; 
+        font-size: 10pt !important;
+        border: 1px solid #004494 !important;
+    }
+    td { 
+        padding: 10px !important; 
+        border: 1px solid #eee !important; 
+        font-size: 9pt !important; 
+    }
+
+    /* Evitamos que una fila se corte a la mitad entre dos páginas */
+    tr { page-break-inside: avoid; }
+}
 @media (max-width: 768px) {
     /* 1. La Card: Ajustamos el padding lateral a 24px para alinear con el cabezal */
     .movimientos-table tr {
@@ -465,6 +499,41 @@ function limpiarFiltros() {
     document.getElementById("fechaDesde").value = "";
     if(document.getElementById("fechaHasta")) document.getElementById("fechaHasta").value = "";
     filtrarMovimientos();
+}
+
+function exportarAPDF() {
+    // 1. Nombre de archivo pro con la fecha actual
+    const fecha = new Date().toLocaleDateString('es-UY').replace(/\//g, '-');
+    const tituloOriginal = document.title;
+    document.title = `Reporte_Movimientos_${fecha}`;
+
+    // 2. Creamos el encabezado que SOLO se verá en el PDF
+    const headerPDF = document.createElement('div');
+    headerPDF.id = 'pdf-header-extra';
+    headerPDF.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #28a745; padding-bottom: 15px; margin-bottom: 25px;">
+            <div>
+                <h1 style="color: #0056b3; margin: 0; font-family: 'Poppins', sans-serif; font-size: 28px;">MI BOLSILLO</h1>
+                <p style="margin: 0; color: #64748b; font-size: 13px;">Sistema de Gestión de Finanzas e Ingeniería</p>
+            </div>
+            <div style="text-align: right; color: #1e293b;">
+                <h3 style="margin: 0; font-size: 16px;">REPORTE FORMAL DE MOVIMIENTOS</h3>
+                <p style="margin: 0; font-size: 12px;">Fecha de emisión: ${new Date().toLocaleString('es-UY')}</p>
+                <p style="margin: 0; font-size: 12px;">Estado: Documento Digital Oficial</p>
+            </div>
+        </div>
+    `;
+
+    // 3. Lo metemos arriba de todo en el Main
+    const main = document.querySelector('main');
+    main.prepend(headerPDF);
+
+    // 4. Mandamos a imprimir
+    window.print();
+
+    // 5. Limpiamos: borramos el encabezado y restauramos el título de la pestaña
+    headerPDF.remove();
+    document.title = tituloOriginal;
 }
 
 function exportarAExcel() {
