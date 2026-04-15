@@ -309,36 +309,46 @@
     </div>
 
     <div class="filtros-grid" style="border: 2px solid var(--pocket-green); background: var(--pocket-blue); padding: 15px; border-radius: 12px; margin-bottom: 15px;">
-        <div class="search-container" style="width: 100%; margin-bottom: 15px; position: relative;">
-            <small style="color: white; font-weight: 700; text-transform: uppercase;">Buscar Movimiento</small>
-            <div style="position: relative; margin-top: 5px;">
-                <i class="fas fa-search" style="position: absolute; left: 12px; top: 12px; color: #94a3b8;"></i>
-                <input type="text" id="busquedaMovimiento" onkeyup="filtrarMovimientos()" placeholder="Detalle, cuenta o motivo..." class="form-control" style="padding-left: 35px; width: 100%; background: white; border-radius: 6px; border: none; padding: 8px 35px;">
+    <div class="search-container" style="width: 100%; margin-bottom: 15px; position: relative;">
+        <small style="color: white; font-weight: 700; text-transform: uppercase;">Buscar Movimiento</small>
+        <div style="position: relative; margin-top: 5px;">
+            <i class="fas fa-search" style="position: absolute; left: 12px; top: 12px; color: #94a3b8;"></i>
+            <input type="text" id="busquedaMovimiento" onkeyup="filtrarMovimientos()" placeholder="Detalle, cuenta o motivo..." class="form-control" style="padding-left: 35px; width: 100%; background: white; border-radius: 6px; border: none; padding: 10px 35px;">
+        </div>
+    </div>
+    
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; width: 100%; flex-wrap: wrap; gap: 15px;">
+        <div class="acciones-filtros">
+            <small style="color: white; font-weight: 700; text-transform: uppercase;">Reportes</small>
+            <div style="display: flex; gap: 8px; margin-top: 5px;">
+                <button onclick="exportarAExcel()" class="btn-export btn-excel" style="background: #10b981; color: white; border: none; padding: 8px 12px; border-radius: 6px;"><i class="fas fa-file-excel"></i></button>
+                <button onclick="exportarAPDF()" class="btn-export btn-pdf" style="background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 6px;"><i class="fas fa-file-pdf"></i></button>
+                <button onclick="limpiarFiltros()" class="btn-limpiar" style="background: white; border: none; padding: 8px 12px; border-radius: 6px;"><i class="fas fa-sync-alt"></i></button>
             </div>
         </div>
-        
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; width: 100%; flex-wrap: wrap; gap: 15px;">
-            <div class="acciones-filtros">
-                <small style="color: white; font-weight: 700; text-transform: uppercase;">Reportes</small>
-                <div style="display: flex; gap: 8px; margin-top: 5px;">
-                    <button onclick="exportarAExcel()" class="btn-export btn-excel" style="background: #10b981; color: white; border: none; padding: 8px 12px; border-radius: 6px;"><i class="fas fa-file-excel"></i></button>
-                    <button onclick="exportarAPDF()" class="btn-export btn-pdf" style="background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 6px;"><i class="fas fa-file-pdf"></i></button>
-                    <button onclick="limpiarFiltros()" class="btn-limpiar" style="background: white; border: none; padding: 8px 12px; border-radius: 6px;"><i class="fas fa-sync-alt"></i></button>
-                </div>
-            </div>
 
-            <div class="fecha-inputs" style="flex: 0 1 auto; min-width: 300px; display: flex; gap: 10px;">
-                <div style="flex: 1;">
-                    <small style="color: white; font-weight: 700; text-transform: uppercase;">Desde</small>
-                    <input type="date" id="fechaDesde" onchange="filtrarMovimientos()" class="form-control" style="background: white; border-radius: 6px; border: none; width: 100%; padding: 5px;">
-                </div>
-                <div style="flex: 1;">
-                    <small style="color: white; font-weight: 700; text-transform: uppercase;">Hasta</small>
-                    <input type="date" id="fechaHasta" onchange="filtrarMovimientos()" class="form-control" style="background: white; border-radius: 6px; border: none; width: 100%; padding: 5px;">
-                </div>
+        <div style="flex: 1; min-width: 150px;">
+            <small style="color: white; font-weight: 700; text-transform: uppercase;">Tipo de Operación</small>
+            <select id="filtroTipo" onchange="filtrarMovimientos()" class="form-control" style="background: white; border-radius: 6px; border: none; width: 100%; padding: 7px; margin-top: 5px; font-weight: 600;">
+                <option value="">TODOS</option>
+                <option value="INGRESO">INGRESO</option>
+                <option value="EGRESO">EGRESO</option>
+                <option value="TRANSFERENCIA">TRANSF.</option>
+            </select>
+        </div>
+
+        <div class="fecha-inputs" style="flex: 0 1 auto; min-width: 300px; display: flex; gap: 10px;">
+            <div style="flex: 1;">
+                <small style="color: white; font-weight: 700; text-transform: uppercase;">Desde</small>
+                <input type="date" id="fechaDesde" onchange="filtrarMovimientos()" class="form-control" style="background: white; border-radius: 6px; border: none; width: 100%; padding: 5px; margin-top: 5px;">
+            </div>
+            <div style="flex: 1;">
+                <small style="color: white; font-weight: 700; text-transform: uppercase;">Hasta</small>
+                <input type="date" id="fechaHasta" onchange="filtrarMovimientos()" class="form-control" style="background: white; border-radius: 6px; border: none; width: 100%; padding: 5px; margin-top: 5px;">
             </div>
         </div>
     </div>
+</div>
     
     <div class="table-responsive" style="border-radius: 12px; overflow: hidden; border: 2px solid var(--pocket-green); margin-top: 10px;">
     <table style="width: 100%; border-collapse: collapse; background-color: white;">
@@ -420,14 +430,14 @@
         });
     }
 
-    // 2. FUNCIÓN DE FILTRADO - La que hace la magia
-    function filtrarMovimientos() {
+    // 2. FUNCIÓN DE FILTRADO - Actualizada con Tipo
+function filtrarMovimientos() {
     const texto = document.getElementById("busquedaMovimiento").value.toLowerCase();
-    const desdeRaw = document.getElementById("fechaDesde").value; // Viene AAAA-MM-DD
-    const hastaRaw = document.getElementById("fechaHasta").value; // Viene AAAA-MM-DD
+    const filtroTipo = document.getElementById("filtroTipo").value; // <--- Nuevo: INGRESO, EGRESO o TRANSF.
+    const desdeRaw = document.getElementById("fechaDesde").value;
+    const hastaRaw = document.getElementById("fechaHasta").value;
     const filas = document.querySelectorAll("tbody tr");
 
-    // Función para convertir AAAA-MM-DD a número puro para comparar
     const formatearFiltro = (f) => f ? f.replace(/-/g, '') : null;
     const desde = formatearFiltro(desdeRaw);
     const hasta = formatearFiltro(hastaRaw);
@@ -438,28 +448,37 @@
         const celdas = fila.getElementsByTagName("td");
         if (celdas.length < 5) return;
 
-        // --- LÓGICA DE FECHA (Crucial) ---
-        const fechaVisible = celdas[0].innerText.trim(); // "DD/MM/AAAA"
+        // --- LÓGICA DE FECHA ---
+        const fechaVisible = celdas[0].innerText.trim();
         const p = fechaVisible.split('/');
-        // Convertimos DD/MM/AAAA -> AAAAMMDD
         const fechaParaComparar = p.length === 3 ? p[2] + p[1] + p[0] : "0";
 
         // --- LÓGICA DE TEXTO Y MONTO ---
-        const tipoTexto = celdas[1].innerText.toUpperCase();
-        const montoStr = celdas[2].innerText.replace('$', '').replace(/,/g, '').trim();
+        const tipoFila = celdas[1].innerText.toUpperCase(); // INGRESO, EGRESO, TRANSFERENCIA
+        const montoStr = celdas[2].innerText.replace('$', '').replace(/\./g, '').replace(',', '.').trim(); 
+        // Nota: Ajusté el replace por si usás puntos de miles y coma decimal estilo UY
         const monto = parseFloat(montoStr) || 0;
         const contenidoBusqueda = (celdas[3].innerText + " " + celdas[4].innerText).toLowerCase();
 
         // --- FILTRADO ---
         const coincideTexto = contenidoBusqueda.includes(texto);
+        
+        // Nuevo: Coincidencia de Tipo
+        const coincideTipo = filtroTipo === "" || tipoFila.includes(filtroTipo);
+
         let coincideFecha = true;
         if (desde && fechaParaComparar < desde) coincideFecha = false;
         if (hasta && fechaParaComparar > hasta) coincideFecha = false;
 
-        if (coincideTexto && coincideFecha) {
+        // --- RESULTADO FINAL ---
+        if (coincideTexto && coincideFecha && coincideTipo) {
             fila.style.display = "";
-            if (tipoTexto.includes("INGRESO")) sumaTotal += monto;
-            else if (tipoTexto.includes("EGRESO")) sumaTotal -= monto;
+            // Sumamos al total solo si es Ingreso o Egreso (las transferencias suelen ser neutras al total)
+            if (tipoFila.includes("INGRESO")) {
+                sumaTotal += monto;
+            } else if (tipoFila.includes("EGRESO")) {
+                sumaTotal -= monto;
+            }
         } else {
             fila.style.display = "none";
         }
