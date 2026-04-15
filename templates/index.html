@@ -433,7 +433,7 @@
     // 2. FUNCIÓN DE FILTRADO - Actualizada con Tipo
 function filtrarMovimientos() {
     const texto = document.getElementById("busquedaMovimiento").value.toLowerCase();
-    const filtroTipo = document.getElementById("filtroTipo").value; // <--- Nuevo: INGRESO, EGRESO o TRANSF.
+    const filtroTipo = document.getElementById("filtroTipo").value;
     const desdeRaw = document.getElementById("fechaDesde").value;
     const hastaRaw = document.getElementById("fechaHasta").value;
     const filas = document.querySelectorAll("tbody tr");
@@ -448,48 +448,61 @@ function filtrarMovimientos() {
         const celdas = fila.getElementsByTagName("td");
         if (celdas.length < 5) return;
 
-        // --- LÓGICA DE FECHA ---
+        // --- FECHA ---
         const fechaVisible = celdas[0].innerText.trim();
         const p = fechaVisible.split('/');
-        const fechaParaComparar = p.length === 3 ? p[2] + p[1] + p[0] : "0";
+        const fechaParaComparar = (p.length === 3) ? (p[2] + p[1] + p[0]) : "0";
 
-        // --- LÓGICA DE TEXTO Y MONTO ---
-        const tipoFila = celdas[1].innerText.replace(/\s+/g, ' ').trim().toUpperCase(); // INGRESO, EGRESO, TRANSFERENCIA
+        // --- TIPO (CORREGIDO) ---
+        const tipoTexto = celdas[1].innerText.toUpperCase();
+
+        let tipoFila = "";
+        if (tipoTexto.includes("INGRESO")) tipoFila = "INGRESO";
+        else if (tipoTexto.includes("EGRESO")) tipoFila = "EGRESO";
+        else if (tipoTexto.includes("TRANSF")) tipoFila = "TRANSFERENCIA";
+
+        // --- MONTO ---
         const montoStr = celdas[2].innerText
-         .replace(/[^\d,.-]/g, '')   // deja solo números, coma, punto y signo
-         .replace(/\./g, '')         // elimina separador de miles
-         .replace(',', '.');         // convierte decimal a punto
-        const monto = parseFloat(montoStr) || 0;
-        const contenidoBusqueda = (celdas[3].innerText + " " + celdas[4].innerText).toLowerCase();
+            .replace(/[^\d,.-]/g, '')
+            .replace(/\./g, '')
+            .replace(',', '.');
 
-        // --- FILTRADO ---
+        const monto = parseFloat(montoStr) || 0;
+
+        // --- TEXTO ---
+        const contenidoBusqueda = (
+            celdas[3].innerText + " " + celdas[4].innerText
+        ).toLowerCase();
+
+        // --- FILTROS ---
         const coincideTexto = contenidoBusqueda.includes(texto);
-        
-        // Nuevo: Coincidencia de Tipo
-        const coincideTipo = filtroTipo === "" || tipoFila.includes(filtroTipo);
+        const coincideTipo = (filtroTipo === "" || tipoFila === filtroTipo);
 
         let coincideFecha = true;
         if (desde && fechaParaComparar < desde) coincideFecha = false;
         if (hasta && fechaParaComparar > hasta) coincideFecha = false;
 
-        // --- RESULTADO FINAL ---
+        // --- RESULTADO ---
         if (coincideTexto && coincideFecha && coincideTipo) {
             fila.style.display = "";
-            // Sumamos al total solo si es Ingreso o Egreso (las transferencias suelen ser neutras al total)
+
             if (tipoFila === "INGRESO") {
-               sumaTotal += monto;
+                sumaTotal += monto;
             } else if (tipoFila === "EGRESO") {
-               sumaTotal -= monto;
+                sumaTotal -= monto;
             }
+
         } else {
             fila.style.display = "none";
         }
     });
 
-    document.getElementById("sumaTotalFiltrada").innerText = "$ " + sumaTotal.toLocaleString('es-UY', { 
-        minimumFractionDigits: 2, 
-        maximumFractionDigits: 2 
-    });
+    // --- ACTUALIZAR TOTAL ---
+    document.getElementById("sumaTotalFiltrada").innerText =
+        "$ " + sumaTotal.toLocaleString('es-UY', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
 }
     // 4. EXPORTAR A EXCEL
     function exportarAExcel() {
