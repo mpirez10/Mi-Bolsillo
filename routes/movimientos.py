@@ -56,7 +56,7 @@ def movimiento():
                 )
 
             elif tipo == "Egreso":
-                if saldo_actual < monto:
+                if round(saldo_actual, 2) < monto:
                     return "Error: Saldo insuficiente."
 
                 cursor.execute(
@@ -80,7 +80,7 @@ def movimiento():
                 if not cuenta_dest:
                     return "Error: Cuenta destino no válida."
 
-                if saldo_actual < monto:
+                if round(saldo_actual, 2) < monto:
                     return "Error: Saldo insuficiente."
 
                 cursor.execute(
