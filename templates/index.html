@@ -454,9 +454,11 @@ function filtrarMovimientos() {
         const fechaParaComparar = p.length === 3 ? p[2] + p[1] + p[0] : "0";
 
         // --- LÓGICA DE TEXTO Y MONTO ---
-        const tipoFila = celdas[1].innerText.toUpperCase(); // INGRESO, EGRESO, TRANSFERENCIA
-        const montoStr = celdas[2].innerText.replace('$', '').replace(/\./g, '').replace(',', '.').trim(); 
-        // Nota: Ajusté el replace por si usás puntos de miles y coma decimal estilo UY
+        const tipoFila = celdas[1].innerText.replace(/\s+/g, ' ').trim().toUpperCase(); // INGRESO, EGRESO, TRANSFERENCIA
+        const montoStr = celdas[2].innerText
+         .replace(/[^\d,.-]/g, '')   // deja solo números, coma, punto y signo
+         .replace(/\./g, '')         // elimina separador de miles
+         .replace(',', '.');         // convierte decimal a punto
         const monto = parseFloat(montoStr) || 0;
         const contenidoBusqueda = (celdas[3].innerText + " " + celdas[4].innerText).toLowerCase();
 
