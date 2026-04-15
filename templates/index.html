@@ -405,197 +405,187 @@
     </main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-    // 1. INICIALIZACIÓN DEL GRÁFICO (Doughnut)
-    const ctx = document.getElementById('balanceChart');
-    if (ctx) {
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Gastos', 'Ingresos', 'Deudas'],
-                datasets: [{
-                    data: [{{ egresos_total|default(0) }}, {{ ingresos_total|default(0) }}, {{ deudas_total|default(0) }}],
-                    backgroundColor: ['#ef4444', '#10b981', '#f59e0b'],
-                    borderWidth: 0,
-                    hoverOffset: 10
-                }]
-            },
-            options: { 
-                responsive: true, 
-                maintainAspectRatio: false, 
-                cutout: '70%',
-                plugins: { 
-                    legend: { 
-                        position: 'bottom', 
-                        labels: {color: 'white', boxWidth: 12, usePointStyle: true, font: { size: 11, weight: '600' } } 
-                    } 
-                } 
-            }
-        });
-    }
-// No te olvides de agregar este listener para el buscador
-document.getElementById("busquedaMovimiento").addEventListener("keypress", function(e) {
-    if (e.key === "Enter") {
-        filtrarMovimientos();
-    }
-});
-  // 2. FUNCIÓN DE FILTRADO - Ahora redirige al servidor (Opción 1)
+// ===============================
+// 1. GRÁFICO
+// ===============================
+const ctx = document.getElementById('balanceChart');
+if (ctx) {
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Gastos', 'Ingresos', 'Deudas'],
+            datasets: [{
+                data: [{{ egresos_total|default(0) }}, {{ ingresos_total|default(0) }}, {{ deudas_total|default(0) }}],
+                backgroundColor: ['#ef4444', '#10b981', '#f59e0b'],
+                borderWidth: 0,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: 'white',
+                        boxWidth: 12,
+                        usePointStyle: true,
+                        font: { size: 11, weight: '600' }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// ===============================
+// 2. BUSCADOR (ENTER)
+// ===============================
+const buscador = document.getElementById("busquedaMovimiento");
+
+if (buscador) {
+    buscador.addEventListener("keypress", function(e) {
+        if (e.key === "Enter") {
+            filtrarMovimientos();
+        }
+    });
+}
+
+// ===============================
+// 3. FILTROS (REDIRECCIÓN)
+// ===============================
 function filtrarMovimientos() {
-    // 1. Capturamos los valores de los inputs
-    const q = document.getElementById("busquedaMovimiento").value.trim();
-    const tipo = document.getElementById("filtroTipo").value;
-    const desde = document.getElementById("fechaDesde").value;
-    const hasta = document.getElementById("fechaHasta").value;
+    const q = document.getElementById("busquedaMovimiento").value.trim();
+    const tipo = document.getElementById("filtroTipo").value;
+    const desde = document.getElementById("fechaDesde").value;
+    const hasta = document.getElementById("fechaHasta").value;
 
-    // 2. Armamos los parámetros de la URL
-    // Esto crea algo como: /?q=asado&tipo=EGRESO&desde=2024-04-01...
-    const params = new URLSearchParams();
-    
-    if (q) params.append('q', q);
-    if (tipo) params.append('tipo', tipo);
-    if (desde) params.append('desde', desde);
-    if (hasta) params.append('hasta', hasta);
+    const params = new URLSearchParams();
 
-    // 3. Redirigimos a la raíz (o a la ruta de tu index) con los nuevos filtros
-    window.location.href = "/?" + params.toString();
+    if (q) params.append('q', q);
+    if (tipo) params.append('tipo', tipo);
+    if (desde) params.append('desde', desde);
+    if (hasta) params.append('hasta', hasta);
+
+    window.location.href = "/?" + params.toString();
 }
 
-// Extra: Para que busque cuando apretás Enter en el cuadro de búsqueda
-document.getElementById("busquedaMovimiento").addEventListener("keypress", function(e) {
-    if (e.key === "Enter") {
-        filtrarMovimientos();
-    }
-});
+// ===============================
+// 4. EXPORTAR A EXCEL
+// ===============================
+function exportarAExcel() {
+    const filas = document.querySelectorAll("table tr");
+    let csv = [];
 
-    document.getElementById("sumaTotalFiltrada").innerText = "$ " + sumaTotal.toLocaleString('es-UY', { 
-        minimumFractionDigits: 2, 
-        maximumFractionDigits: 2 
-    });
+    filas.forEach(fila => {
+        if (fila.style.display !== 'none') {
+            const cols = fila.querySelectorAll("td, th");
+            let filaData = [];
+
+            for (let i = 0; i < cols.length - 1; i++) {
+                let limpio = cols[i].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
+                filaData.push('"' + limpio + '"');
+            }
+
+            csv.push(filaData.join(","));
+        }
+    });
+
+    const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + csv.join("\n");
+
+    const link = document.createElement("a");
+    link.setAttribute("href", encodeURI(csvContent));
+    link.setAttribute("download", "Movimientos_MiBolsillo.csv");
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
-    // 4. EXPORTAR A EXCEL
-    function exportarAExcel() {
-        const filas = document.querySelectorAll("table tr");
-        let csv = [];
-        filas.forEach(fila => {
-            if (fila.style.display !== 'none') {
-                const cols = fila.querySelectorAll("td, th");
-                let filaData = [];
-                for (let i = 0; i < cols.length - 1; i++) {
-                    let limpio = cols[i].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
-                    filaData.push('"' + limpio + '"');
-                }
-                csv.push(filaData.join(","));
-            }
-        });
-        const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + csv.join("\n");
-        const link = document.createElement("a");
-        link.setAttribute("href", encodeURI(csvContent));
-        link.setAttribute("download", "Movimientos_MiBolsillo.csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
 
-   function exportarAPDF() {
-    // 1. Capturamos los datos de cabecera
-    const totalFiltrado = document.getElementById('sumaTotalFiltrada')?.innerText || '$ 0.00';
-    const fechaEmision = new Date().toLocaleString('es-UY');
+// ===============================
+// 5. EXPORTAR A PDF
+// ===============================
+function exportarAPDF() {
+    const totalFiltrado = document.getElementById('sumaTotalFiltrada')?.innerText || '$ 0.00';
+    const fechaEmision = new Date().toLocaleString('es-UY');
 
-    // 2. Procesar filas (Igualito a tu función de Excel)
-    let filasHtml = '';
-    const filas = document.querySelectorAll("table tr"); // Usamos el mismo selector que tu Excel
-    
-    filas.forEach((fila, index) => {
-        // Saltamos el encabezado de la tabla original y las filas ocultas
-        if (index > 0 && fila.style.display !== 'none') {
-            const cols = fila.querySelectorAll("td");
-            
-            // Verificamos que tenga las celdas necesarias (Fecha, Tipo, Monto, Cuenta, Detalle)
-            if (cols.length >= 5) {
-                const fecha   = cols[0].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
-                const tipo    = cols[1].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
-                const monto   = cols[2].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
-                const cuenta  = cols[3].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
-                const detalle = cols[4].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
+    let filasHtml = '';
+    const filas = document.querySelectorAll("table tr");
 
-                const t = tipo.toUpperCase();
-                let claseMonto = '';
-                if (t.includes("INGRESO")) claseMonto = 'text-success';
-                else if (t.includes("EGRESO")) claseMonto = 'text-danger';
+    filas.forEach((fila, index) => {
+        if (index > 0 && fila.style.display !== 'none') {
+            const cols = fila.querySelectorAll("td");
 
-                filasHtml += `
-                    <tr>
-                        <td style="white-space: nowrap;">${fecha}</td>
-                        <td style="font-size: 7.5pt; font-weight: bold; color: #64748b;">${tipo}</td>
-                        <td class="${claseMonto}" style="white-space: nowrap;">${monto}</td>
-                        <td>${cuenta}</td>
-                        <td style="text-transform: uppercase; font-size: 8pt;">${detalle}</td>
-                    </tr>
-                `;
-            }
-        }
-    });
+            if (cols.length >= 5) {
+                const fecha = cols[0].innerText.trim();
+                const tipo = cols[1].innerText.trim();
+                const monto = cols[2].innerText.trim();
+                const cuenta = cols[3].innerText.trim();
+                const detalle = cols[4].innerText.trim();
 
-    if (!filasHtml) {
-        filasHtml = '<tr><td colspan="5" style="text-align:center; padding: 20px;">No hay movimientos para mostrar.</td></tr>';
-    }
+                const t = tipo.toUpperCase();
+                let claseMonto = '';
 
-    // 3. Crear el contenedor del reporte formal
-    const reporte = document.createElement('div');
-    reporte.id = 'reporte-impresion-formal';
-    
-    reporte.innerHTML = `
-        <div class="pdf-header">
-            <div>
-                <div class="pdf-logo-text">MI BOLSILLO</div>
-                <div class="pdf-tagline">Software de Gestión de Finanzas y Negocios</div>
-            </div>
-            <div style="text-align: right;">
-                <h1 style="font-size: 14pt; margin: 0; color: #0f172a;">REPORTE DE MOVIMIENTOS</h1>
-                <p style="font-size: 9pt; color: #64748b; margin: 5px 0 0 0;">Emitido: ${fechaEmision}</p>
-            </div>
-        </div>
+                if (t.includes("INGRESO")) claseMonto = 'text-success';
+                else if (t.includes("EGRESO")) claseMonto = 'text-danger';
 
-        <div class="pdf-summary-bar">
-            <div style="text-align: center;">
-                <span style="font-size: 8pt; font-weight: 800; color: #64748b; display: block; text-transform: uppercase;">Total Filtrado</span>
-                <strong style="font-size: 20pt; color: #0f172a;">${totalFiltrado}</strong>
-            </div>
-        </div>
+                filasHtml += `
+                    <tr>
+                        <td>${fecha}</td>
+                        <td>${tipo}</td>
+                        <td class="${claseMonto}">${monto}</td>
+                        <td>${cuenta}</td>
+                        <td>${detalle}</td>
+                    </tr>
+                `;
+            }
+        }
+    });
 
-        <table class="pdf-table">
-            <thead>
-                <tr>
-                    <th style="width: 15%;">FECHA</th>
-                    <th style="width: 12%;">TIPO</th>
-                    <th style="width: 15%;">MONTO</th>
-                    <th style="width: 18%;">CUENTA</th>
-                    <th style="width: 40%;">DETALLE</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${filasHtml}
-            </tbody>
-        </table>
+    if (!filasHtml) {
+        filasHtml = '<tr><td colspan="5">No hay movimientos</td></tr>';
+    }
 
-        <div class="pdf-footer">
-            <p>Reporte generado desde el Panel de Negocio - Mi Bolsillo</p>
-            <p>TUTUCODE-UY</p>
-        </div>
-    `;
+    const reporte = document.createElement('div');
+    reporte.id = 'reporte-impresion-formal';
 
-    document.body.appendChild(reporte);
-    window.print();
-    reporte.remove();
+    reporte.innerHTML = `
+        <h1>REPORTE DE MOVIMIENTOS</h1>
+        <p>Emitido: ${fechaEmision}</p>
+        <h2>Total: ${totalFiltrado}</h2>
+
+        <table class="pdf-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th>Monto</th>
+                    <th>Cuenta</th>
+                    <th>Detalle</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${filasHtml}
+            </tbody>
+        </table>
+    `;
+
+    document.body.appendChild(reporte);
+    window.print();
+    reporte.remove();
 }
-    function limpiarFiltros() {
-        document.getElementById("busquedaMovimiento").value = "";
-        document.getElementById("fechaDesde").value = "";
-        document.getElementById("fechaHasta").value = "";
-        filtrarMovimientos();
-    }
-    
-    // Ejecutamos al cargar para calcular el total inicial
-    document.addEventListener("DOMContentLoaded", filtrarMovimientos);
+
+// ===============================
+// 6. LIMPIAR FILTROS
+// ===============================
+function limpiarFiltros() {
+    window.location.href = "/";
+}
+
 </script>
+
 {% endblock %}
