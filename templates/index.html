@@ -461,13 +461,23 @@ function filtrarMovimientos() {
         else if (tipoTexto.includes("EGRESO")) tipoFila = "EGRESO";
         else if (tipoTexto.includes("TRANSF")) tipoFila = "TRANSFERENCIA";
 
-        // --- MONTO ---
-        const montoStr = celdas[2].innerText
-            .replace(/[^\d,.-]/g, '')
-            .replace(/\./g, '')
-            .replace(',', '.');
+        const montoStrRaw = celdas[2].innerText.replace(/[^\d.,-]/g, '');
 
-        const monto = parseFloat(montoStr) || 0;
+let monto = 0;
+
+if (montoStrRaw.includes(',') && montoStrRaw.includes('.')) {
+    // Formato tipo: 2,500.00 (USA)
+    monto = parseFloat(montoStrRaw.replace(/,/g, ''));
+} else if (montoStrRaw.includes(',')) {
+    // Formato tipo: 2500,00 (LATAM)
+    monto = parseFloat(montoStrRaw.replace(',', '.'));
+} else {
+    // Formato limpio: 2500.00
+    monto = parseFloat(montoStrRaw);
+}
+
+monto = monto || 0;
+
 
         // --- TEXTO ---
         const contenidoBusqueda = (
