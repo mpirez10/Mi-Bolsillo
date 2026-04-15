@@ -25,6 +25,7 @@ def index():
         SELECT * FROM movimientos 
         WHERE usuario_id = %s 
         ORDER BY fecha DESC, id DESC
+        LIMIT 10
     """, (current_user.id,))
     movimientos = cursor.fetchall()
 
