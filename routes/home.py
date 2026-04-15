@@ -7,37 +7,54 @@ bp = Blueprint("home", __name__)
 @bp.route("/")
 @login_required
 def index():
+    # 1. CAPTURAR FILTROS DE LA URL
+    busqueda = request.args.get('q', '').strip()
+    tipo_filtro = request.args.get('tipo', '')
+    desde = request.args.get('desde', '')
+    hasta = request.args.get('hasta', '')
+
     conn = get_db()
     cursor = conn.cursor()
 
-    # --- 1. CUENTAS ---
-    cursor.execute(
-        "SELECT id, nombre, saldo FROM cuentas WHERE usuario_id = %s",
-        (current_user.id,)
-    )
+    # --- CUENTAS (Igual que antes) ---
+    cursor.execute("SELECT id, nombre, saldo FROM cuentas WHERE usuario_id = %s", (current_user.id,))
     cuentas = cursor.fetchall()
-
-    # Suma directa, sin preguntar nada. ¡Un placer!
     saldo_general = round(sum(c['saldo'] for c in cuentas), 2)
 
-    # --- 2. MOVIMIENTOS ---
-    cursor.execute("""
-        SELECT * FROM movimientos 
-        WHERE usuario_id = %s 
-        ORDER BY fecha DESC, id DESC
-        LIMIT 10
-    """, (current_user.id,))
+    # --- 2. MOVIMIENTOS FILTRABLES (El motor de la Opción 1) ---
+    query_movs = "SELECT * FROM movimientos WHERE usuario_id = %s"
+    params_movs = [current_user.id]
+
+    if busqueda:
+        query_movs += " AND (motivo ILIKE %s OR detalle ILIKE %s OR cuenta_origen ILIKE %s OR cuenta_destino ILIKE %s)"
+        params_movs.extend([f"%{busqueda}%"] * 4)
+
+    if tipo_filtro:
+        query_movs += " AND UPPER(tipo) = %s"
+        params_movs.append(tipo_filtro.upper())
+
+    if desde:
+        query_movs += " AND fecha >= %s"
+        params_movs.append(desde)
+
+    if hasta:
+        query_movs += " AND fecha <= %s"
+        params_movs.append(hasta)
+
+    # Si NO hay filtros, clavamos el LIMIT 10. Si hay filtros, mostramos TODO lo que coincida.
+    if not (busqueda or tipo_filtro or desde or hasta):
+        query_movs += " ORDER BY fecha DESC, id DESC LIMIT 10"
+    else:
+        query_movs += " ORDER BY fecha DESC, id DESC"
+
+    cursor.execute(query_movs, params_movs)
     movimientos = cursor.fetchall()
 
-    # --- 3. DEUDAS ---
-    cursor.execute("""
-        SELECT * FROM deudas 
-        WHERE usuario_id = %s AND estado = 'pendiente' 
-        ORDER BY id DESC LIMIT 5
-    """, (current_user.id,))
+    # --- 3. DEUDAS (Igual) ---
+    cursor.execute("SELECT * FROM deudas WHERE usuario_id = %s AND estado = 'pendiente' ORDER BY id DESC LIMIT 5", (current_user.id,))
     deudas_list = cursor.fetchall()
 
-    # --- 4. TOTALES (Usando ALIAS en SQL para más limpieza) ---
+    # --- 4. TOTALES ---
     def fetch_sum(query):
         cursor.execute(query, (current_user.id,))
         res = cursor.fetchone()
@@ -52,6 +69,7 @@ def index():
     cursor.close()
     conn.close()
 
+    # Retornamos también el diccionario 'filtros' para que el HTML sepa qué mostrar en los inputs
     return render_template(
         "index.html", 
         cuentas=cuentas, 
@@ -62,7 +80,8 @@ def index():
         egresos_total=egresos_total,
         deudas_total=deudas_total,
         ganancia_mes=ganancia_mes, 
-        gasto_mes=gasto_mes
+        gasto_mes=gasto_mes,
+        filtros={'q': busqueda, 'tipo': tipo_filtro, 'desde': desde, 'hasta': hasta}
     )
 
 @bp.route("/eliminar_movimiento/<int:mid>")
