@@ -476,10 +476,10 @@ function filtrarMovimientos() {
         if (coincideTexto && coincideFecha && coincideTipo) {
             fila.style.display = "";
             // Sumamos al total solo si es Ingreso o Egreso (las transferencias suelen ser neutras al total)
-            if (tipoFila.includes("INGRESO")) {
-                sumaTotal += monto;
-            } else if (tipoFila.includes("EGRESO")) {
-                sumaTotal -= monto;
+            if (tipoFila === "INGRESO") {
+               sumaTotal += monto;
+            } else if (tipoFila === "EGRESO") {
+               sumaTotal -= monto;
             }
         } else {
             fila.style.display = "none";
