@@ -13,7 +13,6 @@ def index():
     desde = request.args.get('desde', '')
     hasta = request.args.get('hasta', '')
     
-    # Manejo de página: por defecto la 1
     try:
         page = int(request.args.get('page', 1))
     except ValueError:
@@ -22,52 +21,51 @@ def index():
     conn = get_db()
     cursor = conn.cursor()
 
-    # --- CUENTAS ---
+    # --- CUENTAS (Igual que antes) ---
     cursor.execute("SELECT id, nombre, saldo FROM cuentas WHERE usuario_id = %s", (current_user.id,))
     cuentas = cursor.fetchall()
     saldo_general = round(sum(c['saldo'] for c in cuentas), 2)
 
-    # --- 2. MOTOR DE MOVIMIENTOS CON PAGINACIÓN ---
-    query_movs = "SELECT * FROM movimientos WHERE usuario_id = %s"
+    # --- 2. MOTOR DE MOVIMIENTOS CON PAGINACIÓN INTELIGENTE ---
+    query_base = " FROM movimientos WHERE usuario_id = %s"
     params_movs = [current_user.id]
 
-    # Aplicar filtros si existen
+    # Construimos las condiciones de filtro
+    filtros_sql = ""
     if busqueda:
-        query_movs += " AND (motivo ILIKE %s OR detalle ILIKE %s OR cuenta_origen ILIKE %s OR cuenta_destino ILIKE %s)"
+        filtros_sql += " AND (motivo ILIKE %s OR detalle ILIKE %s OR cuenta_origen ILIKE %s OR cuenta_destino ILIKE %s)"
         params_movs.extend([f"%{busqueda}%"] * 4)
     if tipo_filtro:
-        query_movs += " AND UPPER(tipo) = %s"
+        filtros_sql += " AND UPPER(tipo) = %s"
         params_movs.append(tipo_filtro.upper())
     if desde:
-        query_movs += " AND fecha >= %s"
+        filtros_sql += " AND fecha >= %s"
         params_movs.append(desde)
     if hasta:
-        query_movs += " AND fecha <= %s"
+        filtros_sql += " AND fecha <= %s"
         params_movs.append(hasta)
 
-    # Lógica de Paginación y Límites
-    es_busqueda_activa = any([busqueda, tipo_filtro, desde, hasta])
-    
+    # Lógica de Paginación
     limit = 10
     offset = (page - 1) * limit
+    
+    # IMPORTANTE: Ahora el límite de 30 aplica SIEMPRE para no saturar, 
+    # pero sobre el resultado YA filtrado.
+    if page > 3:
+        page = 3
+        offset = 20
 
-    # Si NO está filtrando, le clavamos el límite de 30 total (máximo página 3)
-    if not es_busqueda_activa:
-        if page > 3: # Seguridad por si tocan la URL a mano
-            page = 3
-            offset = 20
-        
-    query_movs += f" ORDER BY fecha DESC, id DESC LIMIT {limit} OFFSET {offset}"
-
-    cursor.execute(query_movs, params_movs)
+    # Ejecutamos la consulta con filtros + orden + paginación
+    query_final = f"SELECT * {query_base} {filtros_sql} ORDER BY fecha DESC, id DESC LIMIT {limit} OFFSET {offset}"
+    cursor.execute(query_final, params_movs)
     movimientos = cursor.fetchall()
 
-    # Lógica para los botones del HTML
-    # - "Anterior" (ver más viejos): se habilita si trajo 10 y no pasamos el límite de 30 (en vista general)
-    # - "Siguiente" (volver a los nuevos): se habilita si page > 1
-    hay_mas_viejos = len(movimientos) == limit
-    if not es_busqueda_activa and page >= 3:
-        hay_mas_viejos = False
+    # Lógica de botones (hay más si trajo 10 y no estamos en la página 3)
+    es_busqueda_activa = any([busqueda, tipo_filtro, desde, hasta])
+    hay_mas_viejos = len(movimientos) == limit and page < 3
+
+    # --- 3 y 4. DEUDAS Y TOTALES (Igual que antes) ---
+    # ... (mantené el resto de tu código igual)
 
     # --- 3. DEUDAS ---
     cursor.execute("SELECT * FROM deudas WHERE usuario_id = %s AND estado = 'pendiente' ORDER BY id DESC LIMIT 5", (current_user.id,))
