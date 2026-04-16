@@ -349,7 +349,44 @@
                 </div>
             </div>
         </div>
-        
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; background: var(--pocket-blue); padding: 4px 15px; border-radius: 12px; border: 2px solid var(--pocket-green);">
+            
+    <div>
+        {% if page > 1 %}
+            <a href="{{ url_for('home.index', page=page-1, q=filtros.q, tipo=filtros.tipo, desde=filtros.desde, hasta=filtros.hasta) }}" 
+               style="background-color: var(--pocket-blue); border: 2px solid var(--pocket-green); color: white; padding: 4px 12px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 5px; transition: 0.2s;">
+               <i class="fas fa-arrow-left"></i> MÁS NUEVOS
+            </a>
+        {% else %}
+            <button style="background-color: #e2e8f0; color: #94a3b8; padding: 4px 12px; border-radius: 8px; border: none; font-weight: 700; font-size: 0.8rem; cursor: not-allowed; display: inline-flex; align-items: center; gap: 5px;" disabled>
+               <i class="fas fa-arrow-left"></i> MÁS NUEVOS
+            </button>
+        {% endif %}
+    </div>
+
+    <span style="font-weight: 800; color: var(--pocket-blue); background: var(--pocket-light-blue); padding: 2px 12px; border-radius: 8px; border: 1px solid var(--pocket-blue); font-size: 0.85rem;">
+        Página {{ page }}
+    </span>
+
+    <div>
+        {% if hay_mas_viejos %}
+            <a href="{{ url_for('home.index', page=page+1, q=filtros.q, tipo=filtros.tipo, desde=filtros.desde, hasta=filtros.hasta) }}" 
+               style="background-color: var(--pocket-blue); border: 2px solid var(--pocket-green); color: white; padding: 4px 12px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 5px; transition: 0.2s;">
+               MÁS VIEJOS <i class="fas fa-arrow-right"></i>
+            </a>
+        {% else %}
+            <button style="background-color: #e2e8f0; color: #94a3b8; padding: 4px 12px; border-radius: 8px; border: none; font-weight: 700; font-size: 0.8rem; cursor: not-allowed; display: inline-flex; align-items: center; gap: 5px;" disabled title="No hay más datos o llegaste al límite">
+               MÁS VIEJOS <i class="fas fa-arrow-right"></i>
+            </button>
+        {% endif %}
+    </div>
+</div>
+
+{% if not es_busqueda_activa and page == 3 %}
+    <p style="text-align: center; color: #64748b; font-size: 0.8rem; margin-top: 8px; font-weight: 600;">
+        <i class="fas fa-info-circle"></i> Para ver movimientos más antiguos, haz uso de los filtros de búsqueda de arriba.
+    </p>
+{% endif %}
         <div class="table-responsive" style="border-radius: 12px; overflow: hidden; border: 2px solid var(--pocket-green); margin-top: 10px;">
             <table style="width: 100%; border-collapse: collapse; background-color: white;">
                 <thead>
@@ -397,45 +434,6 @@
                 </tbody>
             </table>
         </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; background: white; padding: 15px; border-radius: 12px; border: 2px solid var(--pocket-green);">
-            
-            <div>
-                {% if page > 1 %}
-                    <a href="{{ url_for('home.index', page=page-1, q=filtros.q, tipo=filtros.tipo, desde=filtros.desde, hasta=filtros.hasta) }}" 
-                       style="background-color: var(--pocket-blue); border: 2px solid var(--pocket-green); color: white; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 5px; transition: 0.2s;">
-                       <i class="fas fa-arrow-left"></i> MÁS NUEVOS
-                    </a>
-                {% else %}
-                    <button style="background-color: #e2e8f0; color: #94a3b8; padding: 8px 15px; border-radius: 8px; border: none; font-weight: 700; font-size: 0.85rem; cursor: not-allowed; display: inline-flex; align-items: center; gap: 5px;" disabled>
-                       <i class="fas fa-arrow-left"></i> MÁS NUEVOS
-                    </button>
-                {% endif %}
-            </div>
-
-            <span style="font-weight: 800; color: var(--pocket-blue); background: var(--pocket-light-blue); padding: 5px 15px; border-radius: 8px; border: 1px solid var(--pocket-blue); font-size: 0.9rem;">
-                Página {{ page }}
-            </span>
-
-            <div>
-                {% if hay_mas_viejos %}
-                    <a href="{{ url_for('home.index', page=page+1, q=filtros.q, tipo=filtros.tipo, desde=filtros.desde, hasta=filtros.hasta) }}" 
-                       style="background-color: var(--pocket-blue); border: 2px solid var(--pocket-green); color: white; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 5px; transition: 0.2s;">
-                       MÁS VIEJOS <i class="fas fa-arrow-right"></i>
-                    </a>
-                {% else %}
-                    <button style="background-color: #e2e8f0; color: #94a3b8; padding: 8px 15px; border-radius: 8px; border: none; font-weight: 700; font-size: 0.85rem; cursor: not-allowed; display: inline-flex; align-items: center; gap: 5px;" disabled title="No hay más datos o llegaste al límite">
-                       MÁS VIEJOS <i class="fas fa-arrow-right"></i>
-                    </button>
-                {% endif %}
-            </div>
-        </div>
-
-        {% if not es_busqueda_activa and page == 3 %}
-            <p style="text-align: center; color: #64748b; font-size: 0.8rem; margin-top: 12px; font-weight: 600;">
-                <i class="fas fa-info-circle"></i> Para ver movimientos más antiguos, haz uso de los filtros de búsqueda de arriba.
-            </p>
-        {% endif %}
     </div>
 </main>
 </div>
