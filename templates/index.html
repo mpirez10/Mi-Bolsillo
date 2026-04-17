@@ -569,80 +569,86 @@ function exportarAExcel() {
     document.body.removeChild(link);
 }
 
-    function exportarAPDF() {
+  function exportarAPDF() {
     const urlParams = new URLSearchParams(window.location.search);
     
-    // Captura de datos
-    const nombreUsuario = "USUARIO"; // Podés cambiar esto por un dato dinámico
-    const q = document.getElementById("busquedaMovimiento")?.value.trim() || urlParams.get('q') || "Todos";
+    // 1. Captura de datos para los filtros (Lo que no puede faltar)
+    const nombreUsuario = document.getElementById('userName')?.innerText.trim() || "Usuario";
     const tipo = document.getElementById("filtroTipo")?.value || urlParams.get('tipo') || "TODOS";
-    const desde = document.getElementById("fechaDesde")?.value || "Inicio";
-    const hasta = document.getElementById("fechaHasta")?.value || "Fin";
-    const totalNeto = document.getElementById('sumaTotalFiltrada')?.innerText || '$ 0.00';
+    const desde = document.getElementById("fechaDesde")?.value || urlParams.get('desde') || "Inicio";
+    const hasta = document.getElementById("fechaHasta")?.value || urlParams.get('hasta') || "Fin";
+    const totalNeto = document.getElementById('sumaTotalFiltrada')?.innerText.trim() || '$ 0.00';
     const fechaHora = new Date().toLocaleString('es-UY');
 
+    // 2. Extraer datos de la tabla
     let filasHtml = '';
     const filas = document.querySelectorAll("table tr"); 
     
     filas.forEach((fila, index) => {
-        const cols = fila.querySelectorAll("td");
-        // Solo procesamos si tiene celdas de datos (evita el header de la tabla original)
-        if (cols.length > 0) {
-            const fecha   = cols[0].innerText.trim();
-            const tTipo    = cols[1].innerText.trim();
-            const monto   = cols[2].innerText.trim();
-            const cuenta  = cols[3].innerText.trim();
-            const detalle = cols[4].innerText.trim();
+        if (index > 0 && fila.style.display !== 'none') {
+            const cols = fila.querySelectorAll("td");
+            if (cols.length >= 5) {
+                const fecha   = cols[0].innerText.trim();
+                const tTipo   = cols[1].innerText.trim();
+                const monto   = cols[2].innerText.trim();
+                const cuenta  = cols[3].innerText.trim();
+                const detalle = cols[4].innerText.trim();
 
-            // Color dinámico para el monto
-            let colorMonto = tTipo.toUpperCase().includes("INGRESO") ? '#10b981' : 
-                            (tTipo.toUpperCase().includes("EGRESO") ? '#ef4444' : '#3b82f6');
+                // Aplicar tus clases de colores (text-success / text-danger)
+                let claseMonto = tTipo.toUpperCase().includes("INGRESO") ? 'text-success' : 
+                                (tTipo.toUpperCase().includes("EGRESO") ? 'text-danger' : '');
 
-            filasHtml += `
-                <tr style="border-bottom: 1px solid #e2e8f0;">
-                    <td style="padding: 10px; font-size: 8.5pt;">${fecha}</td>
-                    <td style="padding: 10px; font-weight: bold; color: #64748b; font-size: 7.5pt;">${tTipo.toUpperCase()}</td>
-                    <td style="padding: 10px; font-weight: bold; color: ${colorMonto}; font-size: 9pt;">${monto}</td>
-                    <td style="padding: 10px; font-size: 8.5pt;">${cuenta}</td>
-                    <td style="padding: 10px; text-transform: uppercase; font-size: 8pt; color: #1e293b;">${detalle}</td>
-                </tr>`;
+                filasHtml += `
+                    <tr>
+                        <td>${fecha}</td>
+                        <td style="font-weight: bold; color: #64748b;">${tTipo.toUpperCase()}</td>
+                        <td class="${claseMonto}">${monto}</td>
+                        <td>${cuenta}</td>
+                        <td style="text-transform: uppercase;">${detalle}</td>
+                    </tr>`;
+            }
         }
     });
 
+    // 3. Construir el HTML usando TUS CLASES de CSS
     const ventanaReporte = document.createElement('div');
+    ventanaReporte.id = 'reporte-impresion-formal'; 
+    
     ventanaReporte.innerHTML = `
-        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e293b; padding: 40px; background-color: white;">
+        <div style="padding: 10px; background: white;">
             
-            <div style="display: flex; justify-content: space-between; border-bottom: 3px solid #0056b3; padding-bottom: 15px; margin-bottom: 25px;">
+            <div class="pdf-header">
                 <div>
-                    <div style="font-size: 20pt; font-weight: 900; color: #0056b3;">MI BOLSILLO</div>
-                    <div style="font-size: 9pt; color: #64748b; font-weight: bold; text-transform: uppercase;">Reporte de Gestión Financiera</div>
+                    <div class="pdf-logo-text">REPORTE</div>
+                    <div class="pdf-tagline">Usuario: ${nombreUsuario}</div>
+                </div>
+                <div class="pdf-title-section">
+                    <h1>SISTEMA DE GESTIÓN</h1>
+                    <p>Emitido: ${fechaHora}</p>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-family: sans-serif;">
+                <div style="font-size: 9pt; color: #475569;">
+                    <strong>PERIODO:</strong> ${desde} al ${hasta} <br>
+                    <strong>TIPO FILTRADO:</strong> ${tipo}
                 </div>
                 <div style="text-align: right;">
-                    <div style="font-size: 10pt; font-weight: bold; color: #1e293b;">Usuario: ${nombreUsuario}</div>
-                    <div style="font-size: 8pt; color: #94a3b8; margin-top: 5px;">${fechaHora}</div>
+                    <span style="font-size: 8pt; font-weight: 800; color: #64748b; display: block;">TOTAL FILTRADO</span>
+                    <strong style="font-size: 20pt; color: #0f172a;">${totalNeto}</strong>
                 </div>
             </div>
 
-            <div style="margin-bottom: 25px; font-size: 9pt; color: #475569; display: flex; gap: 20px;">
-                <span><strong>Búsqueda:</strong> ${q}</span>
-                <span><strong>Tipo:</strong> ${tipo}</span>
-                <span><strong>Periodo:</strong> ${desde} / ${hasta}</span>
-            </div>
+            <div class="section-title">DETALLE DE MOVIMIENTOS (FechaTipoMontoCuentaDetalle)</div>
 
-            <div style="background: #f8fafc; border: 2px solid #28a745; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 30px;">
-                <span style="font-size: 9pt; color: #64748b; text-transform: uppercase; font-weight: 800; letter-spacing: 1px;">Total Neto Filtrado</span>
-                <div style="font-size: 26pt; font-weight: 900; color: #28a745; margin-top: 5px;">${totalNeto}</div>
-            </div>
-
-            <table style="width: 100%; border-collapse: collapse;">
+            <table class="pdf-table">
                 <thead>
-                    <tr style="background: #0056b3; color: white;">
-                        <th style="padding: 12px; text-align: left; font-size: 8pt; border-radius: 8px 0 0 0;">FECHA</th>
-                        <th style="padding: 12px; text-align: left; font-size: 8pt;">TIPO</th>
-                        <th style="padding: 12px; text-align: left; font-size: 8pt;">MONTO</th>
-                        <th style="padding: 12px; text-align: left; font-size: 8pt;">CUENTA</th>
-                        <th style="padding: 12px; text-align: left; font-size: 8pt; border-radius: 0 8px 0 0;">DETALLE</th>
+                    <tr>
+                        <th>FECHA</th>
+                        <th>TIPO</th>
+                        <th>MONTO</th>
+                        <th>CUENTA</th>
+                        <th>DETALLE</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -650,16 +656,24 @@ function exportarAExcel() {
                 </tbody>
             </table>
 
-            <div style="margin-top: 50px; border-top: 1px solid #e2e8f0; padding-top: 20px; text-align: center;">
-                <div style="font-size: 8pt; color: #94a3b8; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px;">Sistema de Control de Finanzas</div>
-                <div style="font-size: 10pt; font-weight: 900; color: #0056b3;">DESARROLLADO POR TUTUCODE</div>
+            <div class="pdf-footer">
+                <p style="margin-bottom: 5px; font-weight: bold; color: #475569;">Reporte generado en Panel Central</p>
+                <p style="margin-bottom: 5px; font-size: 10pt; color: #0f172a; font-weight: 800;">MiBolsillo | Gestión de finanzas y negocios</p>
+                <p style="letter-spacing: 2px; text-transform: uppercase; color: #94a3b8;">Desarrollado por TutuCode</p>
             </div>
         </div>
     `;
 
+    // 4. Ejecutar impresión
     document.body.appendChild(ventanaReporte);
-    window.print();
-    ventanaReporte.remove();
+    
+    // Forzamos un repaint antes de imprimir
+    setTimeout(() => {
+        window.print();
+        setTimeout(() => {
+            ventanaReporte.remove();
+        }, 500);
+    }, 100);
 }
     function limpiarFiltros() {
         document.getElementById("busquedaMovimiento").value = "";
