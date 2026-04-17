@@ -529,7 +529,7 @@ function exportarAExcel() {
     const urlParams = new URLSearchParams(window.location.search);
     
     // 1. Datos de cabecera (Si no tenés el ID 'userName', usa 'Usuario')
-    const nombreUsuario = "{{ current_user.nombre_completo }}"; || "Usuario";
+    const nombreUsuario = "{{ current_user.nombre_completo }}" || "Usuario";
     const q = document.getElementById("busquedaMovimiento")?.value.trim() || urlParams.get('q') || "Sin filtro";
     const tipo = document.getElementById("filtroTipo")?.value || urlParams.get('tipo') || "Todos";
     const totalNeto = document.getElementById('sumaTotalFiltrada')?.innerText.trim() || '$ 0.00';
@@ -539,7 +539,7 @@ function exportarAExcel() {
     let csv = [];
     
     // Encabezados del reporte
-    csv.push(`"REPORTE DE MOVIMIENTOS - ${nombreUsuario.nombre_completo.toUpperCase()}"`);
+    csv.push(`"REPORTE DE MOVIMIENTOS - ${nombreUsuario.toUpperCase()}"`);
     csv.push(`"Filtro: ${q} | Operación: ${tipo}"`);
     csv.push(`"Balance Neto: ${totalNeto.replace('$', '').trim()}"`);
     csv.push(""); 
@@ -573,7 +573,7 @@ function exportarAExcel() {
     const urlParams = new URLSearchParams(window.location.search);
     
     // 1. Captura de datos para los filtros (Lo que no puede faltar)
-    const nombreUsuario = "{{ current_user.nombre_completo }}"; || "Usuario";
+    const nombreUsuario = "{{ current_user.nombre_completo }}" || "Usuario";
     const tipo = document.getElementById("filtroTipo")?.value || urlParams.get('tipo') || "TODOS";
     const desde = document.getElementById("fechaDesde")?.value || urlParams.get('desde') || "Inicio";
     const hasta = document.getElementById("fechaHasta")?.value || urlParams.get('hasta') || "Fin";
