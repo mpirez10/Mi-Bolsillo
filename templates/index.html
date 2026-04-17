@@ -499,7 +499,7 @@ function filtrarMovimientos() {
         }
 
         if (diferenciaDias > 31) {
-            alert("Bo, el lapso máximo permitido es de 31 días.");
+            alert("El lapso máximo permitido es de 31 días.");
             return;
         }
     }
@@ -525,33 +525,36 @@ document.getElementById("filtroTipo").addEventListener("change", filtrarMovimien
 document.getElementById("fechaDesde").addEventListener("change", filtrarMovimientos);
 document.getElementById("fechaHasta").addEventListener("change", filtrarMovimientos);
   function exportarAExcel() {
-    // 1. Capturamos datos contextuales
-    const nombreUsuario = document.getElementById('userName')?.innerText.trim() || "Usuario";
-    const totalFiltrado = document.getElementById('sumaTotalFiltrada')?.innerText || '$ 0.00';
-    const q = document.getElementById("busquedaMovimiento").value || "Sin filtro";
-    const desde = document.getElementById("fechaDesde").value || "Inicio";
-    const hasta = document.getElementById("fechaHasta").value || "Fin";
+    // 1. Capturamos los parámetros actuales de la URL (por si los inputs están vacíos)
+    const urlParams = new URLSearchParams(window.location.search);
     
+    // 2. Capturamos el nombre de usuario (del span que creamos con id="userName")
+    const nombreUsuario = document.getElementById('userName')?.innerText.trim() || "Usuario";
+    
+    // 3. Capturamos los filtros (Prioridad: Input > URL > Default)
+    const q = document.getElementById("busquedaMovimiento")?.value.trim() || urlParams.get('q') || "Sin filtro";
+    const tipo = document.getElementById("filtroTipo")?.value || urlParams.get('tipo') || "Todos";
+    const desde = document.getElementById("fechaDesde")?.value || urlParams.get('desde') || "Inicio";
+    const hasta = document.getElementById("fechaHasta")?.value || urlParams.get('hasta') || "Fin";
+    
+    const totalFiltrado = document.getElementById('sumaTotalFiltrada')?.innerText || '$ 0.00';
     const filas = document.querySelectorAll("table tr");
     let csv = [];
     
-    // 2. Encabezado del documento (Metadatos)
+    // Encabezado con datos reales
     csv.push(`"REPORTE DE MOVIMIENTOS - ${nombreUsuario.toUpperCase()}"`);
-    csv.push(`"Filtros: ${q} | Periodo: ${desde} a ${hasta}"`);
+    csv.push(`"Búsqueda: ${q} | Tipo: ${tipo}"`);
+    csv.push(`"Periodo: ${desde} a ${hasta}"`);
     csv.push(`"Balance Neto: ${totalFiltrado.replace('$', '').trim()}"`);
-    csv.push(""); // Fila vacía separadora
+    csv.push(""); 
 
-    // 3. Procesar la tabla
     filas.forEach((fila) => {
-        // Solo procesamos si la fila es visible (por los filtros)
         if (fila.style.display !== 'none') {
             const cols = fila.querySelectorAll("td, th");
             let filaData = [];
-            
-            // Recorremos columnas (menos la última que suele ser 'Acciones')
+            // Exportamos todo menos la columna de "Acciones"
             for (let i = 0; i < cols.length - 1; i++) {
                 let limpio = cols[i].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
-                // Escapamos comillas dobles para que no rompa el CSV
                 limpio = limpio.replace(/"/g, '""');
                 filaData.push('"' + limpio + '"');
             }
@@ -559,27 +562,27 @@ document.getElementById("fechaHasta").addEventListener("change", filtrarMovimien
         }
     });
 
-    // 4. Generar descarga con BOM para que Excel reconozca tildes y Ñ
     const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + csv.join("\n");
     const link = document.createElement("a");
-    const fechaArchivo = new Date().toISOString().slice(0,10);
-    
     link.setAttribute("href", encodeURI(csvContent));
-    link.setAttribute("download", `Reporte_${nombreUsuario}_${fechaArchivo}.csv`);
+    link.setAttribute("download", `Reporte_${nombreUsuario}_${desde}_${hasta}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 }
     function exportarAPDF() {
-    // 1. Captura de datos
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // Captura de Identidad y Filtros
     const nombreUsuario = document.getElementById('userName')?.innerText.trim() || "Usuario";
+    const q = document.getElementById("busquedaMovimiento")?.value.trim() || urlParams.get('q') || "Todos";
+    const tipo = document.getElementById("filtroTipo")?.value || urlParams.get('tipo') || "Todos";
+    const desde = document.getElementById("fechaDesde")?.value || urlParams.get('desde') || "el inicio";
+    const hasta = document.getElementById("fechaHasta")?.value || urlParams.get('hasta') || "hoy";
+    
     const totalFiltrado = document.getElementById('sumaTotalFiltrada')?.innerText || '$ 0.00';
     const fechaEmision = new Date().toLocaleString('es-UY');
-    const busqueda = document.getElementById("busquedaMovimiento").value || "Todos";
-    const desde = document.getElementById("fechaDesde").value || "Inicio";
-    const hasta = document.getElementById("fechaHasta").value || "Fin";
 
-    // 2. Procesar filas visibles
     let filasHtml = '';
     const filas = document.querySelectorAll("table tbody tr"); 
     
@@ -588,78 +591,60 @@ document.getElementById("fechaHasta").addEventListener("change", filtrarMovimien
             const cols = fila.querySelectorAll("td");
             if (cols.length >= 5) {
                 const fecha   = cols[0].innerText.trim();
-                const tipo    = cols[1].innerText.trim();
+                const tTipo   = cols[1].innerText.trim();
                 const monto   = cols[2].innerText.trim();
                 const cuenta  = cols[3].innerText.trim();
                 const detalle = cols[4].innerText.trim();
 
-                // Lógica de colores pro
-                const t = tipo.toUpperCase();
-                let colorMonto = '#334155'; // Gris oscuro por defecto (Transf)
-                if (t.includes("INGRESO")) colorMonto = '#10b981'; // Verde
-                else if (t.includes("EGRESO")) colorMonto = '#ef4444'; // Rojo
+                const t = tTipo.toUpperCase();
+                let colorMonto = t.includes("INGRESO") ? '#10b981' : (t.includes("EGRESO") ? '#ef4444' : '#64748b');
 
                 filasHtml += `
                     <tr style="border-bottom: 1px solid #e2e8f0;">
-                        <td style="padding: 10px;">${fecha}</td>
-                        <td style="padding: 10px; font-size: 7pt; font-weight: bold; color: #64748b;">${tipo}</td>
-                        <td style="padding: 10px; font-weight: bold; color: ${colorMonto};">${monto}</td>
-                        <td style="padding: 10px;">${cuenta}</td>
-                        <td style="padding: 10px; text-transform: uppercase; font-size: 8pt;">${detalle}</td>
+                        <td style="padding: 8px;">${fecha}</td>
+                        <td style="padding: 8px; font-weight: bold; color: #64748b; font-size: 7pt;">${tTipo}</td>
+                        <td style="padding: 8px; font-weight: bold; color: ${colorMonto};">${monto}</td>
+                        <td style="padding: 8px;">${cuenta}</td>
+                        <td style="padding: 8px; text-transform: uppercase;">${detalle}</td>
                     </tr>`;
             }
         }
     });
 
-    // 3. Construcción del documento
     const reporte = document.createElement('div');
-    reporte.id = 'reporte-impresion-formal';
-    
     reporte.innerHTML = `
-        <div style="font-family: 'Segoe UI', Helvetica, sans-serif; color: #1e293b; padding: 20px;">
-            <div style="display: flex; justify-content: space-between; border-bottom: 3px solid #0f172a; padding-bottom: 15px; align-items: center;">
+        <div style="font-family: sans-serif; color: #1e293b; padding: 20px;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 3px solid #000; padding-bottom: 10px;">
                 <div>
-                    <div style="font-size: 18pt; font-weight: 900; color: #0f172a;">REPORTE DE: ${nombreUsuario.toUpperCase()}</div>
-                    <div style="font-size: 8pt; color: #64748b; margin-top: 4px; letter-spacing: 1px;">SISTEMA DE GESTIÓN FINANCIERA</div>
+                    <div style="font-size: 16pt; font-weight: 800;">REPORTE DE: ${nombreUsuario.toUpperCase()}</div>
+                    <div style="font-size: 8pt; color: #64748b;">FILTRO: ${q} (${tipo})</div>
                 </div>
                 <div style="text-align: right;">
-                    <h1 style="font-size: 12pt; margin: 0; color: #0f172a;">HISTORIAL DE MOVIMIENTOS</h1>
-                    <p style="font-size: 8pt; color: #64748b; margin: 4px 0 0 0;">Generado: ${fechaEmision}</p>
+                    <div style="font-size: 10pt; font-weight: bold;">PERIODO: ${desde} - ${hasta}</div>
+                    <div style="font-size: 8pt; color: #64748b;">Generado: ${fechaEmision}</div>
                 </div>
             </div>
 
-            <div style="margin: 20px 0; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; font-size: 9pt; display: flex; justify-content: space-between;">
-                <span><strong>Búsqueda:</strong> ${busqueda}</span>
-                <span><strong>Periodo:</strong> ${desde} — ${hasta}</span>
+            <div style="text-align: center; margin: 25px 0;">
+                <span style="font-size: 9pt; color: #64748b; display: block;">BALANCE NETO</span>
+                <strong style="font-size: 24pt;">${totalFiltrado}</strong>
             </div>
 
-            <div style="text-align: center; margin: 30px 0;">
-                <span style="font-size: 9pt; color: #64748b; display: block; text-transform: uppercase; font-weight: bold;">Balance Neto Filtrado</span>
-                <strong style="font-size: 26pt; color: #0f172a;">${totalFiltrado}</strong>
-            </div>
-
-            <table style="width: 100%; border-collapse: collapse; font-size: 9pt; margin-bottom: 30px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 8.5pt;">
                 <thead>
-                    <tr style="background: #0f172a; color: #ffffff;">
-                        <th style="padding: 12px; text-align: left; border-radius: 5px 0 0 0;">FECHA</th>
-                        <th style="padding: 12px; text-align: left;">TIPO</th>
-                        <th style="padding: 12px; text-align: left;">MONTO</th>
-                        <th style="padding: 12px; text-align: left;">CUENTA</th>
-                        <th style="padding: 12px; text-align: left; border-radius: 0 5px 0 0;">DETALLE</th>
+                    <tr style="background: #000; color: #fff;">
+                        <th style="padding: 10px; text-align: left;">FECHA</th>
+                        <th style="padding: 10px; text-align: left;">TIPO</th>
+                        <th style="padding: 10px; text-align: left;">MONTO</th>
+                        <th style="padding: 10px; text-align: left;">CUENTA</th>
+                        <th style="padding: 10px; text-align: left;">DETALLE</th>
                     </tr>
                 </thead>
-                <tbody>
-                    ${filasHtml || '<tr><td colspan="5" style="text-align:center; padding: 30px; color: #64748b;">No se encontraron registros para los filtros seleccionados.</td></tr>'}
-                </tbody>
+                <tbody>${filasHtml}</tbody>
             </table>
-
-            <div style="margin-top: 50px; border-top: 1px solid #e2e8f0; padding-top: 15px; text-align: center; font-size: 7.5pt; color: #94a3b8;">
-                Documento generado por el Panel de Control Personal — Usuario: ${nombreUsuario}
-            </div>
         </div>
     `;
 
-    // 4. Ejecución
     document.body.appendChild(reporte);
     window.print();
     reporte.remove();
