@@ -340,11 +340,11 @@
                 <div class="fecha-inputs" style="flex: 0 1 auto; min-width: 300px; display: flex; gap: 10px;">
                     <div style="flex: 1;">
                         <small style="color: white; font-weight: 700; text-transform: uppercase;">Desde</small>
-                        <input type="date" id="fechaDesde" onchange="filtrarMovimientos()" class="form-control" style="background: white; border-radius: 6px; border: none; width: 100%; padding: 5px; margin-top: 5px;">
+                        <input type="date" id="fechaDesde" class="form-control" ...>
                     </div>
                     <div style="flex: 1;">
                         <small style="color: white; font-weight: 700; text-transform: uppercase;">Hasta</small>
-                        <input type="date" id="fechaHasta" onchange="filtrarMovimientos()" class="form-control" style="background: white; border-radius: 6px; border: none; width: 100%; padding: 5px; margin-top: 5px;">
+                        <input type="date" id="fechaHasta" class="form-control" ...>
                     </div>
                 </div>
             </div>
@@ -469,27 +469,61 @@
 
     // 2. FUNCIÓN DE FILTRADO - Actualizada con Tipo
 function filtrarMovimientos() {
-    // Capturamos los valores de tus inputs
+    // 1. Capturamos los valores
     const q = document.getElementById("busquedaMovimiento").value.trim();
     const tipo = document.getElementById("filtroTipo").value;
-    const desde = document.getElementById("fechaDesde").value;
-    const hasta = document.getElementById("fechaHasta").value;
+    const desdeInput = document.getElementById("fechaDesde");
+    const hastaInput = document.getElementById("fechaHasta");
+    
+    const desde = desdeInput.value;
+    const hasta = hastaInput.value;
 
-    // Armamos la URL con los parámetros
-    // Usamos encodeURIComponent por si escribís algo con espacios o tildes
+    // 2. Lógica de validación para Fechas (Máximo 31 días)
+    if (desde || hasta) {
+        // Si falta una de las dos, no filtramos todavía (evita el loop)
+        if (!desde || !hasta) {
+            console.log("Esperando rango de fechas completo...");
+            return; 
+        }
+
+        // Convertimos a objetos Date para calcular la diferencia
+        const fechaInicio = new Date(desde);
+        const fechaFin = new Date(hasta);
+        
+        // La diferencia da en milisegundos, pasamos a días
+        const diferenciaDias = (fechaFin - fechaInicio) / (1000 * 60 * 60 * 24);
+
+        if (diferenciaDias < 0) {
+            alert("¡Ojo! La fecha 'Desde' no puede ser posterior a 'Hasta'.");
+            return;
+        }
+
+        if (diferenciaDias > 31) {
+            alert("Bo, el lapso máximo permitido es de 31 días.");
+            return;
+        }
+    }
+
+    // 3. Si pasó las validaciones, armamos la URL y mandamos al servidor
     let url = `/?q=${encodeURIComponent(q)}&tipo=${tipo}&desde=${desde}&hasta=${hasta}`;
-
-    // Redireccionamos (esto dispara tu función index() en Python)
     window.location.href = url;
 }
 
-// PIQUE EXTRA: Para que no tengas que hacer clic en un botón, 
-// agregá esto para que busque al apretar Enter en el cuadro de texto.
+// --- EVENT LISTENERS (Los encargados de disparar la función) ---
+
+// Para el buscador: Solo cuando apretás Enter
 document.getElementById("busquedaMovimiento").addEventListener("keypress", function (e) {
     if (e.key === 'Enter') {
         filtrarMovimientos();
     }
 });
+
+// Para el tipo (Ingreso/Egreso): Apenas cambia
+document.getElementById("filtroTipo").addEventListener("change", filtrarMovimientos);
+
+// Para las fechas: Se dispara cuando cambian, pero la función arriba controla que estén las dos
+document.getElementById("fechaDesde").addEventListener("change", filtrarMovimientos);
+document.getElementById("fechaHasta").addEventListener("change", filtrarMovimientos);
     // 4. EXPORTAR A EXCEL
     function exportarAExcel() {
         const filas = document.querySelectorAll("table tr");
