@@ -539,7 +539,7 @@ function exportarAExcel() {
     let csv = [];
     
     // Encabezados del reporte
-    csv.push(`"REPORTE DE MOVIMIENTOS - ${nombreUsuario.toUpperCase()}"`);
+    csv.push(`"REPORTE DE MOVIMIENTOS - ${current_user.nombre_completo.toUpperCase()}"`);
     csv.push(`"Filtro: ${q} | Operación: ${tipo}"`);
     csv.push(`"Balance Neto: ${totalNeto.replace('$', '').trim()}"`);
     csv.push(""); 
