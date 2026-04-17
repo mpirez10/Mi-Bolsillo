@@ -85,10 +85,16 @@ def index():
 
     cursor.close()
     conn.close()
+    # Calculamos el total de los 10 movimientos que estamos mostrando ahora
+suma_visible = sum(
+    m['monto'] if m['tipo'].upper() == 'INGRESO' else -m['monto'] 
+    for m in movimientos
+)
 
     return render_template(
         "index.html", 
-        cuentas=cuentas, 
+        cuentas=cuentas,
+        suma_total_filtrada=suma_visible
         saldo_general=saldo_general,
         movimientos=movimientos, 
         deudas=deudas_list,
