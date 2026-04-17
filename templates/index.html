@@ -525,27 +525,29 @@ document.getElementById("filtroTipo").addEventListener("change", filtrarMovimien
 document.getElementById("fechaDesde").addEventListener("change", filtrarMovimientos);
 document.getElementById("fechaHasta").addEventListener("change", filtrarMovimientos);
   function exportarAExcel() {
-    // 1. Capturamos los parámetros actuales de la URL (por si los inputs están vacíos)
+    // 1. Capturamos los parámetros de la URL o los inputs
     const urlParams = new URLSearchParams(window.location.search);
     
-    // 2. Capturamos el nombre de usuario (del span que creamos con id="userName")
+    // 2. Capturamos el nombre de usuario
     const nombreUsuario = document.getElementById('userName')?.innerText.trim() || "Usuario";
     
-    // 3. Capturamos los filtros (Prioridad: Input > URL > Default)
-    const q = document.getElementById("busquedaMovimiento")?.value.trim() || urlParams.get('q') || "Sin filtro";
-    const tipo = document.getElementById("filtroTipo")?.value || urlParams.get('tipo') || "Todos";
-    const desde = document.getElementById("fechaDesde")?.value || urlParams.get('desde') || "Inicio";
-    const hasta = document.getElementById("fechaHasta")?.value || urlParams.get('hasta') || "Fin";
+    // 3. Capturamos los filtros de forma segura
+    let q = document.getElementById("busquedaMovimiento")?.value.trim() || urlParams.get('q') || "Sin filtro";
+    let tipo = document.getElementById("filtroTipo")?.value || urlParams.get('tipo') || "Todos";
+    let desde = document.getElementById("fechaDesde")?.value || urlParams.get('desde') || "Inicio";
+    let hasta = document.getElementById("fechaHasta")?.value || urlParams.get('hasta') || "Fin";
     
+    if (q === "") q = "Sin filtro de texto";
+
     const totalFiltrado = document.getElementById('sumaTotalFiltrada')?.innerText || '$ 0.00';
     const filas = document.querySelectorAll("table tr");
     let csv = [];
     
-    // Encabezado con datos reales
+    // Encabezado nivel corporativo
     csv.push(`"REPORTE DE MOVIMIENTOS - ${nombreUsuario.toUpperCase()}"`);
-    csv.push(`"Búsqueda: ${q} | Tipo: ${tipo}"`);
-    csv.push(`"Periodo: ${desde} a ${hasta}"`);
-    csv.push(`"Balance Neto: ${totalFiltrado.replace('$', '').trim()}"`);
+    csv.push(`"Filtros aplicados: ${q} | Tipo: ${tipo}"`);
+    csv.push(`"Período: ${desde} al ${hasta}"`);
+    csv.push(`"Balance Neto del Período: ${totalFiltrado.replace('$', '').trim()}"`);
     csv.push(""); 
 
     filas.forEach((fila) => {
@@ -565,7 +567,7 @@ document.getElementById("fechaHasta").addEventListener("change", filtrarMovimien
     const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + csv.join("\n");
     const link = document.createElement("a");
     link.setAttribute("href", encodeURI(csvContent));
-    link.setAttribute("download", `Reporte_${nombreUsuario}_${desde}_${hasta}.csv`);
+    link.setAttribute("download", `Reporte_${nombreUsuario.replace(/\s+/g, '_')}_${desde}_${hasta}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -575,21 +577,25 @@ document.getElementById("fechaHasta").addEventListener("change", filtrarMovimien
     
     // Captura de Identidad y Filtros
     const nombreUsuario = document.getElementById('userName')?.innerText.trim() || "Usuario";
-    const q = document.getElementById("busquedaMovimiento")?.value.trim() || urlParams.get('q') || "Todos";
-    const tipo = document.getElementById("filtroTipo")?.value || urlParams.get('tipo') || "Todos";
-    const desde = document.getElementById("fechaDesde")?.value || urlParams.get('desde') || "el inicio";
-    const hasta = document.getElementById("fechaHasta")?.value || urlParams.get('hasta') || "hoy";
+    let q = document.getElementById("busquedaMovimiento")?.value.trim() || urlParams.get('q') || "Todos";
+    let tipo = document.getElementById("filtroTipo")?.value || urlParams.get('tipo') || "Todos";
+    let desde = document.getElementById("fechaDesde")?.value || urlParams.get('desde') || "Inicio";
+    let hasta = document.getElementById("fechaHasta")?.value || urlParams.get('hasta') || "Fin";
     
+    if (q === "") q = "Sin texto";
+
     const totalFiltrado = document.getElementById('sumaTotalFiltrada')?.innerText || '$ 0.00';
     const fechaEmision = new Date().toLocaleString('es-UY');
 
     let filasHtml = '';
     const filas = document.querySelectorAll("table tbody tr"); 
     
+    let filasValidas = 0;
     filas.forEach((fila) => {
         if (fila.style.display !== 'none') {
             const cols = fila.querySelectorAll("td");
             if (cols.length >= 5) {
+                filasValidas++;
                 const fecha   = cols[0].innerText.trim();
                 const tTipo   = cols[1].innerText.trim();
                 const monto   = cols[2].innerText.trim();
@@ -599,49 +605,75 @@ document.getElementById("fechaHasta").addEventListener("change", filtrarMovimien
                 const t = tTipo.toUpperCase();
                 let colorMonto = t.includes("INGRESO") ? '#10b981' : (t.includes("EGRESO") ? '#ef4444' : '#64748b');
 
+                // Filas cebra (alternan color blanco y gris super clarito) para leer más fácil
+                const bgColor = filasValidas % 2 === 0 ? '#f8fafc' : '#ffffff';
+
                 filasHtml += `
-                    <tr style="border-bottom: 1px solid #e2e8f0;">
-                        <td style="padding: 8px;">${fecha}</td>
-                        <td style="padding: 8px; font-weight: bold; color: #64748b; font-size: 7pt;">${tTipo}</td>
-                        <td style="padding: 8px; font-weight: bold; color: ${colorMonto};">${monto}</td>
-                        <td style="padding: 8px;">${cuenta}</td>
-                        <td style="padding: 8px; text-transform: uppercase;">${detalle}</td>
+                    <tr style="border-bottom: 1px solid #e2e8f0; background-color: ${bgColor};">
+                        <td style="padding: 10px 8px; color: #334155;">${fecha}</td>
+                        <td style="padding: 10px 8px; font-weight: bold; color: #64748b; font-size: 7.5pt; letter-spacing: 0.5px;">${tTipo}</td>
+                        <td style="padding: 10px 8px; font-weight: 800; color: ${colorMonto};">${monto}</td>
+                        <td style="padding: 10px 8px; color: #334155;">${cuenta}</td>
+                        <td style="padding: 10px 8px; text-transform: uppercase; color: #475569; font-size: 8pt;">${detalle}</td>
                     </tr>`;
             }
         }
     });
 
+    // Por si filtran algo que no existe
+    if (filasValidas === 0) {
+        filasHtml = '<tr><td colspan="5" style="text-align:center; padding: 30px; color: #64748b;">No hay movimientos en este período con los filtros seleccionados.</td></tr>';
+    }
+
     const reporte = document.createElement('div');
+    // Armado del HTML para la impresión
     reporte.innerHTML = `
-        <div style="font-family: sans-serif; color: #1e293b; padding: 20px;">
-            <div style="display: flex; justify-content: space-between; border-bottom: 3px solid #000; padding-bottom: 10px;">
+        <div style="font-family: 'Segoe UI', Arial, sans-serif; color: #1e293b; padding: 20px; max-width: 1000px; margin: 0 auto;">
+            
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #0f172a; padding-bottom: 15px; margin-bottom: 20px;">
                 <div>
-                    <div style="font-size: 16pt; font-weight: 800;">REPORTE DE: ${nombreUsuario.toUpperCase()}</div>
-                    <div style="font-size: 8pt; color: #64748b;">FILTRO: ${q} (${tipo})</div>
+                    <div style="font-size: 10pt; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Reporte Financiero de</div>
+                    <div style="font-size: 22pt; font-weight: 900; color: #0f172a; line-height: 1;">${nombreUsuario.toUpperCase()}</div>
                 </div>
                 <div style="text-align: right;">
-                    <div style="font-size: 10pt; font-weight: bold;">PERIODO: ${desde} - ${hasta}</div>
-                    <div style="font-size: 8pt; color: #64748b;">Generado: ${fechaEmision}</div>
+                    <div style="font-size: 11pt; font-weight: 700; color: #334155;">PERÍODO: ${desde} al ${hasta}</div>
+                    <div style="font-size: 8.5pt; color: #64748b; margin-top: 4px;">Emisión: ${fechaEmision}</div>
                 </div>
             </div>
 
-            <div style="text-align: center; margin: 25px 0;">
-                <span style="font-size: 9pt; color: #64748b; display: block;">BALANCE NETO</span>
-                <strong style="font-size: 24pt;">${totalFiltrado}</strong>
+            <div style="background-color: #f1f5f9; border-radius: 6px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border: 1px solid #e2e8f0;">
+                <div>
+                    <div style="font-size: 8pt; color: #64748b; text-transform: uppercase; font-weight: bold;">Filtros aplicados</div>
+                    <div style="font-size: 10pt; color: #0f172a; font-weight: 500; margin-top: 2px;">Búsqueda: ${q} | Tipo: ${tipo}</div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 8pt; color: #64748b; text-transform: uppercase; font-weight: bold;">Balance Neto</div>
+                    <div style="font-size: 20pt; font-weight: 900; color: #0f172a; line-height: 1.1;">${totalFiltrado}</div>
+                </div>
             </div>
 
-            <table style="width: 100%; border-collapse: collapse; font-size: 8.5pt;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 9pt; margin-bottom: 40px;">
                 <thead>
-                    <tr style="background: #000; color: #fff;">
-                        <th style="padding: 10px; text-align: left;">FECHA</th>
-                        <th style="padding: 10px; text-align: left;">TIPO</th>
-                        <th style="padding: 10px; text-align: left;">MONTO</th>
-                        <th style="padding: 10px; text-align: left;">CUENTA</th>
-                        <th style="padding: 10px; text-align: left;">DETALLE</th>
+                    <tr style="background: #0f172a; color: #ffffff;">
+                        <th style="padding: 12px 8px; text-align: left; font-weight: 600; border-top-left-radius: 4px;">FECHA</th>
+                        <th style="padding: 12px 8px; text-align: left; font-weight: 600;">TIPO</th>
+                        <th style="padding: 12px 8px; text-align: left; font-weight: 600;">MONTO</th>
+                        <th style="padding: 12px 8px; text-align: left; font-weight: 600;">CUENTA</th>
+                        <th style="padding: 12px 8px; text-align: left; font-weight: 600; border-top-right-radius: 4px;">DETALLE</th>
                     </tr>
                 </thead>
                 <tbody>${filasHtml}</tbody>
             </table>
+
+            <div style="margin-top: 50px; padding-top: 15px; border-top: 1px solid #cbd5e1; text-align: center;">
+                <p style="margin: 0; font-size: 8.5pt; color: #64748b; font-weight: 500;">
+                    Documento generado por el Panel de Gestión Personal
+                </p>
+                <p style="margin: 5px 0 0 0; font-size: 8pt; color: #94a3b8; font-weight: 800; letter-spacing: 1px;">
+                    DESARROLLADO POR TUTUCODE
+                </p>
+            </div>
+            
         </div>
     `;
 
