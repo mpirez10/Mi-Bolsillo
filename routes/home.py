@@ -55,22 +55,21 @@ def index():
         page = 3
         offset = 20
 
-    # Ejecutamos la consulta con filtros + orden + paginación
+# Ejecutamos la consulta con filtros + orden + paginación
     query_final = f"SELECT * {query_base} {filtros_sql} ORDER BY fecha DESC, id DESC LIMIT {limit} OFFSET {offset}"
     cursor.execute(query_final, params_movs)
     movimientos = cursor.fetchall()
 
-    # Lógica de botones (hay más si trajo 10 y no estamos en la página 3)
+    # Lógica de botones
     es_busqueda_activa = any([busqueda, tipo_filtro, desde, hasta])
     hay_mas_viejos = len(movimientos) == limit and page < 3
 
-    # --- 3 y 4. DEUDAS Y TOTALES (Igual que antes) ---
-    # ... (mantené el resto de tu código igual)
-        # Calculamos el total de los 10 movimientos que estamos mostrando ahora
-suma_visible = sum(
-    m['monto'] if m['tipo'].upper() == 'INGRESO' else -m['monto'] 
-    for m in movimientos
-)
+    # --- CORRECCIÓN 1: Indentación de la suma ---
+    # Tiene que estar alineada con el resto del código dentro de la función
+    suma_visible = sum(
+        m['monto'] if m['tipo'].upper() == 'INGRESO' else -m['monto'] 
+        for m in movimientos
+    )
 
     # --- 3. DEUDAS ---
     cursor.execute("SELECT * FROM deudas WHERE usuario_id = %s AND estado = 'pendiente' ORDER BY id DESC LIMIT 5", (current_user.id,))
@@ -81,7 +80,6 @@ suma_visible = sum(
         cursor.execute(query, (current_user.id,))
         res = cursor.fetchone()
         return res['total'] if res and res['total'] else 0
-    
 
     ingresos_total = fetch_sum("SELECT SUM(monto) AS total FROM movimientos WHERE usuario_id = %s AND LOWER(tipo) = 'ingreso'")
     egresos_total = fetch_sum("SELECT SUM(monto) AS total FROM movimientos WHERE usuario_id = %s AND LOWER(tipo) = 'egreso'")
@@ -92,11 +90,11 @@ suma_visible = sum(
     cursor.close()
     conn.close()
 
-
+    # --- CORRECCIÓN 2: Comas en el render_template ---
     return render_template(
         "index.html", 
         cuentas=cuentas,
-        suma_total_filtrada=suma_visible
+        suma_total_filtrada=suma_visible, # Faltaba esta coma
         saldo_general=saldo_general,
         movimientos=movimientos, 
         deudas=deudas_list,
