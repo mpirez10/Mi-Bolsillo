@@ -66,6 +66,11 @@ def index():
 
     # --- 3 y 4. DEUDAS Y TOTALES (Igual que antes) ---
     # ... (mantené el resto de tu código igual)
+        # Calculamos el total de los 10 movimientos que estamos mostrando ahora
+suma_visible = sum(
+    m['monto'] if m['tipo'].upper() == 'INGRESO' else -m['monto'] 
+    for m in movimientos
+)
 
     # --- 3. DEUDAS ---
     cursor.execute("SELECT * FROM deudas WHERE usuario_id = %s AND estado = 'pendiente' ORDER BY id DESC LIMIT 5", (current_user.id,))
@@ -76,6 +81,7 @@ def index():
         cursor.execute(query, (current_user.id,))
         res = cursor.fetchone()
         return res['total'] if res and res['total'] else 0
+    
 
     ingresos_total = fetch_sum("SELECT SUM(monto) AS total FROM movimientos WHERE usuario_id = %s AND LOWER(tipo) = 'ingreso'")
     egresos_total = fetch_sum("SELECT SUM(monto) AS total FROM movimientos WHERE usuario_id = %s AND LOWER(tipo) = 'egreso'")
@@ -85,11 +91,7 @@ def index():
 
     cursor.close()
     conn.close()
-    # Calculamos el total de los 10 movimientos que estamos mostrando ahora
-suma_visible = sum(
-    m['monto'] if m['tipo'].upper() == 'INGRESO' else -m['monto'] 
-    for m in movimientos
-)
+
 
     return render_template(
         "index.html", 
