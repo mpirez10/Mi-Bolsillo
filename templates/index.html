@@ -528,46 +528,42 @@ document.getElementById("fechaHasta").addEventListener("change", filtrarMovimien
 function exportarAExcel() {
     const urlParams = new URLSearchParams(window.location.search);
     
-    // 1. Identidad y Filtros (Prioridad: Input > URL > Default)
+    // 1. Datos de cabecera (Si no tenés el ID 'userName', usa 'Usuario')
     const nombreUsuario = document.getElementById('userName')?.innerText.trim() || "Usuario";
     const q = document.getElementById("busquedaMovimiento")?.value.trim() || urlParams.get('q') || "Sin filtro";
     const tipo = document.getElementById("filtroTipo")?.value || urlParams.get('tipo') || "Todos";
-    const desde = document.getElementById("fechaDesde")?.value || urlParams.get('desde') || "Inicio";
-    const hasta = document.getElementById("fechaHasta")?.value || urlParams.get('hasta') || "Fin";
-    const totalNeto = document.getElementById('sumaTotalFiltrada')?.innerText || '$ 0.00';
+    const totalNeto = document.getElementById('sumaTotalFiltrada')?.innerText.trim() || '$ 0.00';
     
+    // 2. Selección de filas (buscamos todas las TR de la tabla)
     const filas = document.querySelectorAll("table tr");
     let csv = [];
     
-    // 2. Encabezado Profesional
+    // Encabezados del reporte
     csv.push(`"REPORTE DE MOVIMIENTOS - ${nombreUsuario.toUpperCase()}"`);
-    csv.push(`"Búsqueda: ${q} | Categoría: ${tipo}"`);
-    csv.push(`"Período: ${desde} a ${hasta}"`);
+    csv.push(`"Filtro: ${q} | Operación: ${tipo}"`);
     csv.push(`"Balance Neto: ${totalNeto.replace('$', '').trim()}"`);
-    csv.push(""); // Separador
+    csv.push(""); 
 
-    // 3. Datos de la tabla
-    filas.forEach((fila) => {
-        if (fila.style.display !== 'none') {
-            const cols = fila.querySelectorAll("td, th");
+    filas.forEach((fila, index) => {
+        // Obtenemos celdas de encabezado (th) o datos (td)
+        const cols = fila.querySelectorAll("th, td");
+        if (cols.length > 0) {
             let filaData = [];
-            // Recorremos hasta cols.length - 1 para ignorar la columna "Acciones"
+            // Recorremos hasta cols.length - 1 para NO incluir la columna "Acciones"
             for (let i = 0; i < cols.length - 1; i++) {
-                let limpio = cols[i].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
-                limpio = limpio.replace(/"/g, '""'); // Escapar comillas
-                filaData.push('"' + limpio + '"');
+                let texto = cols[i].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
+                // Escapamos comillas dobles para que Excel no se maree
+                texto = texto.replace(/"/g, '""'); 
+                filaData.push('"' + texto + '"');
             }
             csv.push(filaData.join(","));
         }
     });
 
-    // 4. Descarga con BOM (para tildes y Ñ en Excel)
     const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + csv.join("\n");
     const link = document.createElement("a");
-    const nombreArchivo = `Reporte_${nombreUsuario.replace(/\s+/g, '_')}_${desde}.csv`;
-    
     link.setAttribute("href", encodeURI(csvContent));
-    link.setAttribute("download", nombreArchivo);
+    link.setAttribute("download", `Reporte_Finanzas_${new Date().toLocaleDateString('es-UY')}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -576,91 +572,94 @@ function exportarAExcel() {
     function exportarAPDF() {
     const urlParams = new URLSearchParams(window.location.search);
     
-    // Captura de datos dinámicos
-    const nombreUsuario = document.getElementById('userName')?.innerText.trim() || "Usuario";
+    // Captura de datos
+    const nombreUsuario = "USUARIO"; // Podés cambiar esto por un dato dinámico
     const q = document.getElementById("busquedaMovimiento")?.value.trim() || urlParams.get('q') || "Todos";
-    const tipo = document.getElementById("filtroTipo")?.value || urlParams.get('tipo') || "Todos";
-    const desde = document.getElementById("fechaDesde")?.value || urlParams.get('desde') || "el inicio";
-    const hasta = document.getElementById("fechaHasta")?.value || urlParams.get('hasta') || "hoy";
-    
+    const tipo = document.getElementById("filtroTipo")?.value || urlParams.get('tipo') || "TODOS";
+    const desde = document.getElementById("fechaDesde")?.value || "Inicio";
+    const hasta = document.getElementById("fechaHasta")?.value || "Fin";
     const totalNeto = document.getElementById('sumaTotalFiltrada')?.innerText || '$ 0.00';
     const fechaHora = new Date().toLocaleString('es-UY');
 
     let filasHtml = '';
-    const filas = document.querySelectorAll("table tbody tr"); 
+    const filas = document.querySelectorAll("table tr"); 
     
-    filas.forEach((fila) => {
-        if (fila.style.display !== 'none') {
-            const cols = fila.querySelectorAll("td");
-            if (cols.length >= 5) {
-                const fecha   = cols[0].innerText.trim();
-                const tTipo   = cols[1].innerText.trim();
-                const monto   = cols[2].innerText.trim();
-                const cuenta  = cols[3].innerText.trim();
-                const detalle = cols[4].innerText.trim();
+    filas.forEach((fila, index) => {
+        const cols = fila.querySelectorAll("td");
+        // Solo procesamos si tiene celdas de datos (evita el header de la tabla original)
+        if (cols.length > 0) {
+            const fecha   = cols[0].innerText.trim();
+            const tTipo    = cols[1].innerText.trim();
+            const monto   = cols[2].innerText.trim();
+            const cuenta  = cols[3].innerText.trim();
+            const detalle = cols[4].innerText.trim();
 
-                const esIngreso = tTipo.toUpperCase().includes("INGRESO");
-                const colorMonto = esIngreso ? '#10b981' : (tTipo.toUpperCase().includes("EGRESO") ? '#ef4444' : '#64748b');
+            // Color dinámico para el monto
+            let colorMonto = tTipo.toUpperCase().includes("INGRESO") ? '#10b981' : 
+                            (tTipo.toUpperCase().includes("EGRESO") ? '#ef4444' : '#3b82f6');
 
-                filasHtml += `
-                    <tr style="border-bottom: 1px solid #e2e8f0;">
-                        <td style="padding: 10px; color: #1e293b;">${fecha}</td>
-                        <td style="padding: 10px; font-weight: bold; color: #64748b; font-size: 7pt;">${tTipo}</td>
-                        <td style="padding: 10px; font-weight: bold; color: ${colorMonto};">${monto}</td>
-                        <td style="padding: 10px; color: #1e293b;">${cuenta}</td>
-                        <td style="padding: 10px; text-transform: uppercase; font-size: 8pt; color: #475569;">${detalle}</td>
-                    </tr>`;
-            }
+            filasHtml += `
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 10px; font-size: 8.5pt;">${fecha}</td>
+                    <td style="padding: 10px; font-weight: bold; color: #64748b; font-size: 7.5pt;">${tTipo.toUpperCase()}</td>
+                    <td style="padding: 10px; font-weight: bold; color: ${colorMonto}; font-size: 9pt;">${monto}</td>
+                    <td style="padding: 10px; font-size: 8.5pt;">${cuenta}</td>
+                    <td style="padding: 10px; text-transform: uppercase; font-size: 8pt; color: #1e293b;">${detalle}</td>
+                </tr>`;
         }
     });
 
-    const reporte = document.createElement('div');
-    reporte.innerHTML = `
-        <div style="font-family: 'Segoe UI', Arial, sans-serif; color: #1e293b; padding: 30px; background: #fff;">
+    const ventanaReporte = document.createElement('div');
+    ventanaReporte.innerHTML = `
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e293b; padding: 40px; background-color: white;">
             
-            <div style="display: flex; justify-content: space-between; border-bottom: 3px solid #0f172a; padding-bottom: 15px; margin-bottom: 25px;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 3px solid #0056b3; padding-bottom: 15px; margin-bottom: 25px;">
                 <div>
-                    <div style="font-size: 18pt; font-weight: 900; color: #0f172a;">REPORTE DE ${nombreUsuario.toUpperCase()}</div>
-                    <div style="font-size: 9pt; color: #64748b; margin-top: 5px;">FILTROS: ${q} | TIPO: ${tipo}</div>
+                    <div style="font-size: 20pt; font-weight: 900; color: #0056b3;">MI BOLSILLO</div>
+                    <div style="font-size: 9pt; color: #64748b; font-weight: bold; text-transform: uppercase;">Reporte de Gestión Financiera</div>
                 </div>
                 <div style="text-align: right;">
-                    <div style="font-size: 11pt; font-weight: bold;">PERÍODO: ${desde} - ${hasta}</div>
-                    <div style="font-size: 8pt; color: #94a3b8; margin-top: 4px;">Generado el ${fechaHora}</div>
+                    <div style="font-size: 10pt; font-weight: bold; color: #1e293b;">Usuario: ${nombreUsuario}</div>
+                    <div style="font-size: 8pt; color: #94a3b8; margin-top: 5px;">${fechaHora}</div>
                 </div>
             </div>
 
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 30px;">
-                <span style="font-size: 9pt; color: #64748b; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Balance Neto de Movimientos</span>
-                <div style="font-size: 28pt; font-weight: 800; color: #0f172a; margin-top: 5px;">${totalNeto}</div>
+            <div style="margin-bottom: 25px; font-size: 9pt; color: #475569; display: flex; gap: 20px;">
+                <span><strong>Búsqueda:</strong> ${q}</span>
+                <span><strong>Tipo:</strong> ${tipo}</span>
+                <span><strong>Periodo:</strong> ${desde} / ${hasta}</span>
             </div>
 
-            <table style="width: 100%; border-collapse: collapse; font-size: 9pt;">
+            <div style="background: #f8fafc; border: 2px solid #28a745; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 30px;">
+                <span style="font-size: 9pt; color: #64748b; text-transform: uppercase; font-weight: 800; letter-spacing: 1px;">Total Neto Filtrado</span>
+                <div style="font-size: 26pt; font-weight: 900; color: #28a745; margin-top: 5px;">${totalNeto}</div>
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse;">
                 <thead>
-                    <tr style="background: #0f172a; color: #fff;">
-                        <th style="padding: 12px; text-align: left; border-radius: 4px 0 0 0;">FECHA</th>
-                        <th style="padding: 12px; text-align: left;">TIPO</th>
-                        <th style="padding: 12px; text-align: left;">MONTO</th>
-                        <th style="padding: 12px; text-align: left;">CUENTA</th>
-                        <th style="padding: 12px; text-align: left; border-radius: 0 4px 0 0;">DETALLE</th>
+                    <tr style="background: #0056b3; color: white;">
+                        <th style="padding: 12px; text-align: left; font-size: 8pt; border-radius: 8px 0 0 0;">FECHA</th>
+                        <th style="padding: 12px; text-align: left; font-size: 8pt;">TIPO</th>
+                        <th style="padding: 12px; text-align: left; font-size: 8pt;">MONTO</th>
+                        <th style="padding: 12px; text-align: left; font-size: 8pt;">CUENTA</th>
+                        <th style="padding: 12px; text-align: left; font-size: 8pt; border-radius: 0 8px 0 0;">DETALLE</th>
                     </tr>
                 </thead>
                 <tbody>
-                    ${filasHtml || '<tr><td colspan="5" style="text-align:center; padding:30px;">Sin datos para mostrar</td></tr>'}
+                    ${filasHtml}
                 </tbody>
             </table>
 
-            <div style="margin-top: 60px; border-top: 1px solid #e2e8f0; padding-top: 20px; text-align: center;">
-                <p style="margin: 0; font-size: 8pt; color: #94a3b8;">Este documento es un resumen privado de actividad financiera.</p>
-                <p style="margin: 5px 0 0 0; font-size: 9pt; font-weight: bold; color: #0f172a; letter-spacing: 2px;">
-                    DESARROLLADO POR TUTUCODE
-                </p>
+            <div style="margin-top: 50px; border-top: 1px solid #e2e8f0; padding-top: 20px; text-align: center;">
+                <div style="font-size: 8pt; color: #94a3b8; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px;">Sistema de Control de Finanzas</div>
+                <div style="font-size: 10pt; font-weight: 900; color: #0056b3;">DESARROLLADO POR TUTUCODE</div>
             </div>
         </div>
     `;
 
-    document.body.appendChild(reporte);
+    document.body.appendChild(ventanaReporte);
     window.print();
-    reporte.remove();
+    ventanaReporte.remove();
 }
     function limpiarFiltros() {
         document.getElementById("busquedaMovimiento").value = "";
