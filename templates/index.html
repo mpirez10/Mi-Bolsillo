@@ -468,9 +468,11 @@
     }
 
     // 2. FUNCIÓN DE FILTRADO - Actualizada con Tipo
+// 2. FUNCIÓN DE FILTRADO - Multicapa (Cuenta, Tipo, Búsqueda y Fechas)
 function filtrarMovimientos() {
-    // 1. Capturamos los valores
+    // 1. Capturamos los valores de TODOS los selectores
     const q = document.getElementById("busquedaMovimiento").value.trim();
+    const cuenta = document.getElementById("filtroCuenta").value; // Nueva captura de cuenta
     const tipo = document.getElementById("filtroTipo").value;
     const desdeInput = document.getElementById("fechaDesde");
     const hastaInput = document.getElementById("fechaHasta");
@@ -480,17 +482,13 @@ function filtrarMovimientos() {
 
     // 2. Lógica de validación para Fechas (Máximo 31 días)
     if (desde || hasta) {
-        // Si falta una de las dos, no filtramos todavía (evita el loop)
         if (!desde || !hasta) {
             console.log("Esperando rango de fechas completo...");
             return; 
         }
 
-        // Convertimos a objetos Date para calcular la diferencia
         const fechaInicio = new Date(desde);
         const fechaFin = new Date(hasta);
-        
-        // La diferencia da en milisegundos, pasamos a días
         const diferenciaDias = (fechaFin - fechaInicio) / (1000 * 60 * 60 * 24);
 
         if (diferenciaDias < 0) {
@@ -504,24 +502,30 @@ function filtrarMovimientos() {
         }
     }
 
-    // 3. Si pasó las validaciones, armamos la URL y mandamos al servidor
-    let url = `/?q=${encodeURIComponent(q)}&tipo=${tipo}&desde=${desde}&hasta=${hasta}`;
+    // 3. Armamos la URL con TODOS los parámetros (Suma de filtros)
+    // Agregamos &cuenta=${cuenta} a la cadena
+    let url = `/?q=${encodeURIComponent(q)}&cuenta=${cuenta}&tipo=${tipo}&desde=${desde}&hasta=${hasta}`;
+    
+    console.log("Redirigiendo a:", url); // Para debug en consola FING
     window.location.href = url;
 }
 
-// --- EVENT LISTENERS (Los encargados de disparar la función) ---
+// --- EVENT LISTENERS ACTUALIZADOS ---
 
-// Para el buscador: Solo cuando apretás Enter
+// Enter en el buscador
 document.getElementById("busquedaMovimiento").addEventListener("keypress", function (e) {
     if (e.key === 'Enter') {
         filtrarMovimientos();
     }
 });
 
-// Para el tipo (Ingreso/Egreso): Apenas cambia
+// Cambio en la Cuenta (¡Importante agregar este!)
+document.getElementById("filtroCuenta").addEventListener("change", filtrarMovimientos);
+
+// Cambio en el Tipo (Ingreso/Egreso)
 document.getElementById("filtroTipo").addEventListener("change", filtrarMovimientos);
 
-// Para las fechas: Se dispara cuando cambian, pero la función arriba controla que estén las dos
+// Cambio en las Fechas
 document.getElementById("fechaDesde").addEventListener("change", filtrarMovimientos);
 document.getElementById("fechaHasta").addEventListener("change", filtrarMovimientos);
     
