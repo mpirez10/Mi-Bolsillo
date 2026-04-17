@@ -67,8 +67,9 @@ def index():
     # --- CORRECCIÓN 1: Indentación de la suma ---
     # Tiene que estar alineada con el resto del código dentro de la función
     suma_visible = sum(
-        m['monto'] if m['tipo'].upper() == 'INGRESO' else -m['monto'] 
-        for m in movimientos
+        (m['monto'] if m['tipo'].upper() == 'INGRESO' else -m['monto'])
+        for m in movimientos 
+        if m['tipo'].upper() in ['INGRESO', 'EGRESO'] # <--- Solo estos dos
     )
 
     # --- 3. DEUDAS ---
