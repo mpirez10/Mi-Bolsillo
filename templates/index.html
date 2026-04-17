@@ -469,88 +469,27 @@
 
     // 2. FUNCIÓN DE FILTRADO - Actualizada con Tipo
 function filtrarMovimientos() {
-    const texto = document.getElementById("busquedaMovimiento").value.toLowerCase();
-    const filtroTipo = document.getElementById("filtroTipo").value;
-    const desdeRaw = document.getElementById("fechaDesde").value;
-    const hastaRaw = document.getElementById("fechaHasta").value;
-    const filas = document.querySelectorAll("tbody tr");
+    // Capturamos los valores de tus inputs
+    const q = document.getElementById("busquedaMovimiento").value.trim();
+    const tipo = document.getElementById("filtroTipo").value;
+    const desde = document.getElementById("fechaDesde").value;
+    const hasta = document.getElementById("fechaHasta").value;
 
-    const formatearFiltro = (f) => f ? f.replace(/-/g, '') : null;
-    const desde = formatearFiltro(desdeRaw);
-    const hasta = formatearFiltro(hastaRaw);
-    
-    let sumaTotal = 0;
+    // Armamos la URL con los parámetros
+    // Usamos encodeURIComponent por si escribís algo con espacios o tildes
+    let url = `/?q=${encodeURIComponent(q)}&tipo=${tipo}&desde=${desde}&hasta=${hasta}`;
 
-    filas.forEach((fila) => {
-        const celdas = fila.getElementsByTagName("td");
-        if (celdas.length < 5) return;
-
-        // --- FECHA ---
-        const fechaVisible = celdas[0].innerText.trim();
-        const p = fechaVisible.split('/');
-        const fechaParaComparar = (p.length === 3) ? (p[2] + p[1] + p[0]) : "0";
-
-        // --- TIPO (CORREGIDO) ---
-        const tipoTexto = celdas[1].innerText.toUpperCase();
-
-        let tipoFila = "";
-        if (tipoTexto.includes("INGRESO")) tipoFila = "INGRESO";
-        else if (tipoTexto.includes("EGRESO")) tipoFila = "EGRESO";
-        else if (tipoTexto.includes("TRANSF")) tipoFila = "TRANSFERENCIA";
-
-        const montoStrRaw = celdas[2].innerText.replace(/[^\d.,-]/g, '');
-
-let monto = 0;
-
-if (montoStrRaw.includes(',') && montoStrRaw.includes('.')) {
-    // Formato tipo: 2,500.00 (USA)
-    monto = parseFloat(montoStrRaw.replace(/,/g, ''));
-} else if (montoStrRaw.includes(',')) {
-    // Formato tipo: 2500,00 (LATAM)
-    monto = parseFloat(montoStrRaw.replace(',', '.'));
-} else {
-    // Formato limpio: 2500.00
-    monto = parseFloat(montoStrRaw);
+    // Redireccionamos (esto dispara tu función index() en Python)
+    window.location.href = url;
 }
 
-monto = monto || 0;
-
-
-        // --- TEXTO ---
-        const contenidoBusqueda = (
-            celdas[3].innerText + " " + celdas[4].innerText
-        ).toLowerCase();
-
-        // --- FILTROS ---
-        const coincideTexto = contenidoBusqueda.includes(texto);
-        const coincideTipo = (filtroTipo === "" || tipoFila === filtroTipo);
-
-        let coincideFecha = true;
-        if (desde && fechaParaComparar < desde) coincideFecha = false;
-        if (hasta && fechaParaComparar > hasta) coincideFecha = false;
-
-        // --- RESULTADO ---
-        if (coincideTexto && coincideFecha && coincideTipo) {
-            fila.style.display = "";
-
-            if (tipoFila === "INGRESO") {
-                sumaTotal += monto;
-            } else if (tipoFila === "EGRESO") {
-                sumaTotal -= monto;
-            }
-
-        } else {
-            fila.style.display = "none";
-        }
-    });
-
-    // --- ACTUALIZAR TOTAL ---
-    document.getElementById("sumaTotalFiltrada").innerText =
-        "$ " + sumaTotal.toLocaleString('es-UY', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-}
+// PIQUE EXTRA: Para que no tengas que hacer clic en un botón, 
+// agregá esto para que busque al apretar Enter en el cuadro de texto.
+document.getElementById("busquedaMovimiento").addEventListener("keypress", function (e) {
+    if (e.key === 'Enter') {
+        filtrarMovimientos();
+    }
+});
     // 4. EXPORTAR A EXCEL
     function exportarAExcel() {
         const filas = document.querySelectorAll("table tr");
