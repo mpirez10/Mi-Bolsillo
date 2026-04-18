@@ -531,13 +531,6 @@ window.onload = function() {
         };
     }
 };
-    function limpiarFiltros() {
-        document.getElementById("busquedaMovimiento").value = "";
-        document.getElementById("fechaDesde").value = "";
-        document.getElementById("fechaHasta").value = "";
-        document.getElementById("filtroTipo").value = "";
-        filtrarMovimientos();
-    }
 function exportarAExcel() {
     const urlParams = new URLSearchParams(window.location.search);
     
@@ -689,7 +682,13 @@ function exportarAExcel() {
     }, 100);
 }
 
-    
+        function limpiarFiltros() {
+        document.getElementById("busquedaMovimiento").value = "";
+        document.getElementById("fechaDesde").value = "";
+        document.getElementById("fechaHasta").value = "";
+        document.getElementById("filtroTipo").value = "";
+        filtrarMovimientos();
+    }
     // Ejecutamos al cargar para calcular el total inicial
 </script>
 {% endblock %}
