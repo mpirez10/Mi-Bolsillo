@@ -34,7 +34,7 @@ def index():
     filtros_sql = ""
     if busqueda:
         filtros_sql += " AND (motivo ILIKE %s OR cuenta_origen ILIKE %s OR cuenta_destino ILIKE %s)"
-        params_movs.extend([f"%{busqueda}%"] * 4)
+        params_movs.extend([f"%{busqueda}%"] * 3)
     if tipo_filtro:
         filtros_sql += " AND UPPER(tipo) = %s"
         params_movs.append(tipo_filtro.upper())
