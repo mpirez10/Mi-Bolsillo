@@ -623,7 +623,7 @@ ventanaReporte.id = 'reporte-impresion-formal';
 ventanaReporte.innerHTML = `
     <div style="padding: 10px; background: white; min-height: auto !important;">
         
-        <div class="pdf-header" style="margin-bottom: 20px; padding-bottom: 10px;">
+        <div class="pdf-header" style="margin-bottom: 10px; padding-bottom: 10px;">
             <div>
                 <div class="pdf-logo-text">REPORTE</div>
                 <div class="pdf-tagline">Usuario: ${nombreUsuario}</div>
@@ -634,7 +634,7 @@ ventanaReporte.innerHTML = `
             </div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-family: sans-serif;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-family: sans-serif;">
             <div style="font-size: 9pt; color: #475569;">
                 <strong>PERIODO:</strong> ${desde} al ${hasta} <br>
                 <strong>TIPO FILTRADO:</strong> ${tipo}
@@ -644,11 +644,9 @@ ventanaReporte.innerHTML = `
                 <strong style="font-size: 20pt; color: #0f172a;">${totalNeto}</strong>
             </div>
         </div>
-
         <div class="section-title" style="margin-bottom: 0 !important; padding-bottom: 5px !important; margin-top: 0 !important;">
             DETALLE DE MOVIMIENTOS
         </div>
-
         <table class="pdf-table" style="margin-top: 0 !important; width: 100%; border-collapse: collapse; border-spacing: 0;">
             <thead style="margin: 0; padding: 0;">
                 <tr style="background: #0f172a !important; color: white !important;">
