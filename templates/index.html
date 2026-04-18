@@ -468,80 +468,69 @@
         });
     }
 
-    // 2. FUNCIÓN DE FILTRADO - Actualizada con Tipo
-// 2. FUNCIÓN DE FILTRADO - Multicapa (Cuenta, Tipo, Búsqueda y Fechas)
-// 2. FUNCIÓN DE FILTRADO - Versión Definitiva con Botón
+// 2. FUNCIÓN DE FILTRADO - Versión Definitiva
 function filtrarMovimientos() {
-    // 1. Capturamos todos los campos del panel de filtros
-    const q = document.getElementById("busquedaMovimiento").value.trim();
-    const cuenta = document.getElementById("filtroCuenta").value;
-    const tipo = document.getElementById("filtroTipo").value;
-    const desdeInput = document.getElementById("fechaDesde");
-    const hastaInput = document.getElementById("fechaHasta");
-    
-    const desde = desdeInput.value;
-    const hasta = hastaInput.value;
+    console.log("Botón presionado, iniciando filtrado..."); // Esto te avisa si la función arranca
 
-    // 2. Lógica de validación para el rango de fechas
+    // 1. Capturamos los elementos (con ? para evitar errores si alguno no existe)
+    const elQ = document.getElementById("busquedaMovimiento");
+    const elCuenta = document.getElementById("filtroCuenta");
+    const elTipo = document.getElementById("filtroTipo");
+    const elDesde = document.getElementById("fechaDesde");
+    const elHasta = document.getElementById("fechaHasta");
+
+    // Extraemos valores
+    const q = elQ ? elQ.value.trim() : "";
+    const cuenta = elCuenta ? elCuenta.value : "TODAS";
+    const tipo = elTipo ? elTipo.value : "TODOS";
+    const desde = elDesde ? elDesde.value : "";
+    const hasta = elHasta ? elHasta.value : "";
+
+    // 2. Validaciones de fechas
     if (desde || hasta) {
-        // Si el usuario empezó a poner una fecha, le pedimos la otra
         if (!desde || !hasta) {
-            alert("Por favor, seleccioná ambas fechas para filtrar por rango.");
-            return; 
+            alert("Por favor, seleccioná ambas fechas.");
+            return;
         }
-
         const fechaInicio = new Date(desde);
         const fechaFin = new Date(hasta);
-        
-        // Calculamos la diferencia en días
         const diferenciaDias = (fechaFin - fechaInicio) / (1000 * 60 * 60 * 24);
 
         if (diferenciaDias < 0) {
-            alert("¡Ojo! La fecha 'Desde' no puede ser posterior a la fecha 'Hasta'.");
+            alert("La fecha 'Desde' no puede ser posterior.");
             return;
         }
-
-        // Validación de los 31 días (estilo FING, para cuidar el server)
         if (diferenciaDias > 31) {
-            alert("El lapso máximo permitido es de 31 días.");
+            alert("Máximo 31 días permitidos.");
             return;
         }
     }
 
-    // 3. Construcción de la URL con la suma de todos los filtros
-    // Se concatenan todos los parámetros para que el backend reciba la consulta completa
+    // 3. Construcción de URL
     let url = `/?q=${encodeURIComponent(q)}&cuenta=${cuenta}&tipo=${tipo}&desde=${desde}&hasta=${hasta}`;
     
-    console.log("Filtrando por:", { cuenta, tipo, desde, hasta, q });
-    
-    // Redirección final
+    console.log("Redirigiendo a:", url);
     window.location.href = url;
 }
 
-// --- CONFIGURACIÓN DE LOS DISPARADORES (EVENT LISTENERS) ---
-
-// Esperamos a que el DOM esté listo para asignar los eventos
-document.addEventListener("DOMContentLoaded", function() {
-    
-    // Disparador principal: El botón de FILTRAR
-    const botonFiltrar = document.getElementById("btnFiltrar");
-    if (botonFiltrar) {
-        botonFiltrar.addEventListener("click", filtrarMovimientos);
+// --- ASIGNACIÓN DE EVENTOS ---
+// Usamos este método que es más robusto para que no falle
+window.onload = function() {
+    const btn = document.getElementById("btnFiltrar");
+    if (btn) {
+        btn.onclick = filtrarMovimientos;
+        console.log("Evento asignado al botón filtrar correctamente.");
+    } else {
+        console.error("No se encontró el botón con ID 'btnFiltrar'");
     }
 
-    // Disparador de comodidad: Apretar Enter en el cuadro de búsqueda
-    const inputBusqueda = document.getElementById("busquedaMovimiento");
-    if (inputBusqueda) {
-        inputBusqueda.addEventListener("keypress", function (e) {
-            if (e.key === 'Enter') {
-                filtrarMovimientos();
-            }
-        });
+    const inputQ = document.getElementById("busquedaMovimiento");
+    if (inputQ) {
+        inputQ.onkeypress = function(e) {
+            if (e.key === 'Enter') filtrarMovimientos();
+        };
     }
-
-    // NOTA: Hemos quitado los listeners de 'change' en los selectores 
-    // para que no se recargue la página hasta que vos decidas apretar el botón.
-});
+};
 function exportarAExcel() {
     const urlParams = new URLSearchParams(window.location.search);
     
