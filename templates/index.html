@@ -617,55 +617,59 @@ function exportarAExcel() {
     });
 
     // 3. Construir el HTML usando TUS CLASES de CSS
-   const ventanaReporte = document.createElement('div');
-    ventanaReporte.id = 'reporte-impresion-formal'; 
-    
-    // El secreto está en quitar alturas fijas y usar márgenes controlados
-    ventanaReporte.innerHTML = `
-        <div style="padding: 10px; background: white; min-height: auto !important;">
-            
-            <div class="pdf-header" style="margin-bottom: 20px;">
-                <div>
-                    <div class="pdf-logo-text">REPORTE</div>
-                    <div class="pdf-tagline">Usuario: ${nombreUsuario}</div>
-                </div>
-                <div class="pdf-title-section">
-                    <h1>SISTEMA DE GESTIÓN</h1>
-                    <p>Emitido: ${fechaHora}</p>
-                </div>
+const ventanaReporte = document.createElement('div');
+ventanaReporte.id = 'reporte-impresion-formal'; 
+
+ventanaReporte.innerHTML = `
+    <div style="padding: 10px; background: white; min-height: auto !important;">
+        
+        <div class="pdf-header" style="margin-bottom: 20px; padding-bottom: 10px;">
+            <div>
+                <div class="pdf-logo-text">REPORTE</div>
+                <div class="pdf-tagline">Usuario: ${nombreUsuario}</div>
             </div>
-
-            <div style="display: flex; justify-content: space-between; margin-bottom: 30px; font-family: sans-serif;">
-                <div style="font-size: 9pt; color: #475569;">
-                    <strong>PERIODO:</strong> ${desde} al ${hasta} <br>
-                    <strong>TIPO FILTRADO:</strong> ${tipo}
-                </div>
-                <div style="text-align: right;">
-                    <span style="font-size: 8pt; font-weight: 800; color: #64748b; display: block;">TOTAL FILTRADO</span>
-                    <strong style="font-size: 20pt; color: #0f172a;">${totalNeto}</strong>
-                </div>
-            </div>
-
-            <div class="section-title" style="margin-bottom: 5px; margin-top: 0; padding-bottom: 0;">DETALLE DE MOVIMIENTOS</div>
-
-            <table class="pdf-table" style="margin-top: 0; margin-bottom: 30px; width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="line-height: 10px;"> <th>FECHA</th><th>TIPO</th><th>MONTO</th><th>CUENTA</th><th>DETALLE</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${filasHtml}
-                </tbody>
-            </table>
-
-            <div class="pdf-footer" style="margin-top: 20px; border-top: 1px solid #eee; pt: 10px;">
-                <p style="margin-bottom: 5px; font-weight: bold; color: #475569;">Reporte generado en Panel Central</p>
-                <p style="margin-bottom: 5px; font-size: 10pt; color: #0f172a; font-weight: 800;">MiBolsillo | Gestión de finanzas</p>
-                <p style="letter-spacing: 2px; text-transform: uppercase; color: #94a3b8; font-size: 8pt;">Desarrollado por TutuCode</p>
+            <div class="pdf-title-section">
+                <h1>SISTEMA DE GESTIÓN</h1>
+                <p>Emitido: ${fechaHora}</p>
             </div>
         </div>
-    `;
 
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-family: sans-serif;">
+            <div style="font-size: 9pt; color: #475569;">
+                <strong>PERIODO:</strong> ${desde} al ${hasta} <br>
+                <strong>TIPO FILTRADO:</strong> ${tipo}
+            </div>
+            <div style="text-align: right;">
+                <span style="font-size: 8pt; font-weight: 800; color: #64748b; display: block;">TOTAL FILTRADO</span>
+                <strong style="font-size: 20pt; color: #0f172a;">${totalNeto}</strong>
+            </div>
+        </div>
+
+        <div class="section-title" style="margin-bottom: 0 !important; padding-bottom: 5px !important; margin-top: 0 !important;">
+            DETALLE DE MOVIMIENTOS
+        </div>
+
+        <table class="pdf-table" style="margin-top: 0 !important; width: 100%; border-collapse: collapse; border-spacing: 0;">
+            <thead style="margin: 0; padding: 0;">
+                <tr style="background: #0f172a !important; color: white !important;">
+                    <th style="padding: 5px 10px !important; font-size: 8pt !important;">FECHA</th>
+                    <th style="padding: 5px 10px !important; font-size: 8pt !important;">TIPO</th>
+                    <th style="padding: 5px 10px !important; font-size: 8pt !important;">MONTO</th>
+                    <th style="padding: 5px 10px !important; font-size: 8pt !important;">CUENTA</th>
+                    <th style="padding: 5px 10px !important; font-size: 8pt !important;">DETALLE</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${filasHtml}
+            </tbody>
+        </table>
+
+        <div class="pdf-footer" style="margin-top: 20px; border-top: 1px solid #eee; pt: 10px;">
+            <p style="margin: 2px 0; font-weight: bold; color: #475569;">Reporte generado en Panel Central</p>
+            <p style="margin: 2px 0; font-size: 10pt; color: #0f172a; font-weight: 800;">MiBolsillo | Gestión de finanzas</p>
+        </div>
+    </div>
+`;
     // 4. Ejecutar impresión
     document.body.appendChild(ventanaReporte);
     
