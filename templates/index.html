@@ -440,206 +440,256 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // 1. INICIALIZACIÓN DEL GRÁFICO (Sin cambios, está impecable)
-    const ctx = document.getElementById('balanceChart');
-    if (ctx) {
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Gastos', 'Ingresos', 'Deudas'],
-                datasets: [{
-                    data: [{{ egresos_total|default(0) }}, {{ ingresos_total|default(0) }}, {{ deudas_total|default(0) }}],
-                    backgroundColor: ['#ef4444', '#10b981', '#f59e0b'],
-                    borderWidth: 0,
-                    hoverOffset: 10
-                }]
-            },
-            options: { 
-                responsive: true, 
-                maintainAspectRatio: false, 
-                cutout: '70%',
-                plugins: { 
-                    legend: { 
-                        position: 'bottom', 
-                        labels: {color: 'white', boxWidth: 12, usePointStyle: true, font: { size: 11, weight: '600' } } 
-                    } 
-                } 
-            }
-        });
-    }
+    // 1. INICIALIZACIÓN DEL GRÁFICO (Doughnut)
+    const ctx = document.getElementById('balanceChart');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Gastos', 'Ingresos', 'Deudas'],
+                datasets: [{
+                    data: [{{ egresos_total|default(0) }}, {{ ingresos_total|default(0) }}, {{ deudas_total|default(0) }}],
+                    backgroundColor: ['#ef4444', '#10b981', '#f59e0b'],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                cutout: '70%',
+                plugins: { 
+                    legend: { 
+                        position: 'bottom', 
+                        labels: {color: 'white', boxWidth: 12, usePointStyle: true, font: { size: 11, weight: '600' } } 
+                    } 
+                } 
+            }
+        });
+    }
 
-    // 2. FUNCIÓN DE FILTRADO - Recuperamos la "suma" de filtros que querías
-    function filtrarMovimientos() {
-        console.log("Botón presionado, iniciando filtrado...");
-        
-        const q = document.getElementById("busquedaMovimiento")?.value.trim() || "";
-        const cuenta = document.getElementById("filtroCuenta")?.value || "TODAS";
-        const tipo = document.getElementById("filtroTipo")?.value || "";
-        const desde = document.getElementById("fechaDesde")?.value || "";
-        const hasta = document.getElementById("fechaHasta")?.value || "";
+// 2. FUNCIÓN DE FILTRADO - Versión Definitiva
+function filtrarMovimientos() {
+    console.log("Botón presionado, iniciando filtrado..."); // Esto te avisa si la función arranca
 
-        if (desde || hasta) {
-            if (!desde || !hasta) {
-                alert("Por favor, seleccioná ambas fechas.");
-                return;
-            }
-            const fechaInicio = new Date(desde);
-            const fechaFin = new Date(hasta);
-            const diferenciaDias = (fechaFin - fechaInicio) / (1000 * 60 * 60 * 24);
+    // 1. Capturamos los elementos (con ? para evitar errores si alguno no existe)
+    const elQ = document.getElementById("busquedaMovimiento");
+    const elCuenta = document.getElementById("filtroCuenta");
+    const elTipo = document.getElementById("filtroTipo");
+    const elDesde = document.getElementById("fechaDesde");
+    const elHasta = document.getElementById("fechaHasta");
 
-            if (diferenciaDias < 0) {
-                alert("La fecha 'Desde' no puede ser posterior.");
-                return;
-            }
-            if (diferenciaDias > 31) {
-                alert("Máximo 31 días permitidos.");
-                return;
-            }
-        }
+    // Extraemos valores
+    const q = elQ ? elQ.value.trim() : "";
+    const cuenta = elCuenta ? elCuenta.value : "TODAS";
+    const tipo = elTipo ? elTipo.value : "TODOS";
+    const desde = elDesde ? elDesde.value : "";
+    const hasta = elHasta ? elHasta.value : "";
 
-        // URL con TODOS los parámetros sumados
-        let url = `/?q=${encodeURIComponent(q)}&cuenta=${cuenta}&tipo=${tipo}&desde=${desde}&hasta=${hasta}`;
-        window.location.href = url;
-    }
+    // 2. Validaciones de fechas
+    if (desde || hasta) {
+        if (!desde || !hasta) {
+            alert("Por favor, seleccioná ambas fechas.");
+            return;
+        }
+        const fechaInicio = new Date(desde);
+        const fechaFin = new Date(hasta);
+        const diferenciaDias = (fechaFin - fechaInicio) / (1000 * 60 * 60 * 24);
 
-    // 3. FUNCIÓN PARA LIMPIAR (Vuelve a la raíz)
-    function limpiarFiltros() {
-        window.location.href = "/";
-    }
+        if (diferenciaDias < 0) {
+            alert("La fecha 'Desde' no puede ser posterior.");
+            return;
+        }
+        if (diferenciaDias > 31) {
+            alert("Máximo 31 días permitidos.");
+            return;
+        }
+    }
 
-    // 4. EXPORTAR A EXCEL (Mantenemos tu lógica de escape de comillas)
-    function exportarAExcel() {
-        const nombreUsuario = "{{ current_user.nombre_completo }}" || "Usuario";
-        const totalNeto = document.getElementById('sumaTotalFiltrada')?.innerText.trim() || '$ 0.00';
-        const filas = document.querySelectorAll("table tr");
-        let csv = [];
-        
-        csv.push(`"REPORTE DE MOVIMIENTOS - ${nombreUsuario.toUpperCase()}"`);
-        csv.push(`"Balance Neto: ${totalNeto.replace('$', '').trim()}"`);
-        csv.push(""); 
+    // 3. Construcción de URL
+    let url = `/?q=${encodeURIComponent(q)}&cuenta=${cuenta}&tipo=${tipo}&desde=${desde}&hasta=${hasta}`;
+    
+    console.log("Redirigiendo a:", url);
+    window.location.href = url;
+}
 
-        filas.forEach((fila) => {
-            const cols = fila.querySelectorAll("th, td");
-            if (cols.length > 0) {
-                let filaData = [];
-                for (let i = 0; i < cols.length - 1; i++) {
-                    let texto = cols[i].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
-                    texto = texto.replace(/"/g, '""'); 
-                    filaData.push('"' + texto + '"');
-                }
-                csv.push(filaData.join(","));
-            }
-        });
+// --- ASIGNACIÓN DE EVENTOS ---
+// Usamos este método que es más robusto para que no falle
+window.onload = function() {
+    const btn = document.getElementById("btnFiltrar");
+    if (btn) {
+        btn.onclick = filtrarMovimientos;
+        console.log("Evento asignado al botón filtrar correctamente.");
+    } else {
+        console.error("No se encontró el botón con ID 'btnFiltrar'");
+    }
 
-        const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + csv.join("\n");
-        const link = document.createElement("a");
-        link.setAttribute("href", encodeURI(csvContent));
-        link.setAttribute("download", `Reporte_Excel_${new Date().toLocaleDateString('es-UY')}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
+    const inputQ = document.getElementById("busquedaMovimiento");
+    if (inputQ) {
+        inputQ.onkeypress = function(e) {
+            if (e.key === 'Enter') filtrarMovimientos();
+        };
+    }
+};
+    function limpiarFiltros() {
+        document.getElementById("busquedaMovimiento").value = "";
+        document.getElementById("fechaDesde").value = "";
+        document.getElementById("fechaHasta").value = "";
+        document.getElementById("filtroTipo").value = "";
+        filtrarMovimientos();
+    }
+function exportarAExcel() {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // 1. Datos de cabecera (Si no tenés el ID 'userName', usa 'Usuario')
+    const nombreUsuario = "{{ current_user.nombre_completo }}" || "Usuario";
+    const q = document.getElementById("busquedaMovimiento")?.value.trim() || urlParams.get('q') || "Sin filtro";
+    const tipo = document.getElementById("filtroTipo")?.value || urlParams.get('tipo') || "Todos";
+    const totalNeto = document.getElementById('sumaTotalFiltrada')?.innerText.trim() || '$ 0.00';
+    
+    // 2. Selección de filas (buscamos todas las TR de la tabla)
+    const filas = document.querySelectorAll("table tr");
+    let csv = [];
+    
+    // Encabezados del reporte
+    csv.push(`"REPORTE DE MOVIMIENTOS - ${nombreUsuario.toUpperCase()}"`);
+    csv.push(`"Filtro: ${q} | Operación: ${tipo}"`);
+    csv.push(`"Balance Neto: ${totalNeto.replace('$', '').trim()}"`);
+    csv.push(""); 
 
-    // 5. EXPORTAR A PDF (Restauramos tu diseño original de TutuCode)
-    function exportarAPDF() {
-        const nombreUsuario = "{{ current_user.nombre_completo }}" || "Usuario";
-        const tipo = document.getElementById("filtroTipo")?.value || "TODOS";
-        const desde = document.getElementById("fechaDesde")?.value || "Inicio";
-        const hasta = document.getElementById("fechaHasta")?.value || "Fin";
-        const totalNeto = document.getElementById('sumaTotalFiltrada')?.innerText.trim() || '$ 0.00';
-        const fechaHora = new Date().toLocaleString('es-UY');
+    filas.forEach((fila, index) => {
+        // Obtenemos celdas de encabezado (th) o datos (td)
+        const cols = fila.querySelectorAll("th, td");
+        if (cols.length > 0) {
+            let filaData = [];
+            // Recorremos hasta cols.length - 1 para NO incluir la columna "Acciones"
+            for (let i = 0; i < cols.length - 1; i++) {
+                let texto = cols[i].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
+                // Escapamos comillas dobles para que Excel no se maree
+                texto = texto.replace(/"/g, '""'); 
+                filaData.push('"' + texto + '"');
+            }
+            csv.push(filaData.join(","));
+        }
+    });
 
-        let filasHtml = '';
-        const filas = document.querySelectorAll("table tr"); 
-        
-        filas.forEach((fila, index) => {
-            // Saltamos el header y filas ocultas por el buscador de JS si hubiera
-            if (index > 0 && fila.offsetParent !== null) { 
-                const cols = fila.querySelectorAll("td");
-                if (cols.length >= 5) {
-                    const fecha   = cols[0].innerText.trim();
-                    const tTipo   = cols[1].innerText.trim();
-                    const monto   = cols[2].innerText.trim();
-                    const cuenta  = cols[3].innerText.trim();
-                    const detalle = cols[4].innerText.trim();
+    const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + csv.join("\n");
+    const link = document.createElement("a");
+    link.setAttribute("href", encodeURI(csvContent));
+    link.setAttribute("download", `Reporte_Finanzas_${new Date().toLocaleDateString('es-UY')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
 
-                    let claseMonto = tTipo.toUpperCase().includes("INGRESO") ? 'text-success' : 'text-danger';
+  function exportarAPDF() {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // 1. Captura de datos para los filtros (Lo que no puede faltar)
+    const nombreUsuario = "{{ current_user.nombre_completo }}" || "Usuario";
+    const tipo = document.getElementById("filtroTipo")?.value || urlParams.get('tipo') || "TODOS";
+    const desde = document.getElementById("fechaDesde")?.value || urlParams.get('desde') || "Inicio";
+    const hasta = document.getElementById("fechaHasta")?.value || urlParams.get('hasta') || "Fin";
+    const totalNeto = document.getElementById('sumaTotalFiltrada')?.innerText.trim() || '$ 0.00';
+    const fechaHora = new Date().toLocaleString('es-UY');
 
-                    filasHtml += `
-                        <tr>
-                            <td>${fecha}</td>
-                            <td style="font-weight: bold; color: #64748b;">${tTipo.toUpperCase()}</td>
-                            <td class="${claseMonto}">${monto}</td>
-                            <td>${cuenta}</td>
-                            <td style="text-transform: uppercase;">${detalle}</td>
-                        </tr>`;
-                }
-            }
-        });
+    // 2. Extraer datos de la tabla
+    let filasHtml = '';
+    const filas = document.querySelectorAll("table tr"); 
+    
+    filas.forEach((fila, index) => {
+        if (index > 0 && fila.style.display !== 'none') {
+            const cols = fila.querySelectorAll("td");
+            if (cols.length >= 5) {
+                const fecha   = cols[0].innerText.trim();
+                const tTipo   = cols[1].innerText.trim();
+                const monto   = cols[2].innerText.trim();
+                const cuenta  = cols[3].innerText.trim();
+                const detalle = cols[4].innerText.trim();
 
-        const ventanaReporte = document.createElement('div');
-        ventanaReporte.id = 'reporte-impresion-formal'; 
-        
-        // Aquí reinsertamos TODO tu bloque de diseño original que se había perdido
-        ventanaReporte.innerHTML = `
-            <div style="padding: 10px; background: white;">
-                <div class="pdf-header">
-                    <div>
-                        <div class="pdf-logo-text">REPORTE</div>
-                        <div class="pdf-tagline">Usuario: ${nombreUsuario}</div>
-                    </div>
-                    <div class="pdf-title-section">
-                        <h1>SISTEMA DE GESTIÓN</h1>
-                        <p>Emitido: ${fechaHora}</p>
-                    </div>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-family: sans-serif;">
-                    <div style="font-size: 9pt; color: #475569;">
-                        <strong>PERIODO:</strong> ${desde} al ${hasta} <br>
-                        <strong>TIPO FILTRADO:</strong> ${tipo}
-                    </div>
-                    <div style="text-align: right;">
-                        <span style="font-size: 8pt; font-weight: 800; color: #64748b; display: block;">TOTAL FILTRADO</span>
-                        <strong style="font-size: 20pt; color: #0f172a;">${totalNeto}</strong>
-                    </div>
-                </div>
-                <div class="section-title">DETALLE DE MOVIMIENTOS</div>
-                <table class="pdf-table">
-                    <thead>
-                        <tr>
-                            <th>FECHA</th><th>TIPO</th><th>MONTO</th><th>CUENTA</th><th>DETALLE</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${filasHtml}
-                    </tbody>
-                </table>
-                <div class="pdf-footer">
-                    <p style="margin-bottom: 5px; font-weight: bold; color: #475569;">Reporte generado en Panel Central</p>
-                    <p style="margin-bottom: 5px; font-size: 10pt; color: #0f172a; font-weight: 800;">MiBolsillo | Gestión de finanzas</p>
-                    <p style="letter-spacing: 2px; text-transform: uppercase; color: #94a3b8;">Desarrollado por TutuCode</p>
-                </div>
-            </div>`;
+                // Aplicar tus clases de colores (text-success / text-danger)
+                let claseMonto = tTipo.toUpperCase().includes("INGRESO") ? 'text-success' : 
+                                (tTipo.toUpperCase().includes("EGRESO") ? 'text-danger' : '');
 
-        document.body.appendChild(ventanaReporte);
-        setTimeout(() => {
-            window.print();
-            setTimeout(() => { ventanaReporte.remove(); }, 500);
-        }, 100);
-    }
+                filasHtml += `
+                    <tr>
+                        <td>${fecha}</td>
+                        <td style="font-weight: bold; color: #64748b;">${tTipo.toUpperCase()}</td>
+                        <td class="${claseMonto}">${monto}</td>
+                        <td>${cuenta}</td>
+                        <td style="text-transform: uppercase;">${detalle}</td>
+                    </tr>`;
+            }
+        }
+    });
 
-    // 6. ASIGNACIÓN DE EVENTOS (Blindado)
-    window.onload = function() {
-        const btnF = document.getElementById("btnFiltrar");
-        if (btnF) btnF.onclick = filtrarMovimientos;
+    // 3. Construir el HTML usando TUS CLASES de CSS
+    const ventanaReporte = document.createElement('div');
+    ventanaReporte.id = 'reporte-impresion-formal'; 
+    
+    ventanaReporte.innerHTML = `
+        <div style="padding: 10px; background: white;">
+            
+            <div class="pdf-header">
+                <div>
+                    <div class="pdf-logo-text">REPORTE</div>
+                    <div class="pdf-tagline">Usuario: ${nombreUsuario}</div>
+                </div>
+                <div class="pdf-title-section">
+                    <h1>SISTEMA DE GESTIÓN</h1>
+                    <p>Emitido: ${fechaHora}</p>
+                </div>
+            </div>
 
-        const btnL = document.getElementById("btnLimpiar");
-        if (btnL) btnL.onclick = limpiarFiltros;
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-family: sans-serif;">
+                <div style="font-size: 9pt; color: #475569;">
+                    <strong>PERIODO:</strong> ${desde} al ${hasta} <br>
+                    <strong>TIPO FILTRADO:</strong> ${tipo}
+                </div>
+                <div style="text-align: right;">
+                    <span style="font-size: 8pt; font-weight: 800; color: #64748b; display: block;">TOTAL FILTRADO</span>
+                    <strong style="font-size: 20pt; color: #0f172a;">${totalNeto}</strong>
+                </div>
+            </div>
 
-        const inputQ = document.getElementById("busquedaMovimiento");
-        if (inputQ) {
-            inputQ.onkeypress = function(e) { if (e.key === 'Enter') filtrarMovimientos(); };
-        }
-    };
+            <div class="section-title">DETALLE DE MOVIMIENTOS</div>
+
+            <table class="pdf-table">
+                <thead>
+                    <tr>
+                        <th>FECHA</th>
+                        <th>TIPO</th>
+                        <th>MONTO</th>
+                        <th>CUENTA</th>
+                        <th>DETALLE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${filasHtml}
+                </tbody>
+            </table>
+
+            <div class="pdf-footer">
+                <p style="margin-bottom: 5px; font-weight: bold; color: #475569;">Reporte generado en Panel Central</p>
+                <p style="margin-bottom: 5px; font-size: 10pt; color: #0f172a; font-weight: 800;">MiBolsillo | Gestión de finanzas y negocios</p>
+                <p style="letter-spacing: 2px; text-transform: uppercase; color: #94a3b8;">Desarrollado por TutuCode</p>
+            </div>
+        </div>
+    `;
+
+    // 4. Ejecutar impresión
+    document.body.appendChild(ventanaReporte);
+    
+    // Forzamos un repaint antes de imprimir
+    setTimeout(() => {
+        window.print();
+        setTimeout(() => {
+            ventanaReporte.remove();
+        }, 500);
+    }, 100);
+}
+
+    
+    // Ejecutamos al cargar para calcular el total inicial
 </script>
 {% endblock %}
