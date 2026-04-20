@@ -10,7 +10,8 @@
     --text: #0f172a; 
     --card-bg: #ffffff; 
     --border: #e2e8f0; 
-    --danger: #dc2626; 
+    --danger: #dc2626;
+    --text-muted: #64748b;
 }
 
 /* =========================
