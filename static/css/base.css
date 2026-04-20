@@ -45,14 +45,9 @@ body::before {
 
     opacity: 0.18;
     pointer-events: none;
-    z-index: 0;
+    z-index: -1;
 }
 
-/* Asegura que el contenido esté encima del fondo */
-body > * {
-    position: relative;
-    z-index: 1;
-}
 
 /* =========================
    LAYOUT
