@@ -630,7 +630,7 @@ const ventanaReporte = document.createElement('div');
 ventanaReporte.id = 'reporte-impresion-formal'; 
 
 ventanaReporte.innerHTML = `
-    <div style="position: relative; min-height: 275mm; padding: 10px; background: white; font-family: 'Segoe UI', Arial, sans-serif; color: #1e293b;">
+    <div style="position: relative; min-height: 260mm; padding: 10px; background: white; font-family: 'Segoe UI', Arial, sans-serif; color: #1e293b;">
         
         <div style="display: flex; justify-content: space-between; border-bottom: 3px solid #0f172a; padding-bottom: 10px; margin-bottom: 20px; align-items: flex-end;">
             <div>
@@ -656,10 +656,10 @@ ventanaReporte.innerHTML = `
         </div>
 
         <div style="border-bottom: 2px solid #0f172a; margin-bottom: 0 !important;">
-    <h3 style="margin: 0 !important; padding: 5px 0 !important; font-size: 10pt; color: #0f172a; font-weight: 800; text-transform: uppercase;">
-        Detalle Cronológico de Movimientos
-    </h3>
-            <table class="pdf-table" style="width: 100%; border-collapse: collapse; margin-top: 0 !important; table-layout: fixed;">
+            <h3 style="margin: 0 !important; padding: 5px 0 !important; font-size: 10pt; color: #0f172a; font-weight: 800; text-transform: uppercase;">
+                Detalle Cronológico de Movimientos
+            </h3>
+        </div> <table class="pdf-table" style="width: 100%; border-collapse: collapse; margin-top: 0 !important; table-layout: fixed;">
             <thead>
                 <tr>
                     <th style="width: 14%;">FECHA</th>
@@ -669,12 +669,10 @@ ventanaReporte.innerHTML = `
                     <th style="width: 36%;">DETALLE</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody style="font-size: 9pt;">
                 ${filasHtml}
             </tbody>
         </table>
-        </div>
-
 
         <div style="position: absolute; bottom: 0; left: 0; right: 0; border-top: 1px solid #e2e8f0; padding-top: 15px; display: flex; justify-content: space-between; align-items: center;">
             <div>
