@@ -717,9 +717,8 @@ function exportarAExcel() {
     <!-- IZQUIERDA: LOGO + MARCA -->
     <div style="display: flex; align-items: center; gap: 10px;">
     
-    <img src="${window.location.origin}/static/img/loguito.png"
-         style="height: 45px; object-fit: contain; display: block;">
-
+    <img src="{{ url_for('static', filename='img/loguito.png') }}" 
+     style="height: 50px; object-fit: contain;">
     <div>
         <h1 style="margin: 0; font-size: 18pt; font-weight: 900; color: #0f172a;">
             MI BOLSILLO
