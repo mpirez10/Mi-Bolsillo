@@ -211,6 +211,10 @@
     h1, h2, h3, p {
         margin: 2px 0 !important;
     }
+    img {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    }
 
     /* ❗ NO tocar todos los div (eso rompía todo antes) */
 
@@ -701,17 +705,44 @@ function exportarAExcel() {
     ventanaReporte.innerHTML = `
 <section style="padding: 10px; background: white; font-family: 'Segoe UI', Arial, sans-serif; color: #1e293b;">
     
-    <div style="display: flex; justify-content: space-between; border-bottom: 3px solid #0f172a; padding-bottom: 8px; margin-bottom: 10px; align-items: flex-end;">
+    <div class="pdf-header" style="
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 3px solid #0f172a;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+">
+
+    <!-- IZQUIERDA: LOGO + MARCA -->
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <img src="/static/img/loguito.png" 
+             style="height: 45px; object-fit: contain;">
+
         <div>
-            <h1 style="margin: 0; font-size: 22pt; font-weight: 900;">MI BOLSILLO</h1>
-            <p style="margin: 0; font-size: 8pt; color: #64748b;">Gestión de Finanzas Personales</p>
-        </div>
-        <div style="text-align: right;">
-            <h2 style="margin: 0; font-size: 10pt;">REPORTE</h2>
-            <p style="margin: 0; font-size: 8pt;">${fechaHora}</p>
-            <p style="margin: 0; font-size: 8pt;">${nombreUsuario}</p>
+            <h1 style="margin: 0; font-size: 18pt; font-weight: 900; color: #0f172a;">
+                MI BOLSILLO
+            </h1>
+            <p style="margin: 0; font-size: 8pt; color: #64748b; font-weight: 600;">
+                Software de Gestión de Finanzas y Negocios
+            </p>
         </div>
     </div>
+
+    <!-- DERECHA: INFO -->
+    <div style="text-align: right;">
+        <h2 style="margin: 0; font-size: 10pt; font-weight: 700;">
+            REPORTE DE MOVIMIENTOS
+        </h2>
+        <p style="margin: 0; font-size: 8pt; color: #64748b;">
+            Emitido: <strong>${fechaHora}</strong>
+        </p>
+        <p style="margin: 0; font-size: 8pt; color: #64748b;">
+            Usuario: ${nombreUsuario}
+        </p>
+    </div>
+
+</div>
 
     <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
         <div style="font-size: 8pt;">
