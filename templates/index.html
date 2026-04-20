@@ -176,89 +176,55 @@
         td:nth-child(6) { grid-area: acciones; display: flex; justify-content: flex-end; }
     }
 
-    /* 6. MODO IMPRESIÓN - Para que el PDF salga prolijo */
-   @media print {
-    /* Ocultamos todo lo que no sea el reporte nuevo */
+ /* 6. MODO IMPRESIÓN - Estilo Ingeniería Pro */
+@media print {
     body > *:not(#reporte-impresion-formal) { display: none !important; }
     
     #reporte-impresion-formal { 
         display: block !important; 
-        font-family: 'Segoe UI', Arial, sans-serif;
-        color: #1a202c;
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        color: #0f172a;
         width: 100%;
+        -webkit-print-color-adjust: exact; /* Crucial para que salgan los colores */
+        print-color-adjust: exact;
     }
 
-    @page { size: A4 portrait; margin: 1.5cm; }
+    @page { size: A4 portrait; margin: 1.2cm; }
 
-    /* Encabezado Estilo Ingeniería */
     .pdf-header {
         display: flex;
         justify-content: space-between;
-        align-items: flex-start;
-        border-bottom: 2px solid #0f172a;
-        padding-bottom: 20px;
-        margin-bottom: 30px;
+        align-items: flex-end;
+        border-bottom: 3px solid #0f172a;
+        padding-bottom: 10px;
+        margin-bottom: 25px;
     }
 
-    .pdf-logo-text { font-size: 24pt; font-weight: 800; color: #0f172a; line-height: 1; }
-    .pdf-tagline { font-size: 9pt; color: #64748b; font-weight: 600; text-transform: uppercase; margin-top: 5px; }
-
-    .pdf-title-section { text-align: right; }
-    .pdf-title-section h1 { font-size: 14pt; margin: 0; color: #1e293b; letter-spacing: 1px; }
-    .pdf-title-section p { font-size: 9pt; color: #64748b; margin: 5px 0 0 0; }
-
-    /* Barra de Total */
-    .pdf-summary-bar {
-        background: #f8fafc !important;
-        border: 1px solid #e2e8f0;
-        padding: 15px;
-        border-radius: 8px;
-        margin-bottom: 30px;
-        display: flex;
-        justify-content: center;
-    }
-    .summary-item { text-align: center; }
-    .summary-item span { display: block; font-size: 8pt; font-weight: 800; color: #64748b; }
-    .summary-item strong { font-size: 18pt; color: #0f172a; }
-
-    /* Tabla de Movimientos */
-    .section-title { 
-        font-size: 11pt; 
-        border-left: 4px solid #0f172a; 
-        padding-left: 10px; 
-        margin-bottom: 0 !important; /* CAMBIAR DE 15px A 0 */
-        margin-top: 20px; 
-        text-transform: uppercase;
-        font-weight: bold;
-    }
-    
+    /* Tabla con Zebra-Striping para mejor lectura */
     .pdf-table { 
         width: 100%; 
-        border-collapse: collapse !important; /* FUNDAMENTAL */
-        margin-top: 0 !important;             /* PEGA LA TABLA AL TÍTULO */
+        border-collapse: collapse !important; 
+        margin-top: 0 !important;
     }
     .pdf-table th { 
-        background: #0f172a !important; 
-        color: white !important; 
+        background: #f1f5f9 !important; /* Gris muy suave para no gastar tanta tinta pero dar jerarquía */
+        color: #0f172a !important; 
         text-align: left; 
         padding: 10px; 
-        font-size: 9pt; 
+        font-size: 8.5pt; 
         text-transform: uppercase;
+        border-bottom: 2px solid #0f172a;
     }
-    .pdf-table td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; font-size: 9pt; }
-
-    /* Colores de montos */
-    .text-success { color: #10b981 !important; font-weight: bold; }
-    .text-danger { color: #ef4444 !important; font-weight: bold; }
-
-    .pdf-footer {
-        margin-top: 40px;
-        text-align: center;
-        font-size: 8pt;
-        color: #94a3b8;
-        border-top: 1px solid #e2e8f0;
-        padding-top: 10px;
+    .pdf-table td { 
+        padding: 8px 10px; 
+        border-bottom: 1px solid #e2e8f0; 
+        font-size: 9pt; 
+        color: #334155;
     }
+    .pdf-table tr:nth-child(even) { background-color: #f8fafc !important; }
+
+    .text-success { color: #059669 !important; font-weight: 700; }
+    .text-danger { color: #dc2626 !important; font-weight: 700; }
 }
 </style>
 
@@ -664,54 +630,60 @@ const ventanaReporte = document.createElement('div');
 ventanaReporte.id = 'reporte-impresion-formal'; 
 
 ventanaReporte.innerHTML = `
-    <div style="padding: 20px; background: white; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; color: #1e293b;">
+    <div style="position: relative; min-height: 275mm; padding: 10px; background: white; font-family: 'Segoe UI', Arial, sans-serif; color: #1e293b;">
         
-        <div style="display: flex; justify-content: space-between; border-bottom: 3px solid #0f172a; padding-bottom: 15px; margin-bottom: 25px; align-items: flex-end;">
+        <div style="display: flex; justify-content: space-between; border-bottom: 3px solid #0f172a; padding-bottom: 10px; margin-bottom: 20px; align-items: flex-end;">
             <div>
-                <h1 style="margin: 0; font-size: 26px; color: #0f172a; font-weight: 800;">MI BOLSILLO</h1>
-                <p style="margin: 0; font-size: 10px; color: #64748b; font-weight: 600;">Usuario: ${nombreUsuario}</p>
+                <h1 style="margin: 0; font-size: 28px; color: #0f172a; font-weight: 900; letter-spacing: -1px;">MI BOLSILLO</h1>
+                <p style="margin: 0; font-size: 9pt; color: #64748b; font-weight: 600; text-transform: uppercase;">Gestión de Finanzas Personales</p>
             </div>
             <div style="text-align: right;">
-                <h2 style="margin: 0; font-size: 13pt; color: #1e293b; text-transform: uppercase; letter-spacing: 1px;">SISTEMA DE GESTIÓN</h2>
-                <p style="margin: 5px 0 0 0; font-size: 10px; color: #64748b;">Emitido: ${fechaHora}</p>
+                <h2 style="margin: 0; font-size: 11pt; color: #1e293b; font-weight: 700;">REPORTE DE MOVIMIENTOS</h2>
+                <p style="margin: 2px 0 0 0; font-size: 8.5pt; color: #64748b;">Emitido: <strong>${fechaHora}</strong></p>
+                <p style="margin: 0; font-size: 8.5pt; color: #64748b;">Usuario: ${nombreUsuario}</p>
             </div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-            <div style="font-size: 9pt; color: #475569; line-height: 1.5;">
-                <strong style="color: #0f172a;">PERIODO:</strong> ${desde} al ${hasta} <br>
-                <strong style="color: #0f172a;">TIPO FILTRADO:</strong> ${tipo}
+        <div style="display: flex; justify-content: space-between; align-items: stretch; margin-bottom: 25px; gap: 15px;">
+            <div style="flex: 1; font-size: 9pt; color: #475569; background: #f8fafc; padding: 12px; border-radius: 8px; border-left: 4px solid #cbd5e1;">
+                <div style="margin-bottom: 4px;"><strong style="color: #0f172a;">PERIODO:</strong> ${desde} al ${hasta}</div>
+                <div><strong style="color: #0f172a;">FILTRO:</strong> ${tipo}</div>
             </div>
-            <div style="text-align: right; background-color: #f8fafc; padding: 10px 20px; border-radius: 10px; border: 1px solid #e2e8f0;">
-                <span style="display: block; font-size: 8pt; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 2px;">TOTAL FILTRADO</span>
-                <strong style="font-size: 20pt; color: #0f172a;">${totalNeto}</strong>
+            <div style="text-align: right; background-color: #0f172a; padding: 12px 25px; border-radius: 8px; color: white;">
+                <span style="display: block; font-size: 8pt; font-weight: 600; text-transform: uppercase; opacity: 0.8; margin-bottom: 2px;">Total Neto Filtrado</span>
+                <strong style="font-size: 20pt; letter-spacing: -0.5px;">${totalNeto}</strong>
             </div>
         </div>
 
-       <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0f172a; padding-bottom: 0 !important; margin-bottom: 0 !important;">
-    <h3 style="margin: 0 !important; padding: 5px 0 !important; font-size: 11pt; color: #0f172a; font-weight: 700; text-transform: uppercase;">
-        DETALLE DE MOVIMIENTOS
-    </h3>
-</div>
+        <div style="border-bottom: 2px solid #0f172a; margin-bottom: 0 !important;">
+            <h3 style="margin: 0 !important; padding: 5px 0 !important; font-size: 10pt; color: #0f172a; font-weight: 800; text-transform: uppercase;">
+                Detalle Cronológico de Movimientos
+            </h3>
+        </div>
 
-<table style="width: 100%; border-collapse: collapse; margin-top: 0 !important; border-spacing: 0; table-layout: fixed;">
-    <thead>
-        <tr style="background: #f1f5f9 !important;">
-            <th style="width: 15%; padding: 10px; text-align: left; font-size: 8.5pt; color: #0f172a; text-transform: uppercase; border-bottom: 1px solid #0f172a;">FECHA</th>
-            <th style="width: 15%; padding: 10px; text-align: left; font-size: 8.5pt; color: #0f172a; text-transform: uppercase; border-bottom: 1px solid #0f172a;">TIPO</th>
-            <th style="width: 18%; padding: 10px; text-align: left; font-size: 8.5pt; color: #0f172a; text-transform: uppercase; border-bottom: 1px solid #0f172a;">MONTO</th>
-            <th style="width: 17%; padding: 10px; text-align: left; font-size: 8.5pt; color: #0f172a; text-transform: uppercase; border-bottom: 1px solid #0f172a;">CUENTA</th>
-            <th style="width: 35%; padding: 10px; text-align: left; font-size: 8.5pt; color: #0f172a; text-transform: uppercase; border-bottom: 1px solid #0f172a;">DETALLE</th>
-        </tr>
-    </thead>
-    <tbody style="font-size: 9pt;">
-        ${filasHtml}
-    </tbody>
-</table>
+        <table class="pdf-table" style="table-layout: fixed;">
+            <thead>
+                <tr>
+                    <th style="width: 14%;">FECHA</th>
+                    <th style="width: 14%;">TIPO</th>
+                    <th style="width: 18%;">MONTO</th>
+                    <th style="width: 18%;">CUENTA</th>
+                    <th style="width: 36%;">DETALLE</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${filasHtml}
+            </tbody>
+        </table>
 
-        <div class="pdf-footer" style="position: absolute; bottom: 20px; left: 20px; right: 20px; border-top: 1px solid #eee; padding-top: 10px; text-align: center;">
-        <p style="margin: 2px 0; font-weight: bold; color: #475569;">Reporte generado en Panel Central</p>
-        <p style="margin: 2px 0; font-size: 10pt; color: #0f172a; font-weight: 800;">MiBolsillo | Gestión de finanzas</p>
+        <div style="position: absolute; bottom: 0; left: 0; right: 0; border-top: 1px solid #e2e8f0; padding-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <p style="margin: 0; font-size: 8.5pt; font-weight: 700; color: #475569;">MiBolsillo | Panel de Control</p>
+                <p style="margin: 0; font-size: 7.5pt; color: #94a3b8;">Sistema de auditoría financiera interna.</p>
+            </div>
+            <div style="text-align: right;">
+                <p style="margin: 0; font-size: 8pt; color: #94a3b8;">Página 1 de 1</p>
+            </div>
         </div>
     </div>
 `;
