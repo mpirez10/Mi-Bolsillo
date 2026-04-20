@@ -178,6 +178,32 @@
 
  /* 6. MODO IMPRESIÓN - Estilo Ingeniería Pro */
 @media print {
+     html, body {
+        height: auto;
+    }
+
+    table, tr, td {
+        page-break-inside: avoid;
+    }
+
+    thead {
+        display: table-header-group; /* Repite encabezado si hay salto */
+    }
+
+    tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+
+    .pdf-header, .pdf-table, .pdf-footer {
+        page-break-inside: avoid;
+    }
+
+    /* CLAVE: reduce espacios exagerados */
+    h1, h2, h3, p, div {
+        margin-top: 4px !important;
+        margin-bottom: 4px !important;
+    }
     body > *:not(#reporte-impresion-formal) { display: none !important; }
     
     #reporte-impresion-formal { 
@@ -684,9 +710,9 @@ ventanaReporte.innerHTML = `
             </tbody>
         </table>
 
-        <div style="margin-top: 40px; border-top: 1px solid #e2e8f0; padding-top: 10px; display: flex; justify-content: space-between; font-size: 8pt; color: #94a3b8;">
+        <div style="margin-top: 10px; border-top: 1px solid #e2e8f0; padding-top: 50px; display: flex; justify-content: space-between; font-size: 8pt; color: #94a3b8;">
             <div>
-                <strong>MiBolsillo</strong> | Sistema de auditoría financiera interna.
+                <strong>MiBolsillo</strong> | Gestión de finanzas y negocios.
             </div>
         </div>
     </div>
