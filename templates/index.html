@@ -191,9 +191,21 @@
     .summary-item strong { font-size: 18pt; color: #0f172a; }
 
     /* Tabla de Movimientos */
-    .section-title { font-size: 11pt; border-left: 4px solid #0f172a; padding-left: 10px; margin-bottom: 15px; }
+    .section-title { 
+        font-size: 11pt; 
+        border-left: 4px solid #0f172a; 
+        padding-left: 10px; 
+        margin-bottom: 0 !important; /* CAMBIAR DE 15px A 0 */
+        margin-top: 20px; 
+        text-transform: uppercase;
+        font-weight: bold;
+    }
     
-    .pdf-table { width: 100%; border-collapse: collapse; }
+    .pdf-table { 
+        width: 100%; 
+        border-collapse: collapse !important; /* FUNDAMENTAL */
+        margin-top: 0 !important;             /* PEGA LA TABLA AL TÍTULO */
+    }
     .pdf-table th { 
         background: #0f172a !important; 
         color: white !important; 
