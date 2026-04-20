@@ -86,6 +86,37 @@
         background: white;
     }
 
+    /* Estilo Blanco y Azul Minimalista para el botón Filtrar */
+.btn-primario {
+    height: 42px; /* Alineado con los inputs */
+    background-color: white; /* Fondo blanco */
+    color: var(--pocket-blue); /* Letras azules (usando tu variable) */
+    border: 2px solid white; /* Borde blanco para definir la forma */
+    border-radius: 8px; /* Esquinas redondeadas */
+    padding: 0 20px;
+    font-weight: 700; /* Negrita para que se lea bien */
+    font-size: 0.85rem;
+    text-transform: uppercase; /* Todo mayúsculas */
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+}
+
+/* Efecto al pasar el mouse (Invertir colores) */
+.btn-primario:hover {
+    background-color: var(--pocket-blue); /* Fondo azul */
+    color: white; /* Letras blancas */
+    border-color: var(--pocket-blue); /* Borde azul */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Sombra más pronunciada */
+}
+
+.btn-primario:active {
+    transform: translateY(1px); /* Efecto de pulsado */
+}
+
     /* Botones alineados y sin sombras raras */
     .acciones-filtros { 
         display: flex; 
@@ -353,11 +384,11 @@
                 <div class="fecha-inputs" style="flex: 0 1 auto; min-width: 300px; display: flex; gap: 10px;">
                     <div style="flex: 1;">
                         <small style="color: white; font-weight: 700; text-transform: uppercase;">Desde</small>
-                        <input type="date" id="fechaDesde" class="form-control" ...>
+                        <input type="date" id="fechaDesde" class="form-control" value="{{ filtros.desde }}">
                     </div>
                     <div style="flex: 1;">
                         <small style="color: white; font-weight: 700; text-transform: uppercase;">Hasta</small>
-                        <input type="date" id="fechaHasta" class="form-control" ...>
+                        <input type="date" id="fechaHasta" class="form-control" value="{{ filtros.hasta }}".>
                     </div>
                 </div>
             </div>
