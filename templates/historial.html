@@ -2,9 +2,10 @@
 
 {% block content %}
 <style>
-    :root {
+:root {
         --pocket-blue: #0056b3;
         --pocket-green: #28a745;
+        --pocket-transfer: #0ea5e9; /* Azul para transferencias */
         --border: #dee2e6;
         --bg-main: #f4f7f6;
     }
@@ -31,66 +32,96 @@
         gap: 10px;
     }
 
+    /* CARD DE FILTROS - MEJORADA */
     .filtros-card {
         background: white;
         border-radius: 12px;
         border: 1px solid var(--border);
-        padding: 20px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        padding: 24px; /* Más aire */
+        margin-bottom: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
 
     .filtros-grid {
-        display: flex; 
-        gap: 12px; 
-        align-items: flex-end; 
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Grid real, no más encimados */
+        gap: 20px;
+        align-items: end;
     }
 
-    .search-container { flex: 2; min-width: 250px; }
-    .fecha-inputs { display: flex; gap: 8px; flex: 1.5; min-width: 280px; }
+    /* Contenedor específico para las fechas para que no se separen */
+    .fecha-inputs-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .form-group label {
+        font-size: 0.7rem;
+        font-weight: 800;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
 
     .form-control {
-        height: 42px;
+        height: 45px;
         border-radius: 8px;
         border: 1px solid var(--border);
         padding: 8px 12px;
-        width: 100%;
         font-size: 0.9rem;
+        transition: border-color 0.2s;
     }
 
-    .resultados-card {
-        background: white;
-        border-radius: 12px;
-        border: 1px solid var(--border);
-        overflow: hidden;
+    .form-control:focus {
+        border-color: var(--pocket-blue);
+        outline: none;
     }
 
-    .table-formal { width: 100%; border-collapse: collapse; }
-    .table-formal thead th { background: #f8fafc; color: #64748b; font-size: 0.7rem; text-transform: uppercase; padding: 12px 15px; text-align: left; border-bottom: 2px solid #edf2f7; }
-    .table-formal tbody td { padding: 14px 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem; }
+    /* BOTONES */
+    .acciones-filtros {
+        display: flex;
+        gap: 10px;
+    }
 
-    .badge-formal { padding: 4px 10px; border-radius: 20px; font-size: 0.65rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
+    .btn-filtrar {
+        background: var(--pocket-blue);
+        color: white;
+        border: none;
+        padding: 0 25px;
+        border-radius: 8px;
+        font-weight: 700;
+        height: 45px;
+        cursor: pointer;
+        flex-grow: 1;
+    }
+
+    /* BADGES */
+    .badge-formal { padding: 6px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
     .badge-ingreso { background: #ecfdf5; color: #059669; border: 1px solid #10b98133; }
     .badge-egreso { background: #fef2f2; color: #dc2626; border: 1px solid #ef444433; }
-    
+    /* Estilo para Transferencia solicitado */
+    .badge-transferencia { background: #f0f9ff; color: var(--pocket-transfer); border: 1px solid #0ea5e933; }
+
     .total-badge {
         background: #1e293b;
         color: white;
-        padding: 8px 16px;
-        border-radius: 8px;
-        font-weight: 800;
+        padding: 10px 20px;
+        border-radius: 10px;
         text-align: right;
     }
 
-    .pagination-bar {
-        padding: 15px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: #f8fafc;
-        border-top: 1px solid #f1f5f9;
-    }
+    /* Resultados */
+    .resultados-card { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+    .table-formal { width: 100%; border-collapse: collapse; }
+    .table-formal thead th { background: #f8fafc; color: #64748b; font-size: 0.75rem; text-transform: uppercase; padding: 15px; text-align: left; border-bottom: 2px solid #edf2f7; }
+    .table-formal tbody td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
     /* 6. MODO IMPRESIÓN - Estilo Ingeniería Pro (FIX DEFINITIVO) */
 @media print {
 
@@ -220,20 +251,20 @@
     <div class="page-header">
         <h2><i class="fas fa-history"></i> Historial</h2>
         <div class="total-badge">
-            <small style="opacity: 0.8; font-size: 0.6rem; display: block; text-transform: uppercase;">Total Filtrado</small>
-            <span id="sumaTotalFiltrada">$ {{ "{:,.2f}".format(suma_total_filtrada) }}</span>
+            <small style="opacity: 0.8; font-size: 0.65rem; display: block; text-transform: uppercase; margin-bottom: 2px;">Balance Neto (Ing - Egr)</small>
+            <span id="sumaTotalFiltrada" style="font-size: 1.2rem;">$ {{ "{:,.2f}".format(suma_total_filtrada) }}</span>
         </div>
     </div>
 
     <div class="filtros-card">
         <div class="filtros-grid">
-            <div class="search-container">
-                <small style="display:block; font-size: 0.65rem; color: #64748b; font-weight: 700; margin-bottom: 5px;">BÚSQUEDA</small>
-                <input type="text" id="busquedaMovimiento" value="{{ filtros.q }}" placeholder="Buscar detalle o cuenta..." class="form-control">
+            <div class="form-group">
+                <label>Búsqueda</label>
+                <input type="text" id="busquedaMovimiento" value="{{ filtros.q }}" placeholder="Detalle o cuenta..." class="form-control">
             </div>
 
-            <div style="flex: 1; min-width: 150px;">
-                <small style="display:block; font-size: 0.65rem; color: #64748b; font-weight: 700; margin-bottom: 5px;">TIPO</small>
+            <div class="form-group">
+                <label>Operación</label>
                 <select id="filtroTipo" class="form-control">
                     <option value="TODOS" {% if filtros.tipo == 'TODOS' %}selected{% endif %}>TODOS</option>
                     <option value="Ingreso" {% if filtros.tipo == 'Ingreso' %}selected{% endif %}>INGRESO</option>
@@ -242,22 +273,20 @@
                 </select>
             </div>
 
-            <div class="fecha-inputs">
-                <div style="flex: 1;">
-                    <small style="display:block; font-size: 0.65rem; color: #64748b; font-weight: 700; margin-bottom: 5px;">DESDE</small>
+            <div class="form-group">
+                <label>Rango de Fechas</label>
+                <div class="fecha-inputs-wrapper">
                     <input type="date" id="fechaDesde" class="form-control" value="{{ filtros.desde }}">
-                </div>
-                <div style="flex: 1;">
-                    <small style="display:block; font-size: 0.65rem; color: #64748b; font-weight: 700; margin-bottom: 5px;">HASTA</small>
                     <input type="date" id="fechaHasta" class="form-control" value="{{ filtros.hasta }}">
                 </div>
             </div>
 
-            <div class="acciones-filtros" style="display: flex; gap: 8px;">
-                <button onclick="exportarAExcel()" class="btn-export btn-excel" title="Excel"><i class="fas fa-file-excel"></i></button>
-                <button onclick="exportarAPDF()" class="btn-export btn-pdf" title="PDF"><i class="fas fa-file-pdf"></i></button>
-                <button id="btnFiltrar" class="btn-primario" style="background: var(--pocket-blue); color: white; border: none; padding: 0 20px; border-radius: 8px; font-weight: 700; cursor: pointer; height: 42px;">FILTRAR</button>
-                <button onclick="window.location.href='/historial'" class="btn-secundario" style="background: #cbd5e1; color: #1e293b; border: none; width: 42px; border-radius: 8px; cursor: pointer;"><i class="fas fa-sync-alt"></i></button>
+            <div class="form-group">
+                <div class="acciones-filtros">
+                    <button id="btnFiltrar" class="btn-filtrar">APLICAR</button>
+                    <button onclick="window.location.href='/historial'" class="form-control" style="width: 45px; cursor: pointer;" title="Limpiar"><i class="fas fa-sync-alt"></i></button>
+                    <button onclick="exportarAExcel()" class="form-control" style="width: 45px; background: #10b981; color: white; border: none; cursor: pointer;"><i class="fas fa-file-excel"></i></button>
+                </div>
             </div>
         </div>
     </div>
@@ -283,26 +312,28 @@
                         {% set cuenta = m.cuenta_origen if m is mapping else m[3] %}
                         {% set motivo = m.motivo if m is mapping else m[4] %}
 
-                        <td style="color: #94a3b8;">{{ fecha }}</td>
+                        <td style="color: #64748b; font-family: monospace;">{{ fecha }}</td>
                         <td>
                             {% if tipo.lower() == 'ingreso' %}
                                 <span class="badge-formal badge-ingreso"><i class="fas fa-arrow-up"></i> INGRESO</span>
                             {% elif tipo.lower() == 'egreso' %}
                                 <span class="badge-formal badge-egreso"><i class="fas fa-arrow-down"></i> EGRESO</span>
                             {% else %}
-                                <span class="badge-formal" style="background:#e2e8f0; color:#475569;"><i class="fas fa-exchange-alt"></i> TRANSF.</span>
+                                <span class="badge-formal badge-transferencia"><i class="fas fa-exchange-alt"></i> TRANSF.</span>
                             {% endif %}
                         </td>
-                        <td style="font-weight:700;">$ {{ "{:,.2f}".format(monto) }}</td>
+                        <td style="font-weight: 800; color: #1e293b;">$ {{ "{:,.2f}".format(monto) }}</td>
                         <td style="color: #64748b;">{{ cuenta }}</td>
                         <td>
-                            <div style="font-weight: 600;">{{ motivo }}</div>
+                            <div style="font-weight: 600; text-transform: uppercase; font-size: 0.8rem;">{{ motivo }}</div>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        </div>
+</div>
 
         <div class="pagination-bar">
             {% if page > 1 %}
