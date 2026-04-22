@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from datetime import datetime
 from db import get_db  # <--- Esto es lo que usás ahora
 
-historial = Blueprint('historial', __name__)
+bp = Blueprint('historial', __name__) # <--- Cambialo a 'bp'
 
 @historial.route('/historial')
 @login_required
