@@ -8,7 +8,7 @@
     <title>Mi Bolsillo | Gestión de Finanzas y Negocios</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <style>
+    <style>
         :root { 
             --pocket-blue: #1e40af; 
             --money-green: #10b981; 
@@ -22,59 +22,54 @@
         }
         
         body { 
-    font-family: 'Inter', sans-serif; 
-    margin: 0; 
-    padding: 15px; 
-    color: var(--text); 
-    line-height: 1.5;
-    transition: padding 0.3s;
-    background-color: #f8fafc;
-}
+            font-family: 'Inter', sans-serif; 
+            margin: 0; 
+            padding: 0; /* Quitamos el padding para que el header llegue a los bordes */
+            color: var(--text); 
+            line-height: 1.5;
+            background-color: #f8fafc;
+        }
 
-/* CAPA DE FONDO (marca de agua PRO) */
-body::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+        /* CAPA DE FONDO (marca de agua PRO) */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image: url("{{ url_for('static', filename='img/fondo_bolsillos.png') }}");
+            background-repeat: repeat;
+            background-size: 120px 120px;
+            background-position: 0 0;
+            image-rendering: auto;
+            opacity: 0.18;
+            pointer-events: none;
+            z-index: 0;
+        }
 
-    background-image: url("{{ url_for('static', filename='img/fondo_bolsillos.png') }}");
-    background-repeat: repeat;
+        body > * { position: relative; z-index: 1; }
 
-    /* tamaño exacto del tile */
-    background-size: 120px 120px;
+        /* NUEVA CLASE PARA EL HEADER FULL WIDTH */
+        .header-full {
+            background: white;
+            width: 100%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
 
-    /* alineación perfecta desde esquina */
-    background-position: 0 0;
-
-    /* evita suavizado raro */
-    image-rendering: auto;
-
-    /* efecto marca de agua */
-    opacity: 0.18;
-
-    pointer-events: none;
-
-    /* importante: no interferir con contenido */
-    z-index: 0;
-}
-
-/* aseguramos que el contenido quede arriba */
-body > * {
-    position: relative;
-    z-index: 1;
-}
-        .container { max-width: 1050px; margin: 0 auto; }
+        .container { 
+            max-width: 1050px; 
+            margin: 0 auto; 
+            padding: 0 15px; /* El padding que antes tenía el body ahora lo maneja el contenedor */
+        }
         
-        /* Barra de navegación principal */
+        /* Contenedor interno de la nav-bar para alinear el contenido */
         .nav-bar { 
-            background: white; 
-            padding: 10px 20px; 
-            border-radius: 12px; 
-            margin-bottom: 20px; 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+            max-width: 1050px;
+            margin: 0 auto;
+            padding: 10px 15px;
             display: flex; 
             justify-content: space-between; 
             align-items: center;
@@ -95,12 +90,12 @@ body > * {
         .btn-outline { border: 1px solid var(--border); color: var(--text); background: white; }
         .btn-yellow { background: #f59e0b; color: white; }
         
-        /* Barra Inferior (Mobile Tab Bar) */
+        /* Barra Inferior Mobile */
         .mobile-tab-bar {
             display: none;
             position: fixed;
             bottom: 0; left: 0; right: 0;
-            background: var(--pocket-blue); /* Cambiado de 'blue' genérico al azul de la app */
+            background: var(--pocket-blue);
             height: 65px;
             border-top: 1px solid rgba(255,255,255,0.1);
             grid-template-columns: repeat(4, 1fr);
@@ -121,12 +116,9 @@ body > * {
         }
 
         .tab-item i { font-size: 1.2rem; }
-        .tab-item.active { 
-            color: white; 
-            background: rgba(255,255,255,0.1); /* Resalta el ícono activo */
-        }
+        .tab-item.active { color: white; background: rgba(255,255,255,0.1); }
 
-        /* Menú de usuario */
+        /* Menú usuario */
         .user-menu-container { position: relative; }
         .user-btn { background: #f8fafc; border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--text); padding: 8px 12px; border-radius: 8px; font-family: inherit; font-size: 0.85rem; }
         
@@ -146,17 +138,19 @@ body > * {
         .dropdown-divider { height: 1px; background: var(--border); margin: 0; }
 
         @media (max-width: 768px) {
-            body { padding: 10px; padding-bottom: 80px; } 
+            body { padding-bottom: 80px; } 
+            .container { padding: 0 10px; }
             .nav-links { display: none; } 
-            .nav-bar { justify-content: center; padding: 10px; margin-bottom: 15px; }
+            .nav-bar { justify-content: center; padding: 10px; }
             .mobile-tab-bar { display: grid; } 
             .brand-logo-img { height: 30px; }
+            .header-full { margin-bottom: 15px; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header class="nav-bar">
+    <header class="header-full">
+        <div class="nav-bar">
             <a href="/" class="brand">
                 <img src="{{ url_for('static', filename='img/loguito.png') }}" alt="Logo Mi Bolsillo" class="brand-logo-img">
                 <div class="brand-text">
@@ -188,8 +182,10 @@ body > * {
                 <a href="{{ url_for('auth.login') }}" class="btn btn-blue">Entrar</a>
                 {% endif %}
             </nav>
-        </header>
-        
+        </div>
+    </header>
+
+    <div class="container">
         <main>
             {% block content %}{% endblock %}
         </main>
