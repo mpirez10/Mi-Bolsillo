@@ -288,7 +288,7 @@ def borrar_dia(id):
 
 
 # --- IMPORTACIÓN Y REGISTRO DE RUTAS ---
-from routes import home, cuentas, movimientos, deudas, auth
+from routes import home, cuentas, movimientos, deudas, auth. historial
 from routes.finanzas import finanzas_bp
 from routes.emprendimiento import emprendimiento_bp
 
@@ -299,6 +299,7 @@ app.register_blueprint(deudas.bp)
 app.register_blueprint(auth.auth_bp)
 app.register_blueprint(finanzas_bp)
 app.register_blueprint(emprendimiento_bp)
+app.register_blueprint(historial.bp)
 
 # --- INICIALIZAR DB (crea tablas si no existen) ---
 with app.app_context():
