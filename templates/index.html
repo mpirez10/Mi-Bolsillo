@@ -623,49 +623,12 @@ details[open] .toggle-icon { transform: rotate(180deg); }
                 </a>
             </div>
 
-            <div class="filtros-container">
-                <div class="total-filtrado-box">
-                    <i class="fas fa-calculator" style="color: #64748b;"></i>
-                    <div>
-                        <small style="display:block; font-size: 0.6rem; color: #64748b; font-weight: 700;">TOTAL FILTRADO</small>
-                        <h2>$ {{ "{:,.2f}".format(suma_total_filtrada) }}</h2>
-                    </div>
-                </div>
-
-                <div class="filtros-grid">
-                    <div class="search-container">
-                        <small>Buscar Movimiento</small>
-                        <input type="text" id="busquedaMovimiento" value="{{ filtros.q }}" placeholder="Detalle, cuenta o motivo..." class="form-control">
-                    </div>
-
-                    <div style="flex: 1; min-width: 120px;">
-                        <small>Tipo</small>
-                        <select id="filtroTipo" class="form-control">
-                            <option value="">TODOS</option>
-                            <option value="INGRESO">INGRESO</option>
-                            <option value="EGRESO">EGRESO</option>
-                            <option value="TRANSFERENCIA">TRANSF.</option>
-                        </select>
-                    </div>
-
-                    <div class="fecha-inputs">
-                        <div style="flex: 1;">
-                            <small>Desde</small>
-                            <input type="date" id="fechaDesde" class="form-control" value="{{ filtros.desde }}">
-                        </div>
-                        <div style="flex: 1;">
-                            <small>Hasta</small>
-                            <input type="date" id="fechaHasta" class="form-control" value="{{ filtros.hasta }}">
-                        </div>
-                    </div>
-                    <div class="acciones-filtros">
+           <div class="acciones-filtros">
                         <button onclick="exportarAExcel()" class="btn-export btn-excel" title="Excel"><i class="fas fa-file-excel"></i></button>
                         <button onclick="exportarAPDF()" class="btn-export btn-pdf" title="PDF"><i class="fas fa-file-pdf"></i></button>
-                        <button onclick="limpiarFiltros()" class="btn-limpiar" title="Reiniciar"><i class="fas fa-sync-alt"></i></button>
-                        <button type="button" id="btnFiltrar" class="btn-primario">FILTRAR</button>
+                        <a href="{{ url_for('historial.ver_historial') }}" class="btn btn-info">
+                        <i class="fas fa-history"></i> Ver Historial</a>
                     </div>
-                </div>
-            </div>
 
             <div style="overflow-x: auto;">
                 <table class="table-formal">
