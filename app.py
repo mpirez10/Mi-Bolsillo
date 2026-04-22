@@ -1,12 +1,12 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for
-from flask_login import LoginManager, UserMixin
+import psycopg2
+import psycopg2.extras
+from flask import Flask, render_template, request, redirect, url_for, jsonify, flash
+from flask_login import LoginManager, current_user, login_required
 from werkzeug.security import generate_password_hash
 from db import get_db, init_db
-from flask import render_template, request, redirect, url_for, jsonify
-import psycopg2
-import psycopg2.extras  # Esto es fundamental para el RealDictCursor
-from flask_login import current_user # Asegurate de tener esta importación arriba
+from models import Usuario
+
 
 # --- CONFIGURACIÓN DE APP ---
 app = Flask(__name__, template_folder='templates', static_folder='static')
@@ -16,49 +16,29 @@ app.secret_key = os.getenv("SECRET_KEY", "dev_key")
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'auth.login'
-login_manager.login_message = "Tienes que iniciar sesión."
-
-# --- MODELO USUARIO ---
-class Usuario(UserMixin):
-    def __init__(self, id, nombre_completo, correo, fecha_nacimiento=None):
-        self.id = id
-        self.nombre_completo = nombre_completo
-        self.correo = correo
-        self.fecha_nacimiento = fecha_nacimiento
+login_manager.login_message = "Tenés que iniciar sesión, bo."
+login_manager.login_message_category = "info"
 
 # --- CARGAR USUARIO ---
 @login_manager.user_loader
 def load_user(user_id):
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute(
-        "SELECT id, nombre_completo, correo, fecha_nacimiento FROM usuarios WHERE id = %s",
-        (user_id,)
-    )
-    user = cursor.fetchone()
-    cursor.close()
-    conn.close()
-
-    if user:
-        try:
-            return Usuario(user["id"], user["nombre_completo"], user["correo"], user["fecha_nacimiento"])
-        except Exception:
-            return Usuario(user[0], user[1], user[2], user[3])
-    return None
+    return Usuario.get_by_id(user_id) # Usamos el método pro que creamos en models.py
 
 # --- VERIFICAR SI HAY USUARIOS ---
 def hay_usuarios():
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT COUNT(*) AS count FROM usuarios")
-    result = cursor.fetchone()
-    cursor.close()
-    conn.close()
     try:
-        return result["count"] > 0
-    except Exception:
-        return result[0] > 0
-
+        cursor.execute("SELECT COUNT(*) FROM usuarios")
+        result = cursor.fetchone()
+        # Manejo por si es tupla o dict
+        count = result[0] if isinstance(result, tuple) else result['count']
+        return count > 0
+    except:
+        return False
+    finally:
+        cursor.close()
+        conn.close()
 # --- REDIRECCIÓN AUTOMÁTICA ---
 @app.before_request
 def verificar_primer_uso():
@@ -105,11 +85,13 @@ def setup():
 
 # --- RESPALDO (DESACTIVADO) ---
 @app.route('/respaldo')
+@login_required
 def descargar_respaldo():
     return "Respaldo desactivado en PostgreSQL", 404
 
 # Agenda
 @app.route('/agenda/<int:id>')
+@login_required
 def ver_agenda(id):
     conn = get_db()
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -127,6 +109,7 @@ def ver_agenda(id):
     return render_template('emprendimiento/agenda.html', agendas=agendas, emprendimiento_id=id)
 
 @app.route('/agregar_dia', methods=['POST'])
+@login_required
 def agregar_dia():
     fecha = request.form.get('fecha')
     # Capturamos el id que mandamos en el input hidden
@@ -147,6 +130,7 @@ def agregar_dia():
     return redirect(url_for('ver_agenda', id=eid))
 
 @app.route('/guardar_turno', methods=['POST'])
+@login_required
 def guardar_turno():
     # 1. Capturamos los datos del form
     eid = request.form.get('emprendimiento_id') # <--- Capturamos el ID real
@@ -182,6 +166,7 @@ def guardar_turno():
     return redirect(url_for('ver_agenda', id=eid))
 
 @app.route('/actualizar_estado/<int:id>', methods=['POST'])
+@login_required
 def actualizar_estado(id):
     datos = request.get_json()
     nuevo_estado = datos.get('estado')
@@ -233,6 +218,7 @@ def actualizar_estado(id):
         conn.close()
 
 @app.route('/borrar_turno/<int:id>', methods=['POST'])
+@login_required
 def borrar_turno(id):
     conn = get_db()
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -274,6 +260,7 @@ def borrar_turno(id):
         conn.close()
 
 @app.route('/borrar_dia/<int:id>', methods=['POST'])
+@login_required
 def borrar_dia(id):
     conn = get_db() # <--- Llamamos a la función para obtener la conexión
     try:
