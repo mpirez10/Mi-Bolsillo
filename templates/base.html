@@ -91,7 +91,9 @@ body > * {
 
         .btn { padding: 8px 14px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.2s; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; }
         .btn-blue { background: var(--pocket-blue); color: white; }
+        .btn-inicio { background: white ; color: var(--pocket-blue); }
         .btn-outline { border: 1px solid var(--border); color: var(--text); background: white; }
+        .btn-yellow { background: #f59e0b; color: white; }
         
         /* Barra Inferior (Mobile Tab Bar) */
         .mobile-tab-bar {
@@ -165,7 +167,7 @@ body > * {
 
             <nav class="nav-links">
                 <a href="/" class="btn btn-outline"><i class="fas fa-home"></i> Inicio</a>
-                <a href="/deudas" class="btn btn-outline"><i class="fas fa-file-invoice-dollar"></i> Deudas</a>
+                <a href="/deudas" class="btn btn-yellow"><i class="fas fa-file-invoice-dollar"></i> Deudas</a>
                 <a href="/emprendimiento" class="btn btn-blue"><i class="fas fa-chart-line"></i> Mi Negocio</a>
                 
                 {% if current_user.is_authenticated %}
@@ -175,7 +177,7 @@ body > * {
                     </button>
                     <div id="dropdownMenu" class="dropdown-menu">
                         <a href="{{ url_for('auth.perfil') }}"><i class="fas fa-user-circle me-2"></i> Mi Perfil</a>
-                        <a href="{{ url_for('descargar_respaldo') }}"><i class="fas fa-cloud-download-alt me-2"></i> Respaldar Datos</a>
+                        <a href="{{ url_for('descargar_respaldo') }}" style="color: var(--money-green);"><i class="fas fa-cloud-download-alt me-2"></i> Respaldar Datos</a>
                         <div class="dropdown-divider"></div>
                         <a href="{{ url_for('auth.logout') }}" style="color: var(--danger);">
                             <i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión
