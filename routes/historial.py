@@ -5,7 +5,7 @@ from db import get_db  # <--- Esto es lo que usás ahora
 
 bp = Blueprint('historial', __name__) # <--- Cambialo a 'bp'
 
-@historial.route('/historial')
+@bp.route('/historial')
 @login_required
 def ver_historial():
     # Parámetros de la URL
