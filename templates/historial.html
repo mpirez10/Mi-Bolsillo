@@ -34,7 +34,7 @@
 
     /* CARD DE FILTROS - MEJORADA */
     .filtros-card {
-        background: white;
+        background: var(--pocket-blue--);
         border-radius: 12px;
         border: 1px solid var(--border);
         padding: 24px; /* Más aire */
@@ -87,8 +87,8 @@
 
     .btn-pdf { color: #e11d48; border-color: #fda4af; }
     .btn-excel { color: #10b981; border-color: #6ee7b7; }
-    .btn-reset { color: #64748b; }
-
+    .btn-reset { color: #64748b; border-color: #64748b; }
+    .btn.filter { background: var(--pocket-blue--); color: white; border-color: white; }
 
     /* BADGES */
     .badge-formal { padding: 6px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
@@ -237,9 +237,9 @@
 
 <div class="historial-container">
     <div class="page-header">
-        <h2><i class="fas fa-history"></i> Historial</h2>
+        <h2><i class="fas fa-history"></i> Historial de movimientos</h2>
         <div class="total-badge">
-            <small style="opacity: 0.8; font-size: 0.65rem; display: block; text-transform: uppercase; margin-bottom: 2px;">Balance Neto (Ing - Egr)</small>
+            <small style="opacity: 0.8; font-size: 0.65rem; display: block; text-transform: uppercase; margin-bottom: 2px;">Balance Neto</small>
             <span id="sumaTotalFiltrada" style="font-size: 1.2rem;">$ {{ "{:,.2f}".format(suma_total_filtrada) }}</span>
         </div>
     </div>
@@ -254,7 +254,7 @@
             </div>
 
             <div class="form-group flex-small">
-                <label>Operación</label>
+                <label>Tipo de operación</label>
                 <select id="filtroTipo" class="form-control">
                     <option value="TODOS" {% if filtros.tipo == 'TODOS' %}selected{% endif %}>TODOS</option>
                     <option value="Ingreso" {% if filtros.tipo == 'Ingreso' %}selected{% endif %}>INGRESO</option>
