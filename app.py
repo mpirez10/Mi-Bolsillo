@@ -288,7 +288,7 @@ def borrar_dia(id):
 
 
 # --- IMPORTACIÓN Y REGISTRO DE RUTAS ---
-from routes import home, cuentas, movimientos, deudas, auth. historial
+from routes import home, cuentas, movimientos, deudas, auth, historial
 from routes.finanzas import finanzas_bp
 from routes.emprendimiento import emprendimiento_bp
 
