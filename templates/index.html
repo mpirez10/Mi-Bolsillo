@@ -13,12 +13,122 @@
     --text-dark: #212529;
 }
 
-    /* Layout General */
+/* --- AJUSTES AL LAYOUT EXISTENTE --- */
 .dashboard-layout {
     display: flex;
-    gap: 20px;
+    gap: 25px; /* Un poco más de aire entre columnas */
     align-items: flex-start;
+    max-width: 1400px; /* Para que no se desparrame en monitores gigantes */
+    margin: 0 auto;
+    padding: 20px;
 }
+
+/* El main ahora toma todo el espacio restante */
+.main-content {
+    flex: 1;
+    min-width: 0; /* Evita que las tablas rompan el layout */
+}
+
+/* --- ESTÉTICA FORMAL PARA MOVIMIENTOS --- */
+.card-movimientos {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+/* Header de la sección de movimientos */
+.movimientos-header {
+    background: #f8fafc;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.movimientos-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--pocket-blue);
+    font-weight: 800;
+}
+
+/* Caja de filtros más sobria */
+.filtros-container {
+    padding: 20px;
+    background: white;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.total-filtrado-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 12px;
+    background: #f1f5f9;
+    border-radius: 8px;
+    width: fit-content;
+}
+
+.total-filtrado-box h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    color: #1e293b;
+    font-weight: 800;
+}
+
+/* Tabla Formal */
+.table-formal {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table-formal thead th {
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 12px 15px;
+    border-bottom: 2px solid #edf2f7;
+    text-align: left;
+}
+
+.table-formal tbody td {
+    padding: 14px 15px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.85rem;
+    color: #334155;
+}
+
+/* Badges más profesionales (menos color de fondo, más borde/texto) */
+.badge-formal {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.badge-ingreso { background: #ecfdf5; color: #059669; border: 1px solid #10b98133; }
+.badge-egreso { background: #fef2f2; color: #dc2626; border: 1px solid #ef444433; }
+.badge-transf { background: #eff6ff; color: #2563eb; border: 1px solid #3b82f633; }
+
+/* Montos y Detalles */
+.monto-valor { font-weight: 700; color: #0f172a; }
+.detalle-principal { font-weight: 600; color: #1e293b; text-transform: uppercase; }
+.detalle-sub { font-size: 0.7rem; color: #94a3b8; margin-top: 2px; }
+
+.btn-eliminar-tabla {
+    color: #cbd5e1;
+    transition: 0.2s;
+}
+.btn-eliminar-tabla:hover { color: #ef4444; }
 
 .sidebar-column {
     width: 280px; /* Ancho más compacto */
@@ -487,165 +597,120 @@ details[open] .toggle-icon { transform: rotate(180deg); }
         </div>
 
     </aside>
-    
-    </div>
-
-<main>
-    <div class="card" style="padding: 20px; border: 2px solid var(--pocket-green); background: white; border-radius: 16px;">
-        
-<div style="background-color: var(--pocket-blue); border: 2px solid var(--pocket-green); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
-    
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h3 style="margin: 0; font-size: 1.2rem; color: white; font-weight: 800;">
-            <i class="fas fa-exchange-alt"></i> MOVIMIENTOS
-        </h3>
-        <a href="/movimiento" class="btn" style="padding: 8px 16px; font-size: 0.85rem; background-color: var(--pocket-green); color: white; border-radius: 8px; text-decoration: none; display: flex; align-items: center; gap: 8px; font-weight: 700;">
-            <i class="fas fa-plus"></i> NUEVO
-        </a>
-    </div>
-
-    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(16, 185, 129, 0.3);">
-        <div style="background: var(--pocket-blue); padding: 10px; border-radius: 8px; border: 2px solid var(--pocket-green);">
-            <i class="fas fa-calculator" style="color:white;"></i>
-        </div>
-        <div>
-            <small style="color:white; font-weight: 700; text-transform: uppercase; font-size: 0.65rem; opacity: 0.9;">Total Filtrado</small>
-            <h2 id="sumaTotalFiltrada" style="margin: 0; font-size: 1.5rem; color: white; font-weight: 800;"> 
-                $ {{ "{:,.2f}".format(suma_total_filtrada) }}
-            </h2>
-        </div>
-    </div>
-        <div style="background: var(--pocket-blue); padding: 10px; border-radius: 8px; border: 2px solid var(--pocket-green);">
-        <div class="search-container" style="width: 100%; margin-bottom: 15px;">
-            <small style="color: white; font-weight: 700; text-transform: uppercase; font-size: 0.7rem;">Buscar Movimiento</small>
-            <div style="position: relative; margin-top: 5px;">
-                <i class="fas fa-search" style="position: absolute; left: 12px; top: 12px; color: #94a3b8;"></i>
-                <input type="text" id="busquedaMovimiento" value="{{ filtros.q }}" placeholder="Detalle, cuenta o motivo..." class="form-control" style="padding-left: 40px; width: 100%; background: white; border-radius: 8px; border: none; height: 40px;">
-            </div>
-        </div>
-        
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; width: 100%; flex-wrap: wrap; gap: 15px;">
-            <div>
-                <small style="color: white; font-weight: 700; text-transform: uppercase; font-size: 0.7rem;">Reportes y Acción</small>
-                <div style="display: flex; gap: 8px; margin-top: 5px;">
-                    <button onclick="exportarAExcel()" class="btn-export btn-excel" style="background: #10b981; color: white; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer;"><i class="fas fa-file-excel"></i></button>
-                    <button onclick="exportarAPDF()" class="btn-export btn-pdf" style="background: #ef4444; color: white; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer;"><i class="fas fa-file-pdf"></i></button>
-                    <button onclick="limpiarFiltros()" class="btn-limpiar" style="background: white; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer;"><i class="fas fa-sync-alt"></i></button>
-                    <button type="button" id="btnFiltrar" class="btn-primario" style="font-weight: 800;">FILTRAR</button>
-                </div>
-            </div>
-
-            <div style="flex: 1; min-width: 150px;">
-                <small style="color: white; font-weight: 700; text-transform: uppercase; font-size: 0.7rem;">Tipo</small>
-                <select id="filtroTipo" class="form-control" style="background: white; border-radius: 8px; border: none; width: 100%; padding: 8px; margin-top: 5px; font-weight: 600; height: 40px;">
-                    <option value="">TODOS</option>
-                    <option value="INGRESO">INGRESO</option>
-                    <option value="EGRESO">EGRESO</option>
-                    <option value="TRANSFERENCIA">TRANSF.</option>
-                </select>
-            </div>
-
-            <div style="display: flex; gap: 10px; flex: 0 1 auto; min-width: 280px;">
-                <div style="flex: 1;">
-                    <small style="color: white; font-weight: 700; text-transform: uppercase; font-size: 0.7rem;">Desde</small>
-                    <input type="date" id="fechaDesde" class="form-control" value="{{ filtros.desde }}" style="width: 100%; border-radius: 8px; border: none; padding: 7px; margin-top: 5px; height: 40px;">
-                </div>
-                <div style="flex: 1;">
-                    <small style="color: white; font-weight: 700; text-transform: uppercase; font-size: 0.7rem;">Hasta</small>
-                    <input type="date" id="fechaHasta" class="form-control" value="{{ filtros.hasta }}" style="width: 100%; border-radius: 8px; border: none; padding: 7px; margin-top: 5px; height: 40px;">
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 25px; padding-top: 15px; border-top: 1px solid rgba(16, 185, 129, 0.3);">
-        <div>
-            {% if page > 1 %}
-                <a href="{{ url_for('home.index', page=page-1, q=filtros.q, tipo=filtros.tipo, desde=filtros.desde, hasta=filtros.hasta) }}" 
-                   style="background-color: transparent; border: 2px solid var(--pocket-green); color: white; padding: 6px 14px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 6px;">
-                   <i class="fas fa-arrow-left"></i> MÁS NUEVOS
+    <main class="main-content">
+        <div class="card-movimientos">
+            
+            <div class="movimientos-header">
+                <h3><i class="fas fa-exchange-alt"></i> MOVIMIENTOS</h3>
+                <a href="/movimiento" class="btn-new" style="background: var(--pocket-green); color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 0.8rem;">
+                    <i class="fas fa-plus"></i> NUEVO
                 </a>
-            {% else %}
-                <button style="background-color: rgba(226, 232, 240, 0.1); color: #64748b; padding: 6px 14px; border-radius: 8px; border: 1px solid #64748b; font-weight: 700; font-size: 0.75rem; cursor: not-allowed;" disabled>
-                   <i class="fas fa-arrow-left"></i> MÁS NUEVOS
-                </button>
-            {% endif %}
-        </div>
+            </div>
 
-        <span style="font-weight: 800; color: var(--pocket-blue); background: var(--pocket-light-blue); padding: 4px 14px; border-radius: 8px; font-size: 0.8rem;">
-            Página {{ page }}
-        </span>
+            <div class="filtros-container">
+                <div class="total-filtrado-box">
+                    <i class="fas fa-calculator" style="color: #64748b;"></i>
+                    <div>
+                        <small style="display:block; font-size: 0.6rem; color: #64748b; font-weight: 700;">TOTAL FILTRADO</small>
+                        <h2>$ {{ "{:,.2f}".format(suma_total_filtrada) }}</h2>
+                    </div>
+                </div>
 
-        <div>
-            {% if hay_mas_viejos %}
-                <a href="{{ url_for('home.index', page=page+1, q=filtros.q, tipo=filtros.tipo, desde=filtros.desde, hasta=filtros.hasta) }}" 
-                   style="background-color: transparent; border: 2px solid var(--pocket-green); color: white; padding: 6px 14px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 6px;">
-                   MÁS VIEJOS <i class="fas fa-arrow-right"></i>
-                </a>
-            {% else %}
-                <button style="background-color: rgba(226, 232, 240, 0.1); color: #64748b; padding: 6px 14px; border-radius: 8px; border: 1px solid #64748b; font-weight: 700; font-size: 0.75rem; cursor: not-allowed;" disabled>
-                   MÁS VIEJOS <i class="fas fa-arrow-right"></i>
-                </button>
-            {% endif %}
-        </div>
-    </div>
-</div>
-</div>
+                <div class="filtros-grid">
+                    <div class="search-container">
+                        <small>Buscar Movimiento</small>
+                        <input type="text" id="busquedaMovimiento" value="{{ filtros.q }}" placeholder="Detalle, cuenta o motivo..." class="form-control">
+                    </div>
 
-{% if not es_busqueda_activa and page == 3 %}
-    <p style="text-align: center; color: #64748b; font-size: 0.8rem; margin-top: 8px; font-weight: 600;">
-        <i class="fas fa-info-circle"></i> Para ver movimientos más antiguos, haz uso de los filtros de búsqueda de arriba.
-    </p>
-{% endif %}
-        <div class="table-responsive" style="border-radius: 12px; overflow: hidden; border: 2px solid var(--pocket-green); margin-top: 10px;">
-            <table style="width: 100%; border-collapse: collapse; background-color: white;">
-                <thead>
-                    <tr style="background-color:white;">
-                        <th style="padding: 15px 10px; text-align: left; font-size: 0.75rem; text-transform: uppercase; color:var(--pocket-blue); font-weight: 800;">Fecha</th>
-                        <th style="padding: 15px 10px; text-align: left; font-size: 0.75rem; text-transform: uppercase; color:var(--pocket-blue); font-weight: 800;">Tipo</th>
-                        <th style="padding: 15px 10px; text-align: left; font-size: 0.75rem; text-transform: uppercase; color:var(--pocket-blue); font-weight: 800;">Monto</th>
-                        <th style="padding: 15px 10px; text-align: left; font-size: 0.75rem; text-transform: uppercase; color:var(--pocket-blue); font-weight: 800;">Cuenta</th>
-                        <th style="padding: 15px 10px; text-align: left; font-size: 0.75rem; text-transform: uppercase; color:var(--pocket-blue); font-weight: 800;">Detalle</th>
-                        <th style="padding: 15px 10px; text-align: center; font-size: 0.75rem; text-transform: uppercase; color:var(--pocket-blue); font-weight: 800;">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for m in movimientos %}
-                    <tr style="border-bottom: 1px solid #f1f5f9;">
-                        <td style="padding: 12px 10px; font-size: 0.8rem; color: #64748b;">{{ m.fecha.strftime('%d/%m/%Y') }}</td>
-                        <td style="padding: 12px 10px;">
-                            {% if m.tipo.lower() == 'ingreso' %}
-                                <span class="status-badge" style="background: #ecfdf5; color: #10b981; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700;">
-                                    <i class="fas fa-arrow-up"></i> INGRESO
-                                </span>
-                            {% elif m.tipo.lower() == 'egreso' %}
-                                <span class="status-badge" style="background: #fef2f2; color: #ef4444; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700;">
-                                    <i class="fas fa-arrow-down"></i> EGRESO
-                                </span>
-                            {% else %}
-                                <span class="status-badge" style="background: #eff6ff; color: #3b82f6; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700;">
-                                    <i class="fas fa-sync"></i> TRANSF.
-                                </span>
-                            {% endif %}
-                        </td>
-                        <td style="padding: 12px 10px; font-weight: 700; color: #1e293b;">${{ "{:,.2f}".format(m.monto) }}</td>
-                        <td style="padding: 12px 10px; font-size: 0.85rem; color: #475569;">{{ m.cuenta_origen }}</td>
-                        <td style="padding: 12px 10px;">
-                            <div style="font-size: 0.9rem; font-weight: 700; color: #1e293b; text-transform: uppercase;">{{ m.detalle }}</div>
-                            <div style="font-size: 0.7rem; color: #94a3b8;">{{ m.motivo if m.motivo else '' }}</div>
-                        </td>
-                        <td style="padding: 12px 10px; text-align: center;">
-                            <a href="{{ url_for('home.eliminar_movimiento', mid=m.id) }}" style="color: #cbd5e1;" onclick="return confirm('¿Eliminar?')">
-                                <i class="fas fa-trash-alt"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    <div style="flex: 1; min-width: 120px;">
+                        <small>Tipo</small>
+                        <select id="filtroTipo" class="form-control">
+                            <option value="">TODOS</option>
+                            <option value="INGRESO">INGRESO</option>
+                            <option value="EGRESO">EGRESO</option>
+                            <option value="TRANSFERENCIA">TRANSF.</option>
+                        </select>
+                    </div>
+
+                    <div class="fecha-inputs">
+                        <div style="flex: 1;">
+                            <small>Desde</small>
+                            <input type="date" id="fechaDesde" class="form-control" value="{{ filtros.desde }}">
+                        </div>
+                        <div style="flex: 1;">
+                            <small>Hasta</small>
+                            <input type="date" id="fechaHasta" class="form-control" value="{{ filtros.hasta }}">
+                        </div>
+                    </div>
+
+                    <div class="acciones-filtros">
+                        <button onclick="exportarAExcel()" class="btn-export btn-excel" title="Excel"><i class="fas fa-file-excel"></i></button>
+                        <button onclick="exportarAPDF()" class="btn-export btn-pdf" title="PDF"><i class="fas fa-file-pdf"></i></button>
+                        <button onclick="limpiarFiltros()" class="btn-limpiar" title="Reiniciar"><i class="fas fa-sync-alt"></i></button>
+                        <button type="button" id="btnFiltrar" class="btn-primario">FILTRAR</button>
+                    </div>
+                </div>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table class="table-formal">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Monto</th>
+                            <th>Cuenta</th>
+                            <th>Detalle</th>
+                            <th style="text-align: center;">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in movimientos %}
+                        <tr>
+                            <td style="color: #94a3b8;">{{ m.fecha.strftime('%d/%m/%Y') }}</td>
+                            <td>
+                                {% if m.tipo.lower() == 'ingreso' %}
+                                    <span class="badge-formal badge-ingreso"><i class="fas fa-arrow-up"></i> INGRESO</span>
+                                {% elif m.tipo.lower() == 'egreso' %}
+                                    <span class="badge-formal badge-egreso"><i class="fas fa-arrow-down"></i> EGRESO</span>
+                                {% else %}
+                                    <span class="badge-formal badge-transf"><i class="fas fa-sync"></i> TRANSF.</span>
+                                {% endif %}
+                            </td>
+                            <td class="monto-valor">${{ "{:,.2f}".format(m.monto) }}</td>
+                            <td style="color: #64748b; font-size: 0.8rem;">{{ m.cuenta_origen }}</td>
+                            <td>
+                                <div class="detalle-principal">{{ m.detalle }}</div>
+                                <div class="detalle-sub">{{ m.motivo if m.motivo else '' }}</div>
+                            </td>
+                            <td style="text-align: center;">
+                                <a href="{{ url_for('home.eliminar_movimiento', mid=m.id) }}" class="btn-eliminar-tabla" onclick="return confirm('¿Eliminar?')">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="padding: 15px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+                {% if page > 1 %}
+                    <a href="{{ url_for('home.index', page=page-1, q=filtros.q, tipo=filtros.tipo, desde=filtros.desde, hasta=filtros.hasta) }}" style="text-decoration: none; color: var(--pocket-blue); font-size: 0.75rem; font-weight: 700;">← ANTERIORES</a>
+                {% else %}
+                    <span style="color: #cbd5e1; font-size: 0.75rem;">← ANTERIORES</span>
+                {% endif %}
+
+                <span style="background: #f1f5f9; padding: 4px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; color: #475569;">Pág. {{ page }}</span>
+
+                {% if hay_mas_viejos %}
+                    <a href="{{ url_for('home.index', page=page+1, q=filtros.q, tipo=filtros.tipo, desde=filtros.desde, hasta=filtros.hasta) }}" style="text-decoration: none; color: var(--pocket-blue); font-size: 0.75rem; font-weight: 700;">SIGUIENTES →</a>
+                {% else %}
+                    <span style="color: #cbd5e1; font-size: 0.75rem;">SIGUIENTES →</span>
+                {% endif %}
+            </div>
         </div>
-    </div>
-</main>
+    </main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
