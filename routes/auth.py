@@ -2,7 +2,7 @@ from flask import Blueprint, request, render_template, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from db import get_db
-from models import Usuario  # Importación limpia desde el modelo
+from .models import Usuario  # Importación limpia desde el modelo
 
 auth_bp = Blueprint("auth", __name__)
 
