@@ -2,7 +2,6 @@
 
 {% block content %}
 <style>
-    /* Reutilizamos tus variables y estilos base */
     :root {
         --pocket-blue: #0056b3;
         --pocket-green: #28a745;
@@ -16,7 +15,6 @@
         padding: 0 20px;
     }
 
-    /* Encabezado de la página */
     .page-header {
         display: flex;
         justify-content: space-between;
@@ -33,7 +31,6 @@
         gap: 10px;
     }
 
-    /* Caja de Filtros Potenciada */
     .filtros-card {
         background: white;
         border-radius: 12px;
@@ -43,7 +40,6 @@
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
 
-    /* Reutilizamos tu filtros-grid pero ajustado al ancho total */
     .filtros-grid {
         display: flex; 
         gap: 12px; 
@@ -63,16 +59,6 @@
         font-size: 0.9rem;
     }
 
-    .filtros-grid small {
-        display: block;
-        color: #64748b;
-        font-weight: 700;
-        margin-bottom: 5px;
-        text-transform: uppercase;
-        font-size: 0.65rem;
-    }
-
-    /* La tabla de resultados */
     .resultados-card {
         background: white;
         border-radius: 12px;
@@ -80,7 +66,6 @@
         overflow: hidden;
     }
 
-    /* Reutilizamos tus badges y estilos de tabla del index */
     .table-formal { width: 100%; border-collapse: collapse; }
     .table-formal thead th { background: #f8fafc; color: #64748b; font-size: 0.7rem; text-transform: uppercase; padding: 12px 15px; text-align: left; border-bottom: 2px solid #edf2f7; }
     .table-formal tbody td { padding: 14px 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem; }
@@ -89,16 +74,15 @@
     .badge-ingreso { background: #ecfdf5; color: #059669; border: 1px solid #10b98133; }
     .badge-egreso { background: #fef2f2; color: #dc2626; border: 1px solid #ef444433; }
     
-    .monto-valor { font-weight: 700; color: #0f172a; }
     .total-badge {
         background: #1e293b;
         color: white;
         padding: 8px 16px;
         border-radius: 8px;
         font-weight: 800;
+        text-align: right;
     }
 
-    /* Paginación */
     .pagination-bar {
         padding: 15px;
         display: flex;
@@ -111,9 +95,9 @@
 
 <div class="historial-container">
     <div class="page-header">
-        <h2><i class="fas fa-history"></i> Historial de Movimientos</h2>
+        <h2><i class="fas fa-history"></i> Historial</h2>
         <div class="total-badge">
-            <small style="opacity: 0.8; font-size: 0.6rem; display: block;">TOTAL FILTRADO</small>
+            <small style="opacity: 0.8; font-size: 0.6rem; display: block; text-transform: uppercase;">Total Filtrado</small>
             <span id="sumaTotalFiltrada">$ {{ "{:,.2f}".format(suma_total_filtrada) }}</span>
         </div>
     </div>
@@ -121,34 +105,34 @@
     <div class="filtros-card">
         <div class="filtros-grid">
             <div class="search-container">
-                <small>Búsqueda</small>
-                <input type="text" id="busquedaMovimiento" value="{{ filtros.q }}" placeholder="Buscar por detalle o cuenta..." class="form-control">
+                <small style="display:block; font-size: 0.65rem; color: #64748b; font-weight: 700; margin-bottom: 5px;">BÚSQUEDA</small>
+                <input type="text" id="busquedaMovimiento" value="{{ filtros.q }}" placeholder="Buscar detalle o cuenta..." class="form-control">
             </div>
 
             <div style="flex: 1; min-width: 150px;">
-                <small>Tipo</small>
+                <small style="display:block; font-size: 0.65rem; color: #64748b; font-weight: 700; margin-bottom: 5px;">TIPO</small>
                 <select id="filtroTipo" class="form-control">
                     <option value="TODOS" {% if filtros.tipo == 'TODOS' %}selected{% endif %}>TODOS</option>
-                    <option value="INGRESO" {% if filtros.tipo == 'INGRESO' %}selected{% endif %}>INGRESO</option>
-                    <option value="EGRESO" {% if filtros.tipo == 'EGRESO' %}selected{% endif %}>EGRESO</option>
+                    <option value="Ingreso" {% if filtros.tipo == 'Ingreso' %}selected{% endif %}>INGRESO</option>
+                    <option value="Egreso" {% if filtros.tipo == 'Egreso' %}selected{% endif %}>EGRESO</option>
+                    <option value="Transferencia" {% if filtros.tipo == 'Transferencia' %}selected{% endif %}>TRANSFERENCIA</option>
                 </select>
             </div>
 
             <div class="fecha-inputs">
                 <div style="flex: 1;">
-                    <small>Desde</small>
+                    <small style="display:block; font-size: 0.65rem; color: #64748b; font-weight: 700; margin-bottom: 5px;">DESDE</small>
                     <input type="date" id="fechaDesde" class="form-control" value="{{ filtros.desde }}">
                 </div>
                 <div style="flex: 1;">
-                    <small>Hasta</small>
+                    <small style="display:block; font-size: 0.65rem; color: #64748b; font-weight: 700; margin-bottom: 5px;">HASTA</small>
                     <input type="date" id="fechaHasta" class="form-control" value="{{ filtros.hasta }}">
                 </div>
             </div>
 
             <div class="acciones-filtros" style="display: flex; gap: 8px;">
-                <button onclick="exportarAExcel()" class="btn-export btn-excel" style="background: #10b981; color: white; border: none; width: 42px; border-radius: 8px; cursor: pointer;"><i class="fas fa-file-excel"></i></button>
-                <button onclick="exportarAPDF()" class="btn-export btn-pdf" style="background: #ef4444; color: white; border: none; width: 42px; border-radius: 8px; cursor: pointer;"><i class="fas fa-file-pdf"></i></button>
-                <button id="btnFiltrar" class="btn-primario" style="background: var(--pocket-blue); color: white; border: none; padding: 0 20px; border-radius: 8px; font-weight: 700; cursor: pointer;">APLICAR FILTROS</button>
+                <button id="btnFiltrar" class="btn-primario" style="background: var(--pocket-blue); color: white; border: none; padding: 0 20px; border-radius: 8px; font-weight: 700; cursor: pointer; height: 42px;">FILTRAR</button>
+                <button onclick="window.location.href='/historial'" class="btn-secundario" style="background: #cbd5e1; color: #1e293b; border: none; width: 42px; border-radius: 8px; cursor: pointer;"><i class="fas fa-sync-alt"></i></button>
             </div>
         </div>
     </div>
@@ -163,30 +147,31 @@
                         <th>Monto</th>
                         <th>Cuenta</th>
                         <th>Detalle</th>
-                        <th style="text-align: center;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for m in movimientos %}
                     <tr>
-                        <td style="color: #94a3b8;">{{ m.fecha.strftime('%d/%m/%Y') }}</td>
+                        {% set fecha = m.fecha if m is mapping else m[5] %}
+                        {% set tipo = m.tipo if m is mapping else m[1] %}
+                        {% set monto = m.monto if m is mapping else m[2] %}
+                        {% set cuenta = m.cuenta_origen if m is mapping else m[3] %}
+                        {% set motivo = m.motivo if m is mapping else m[4] %}
+
+                        <td style="color: #94a3b8;">{{ fecha }}</td>
                         <td>
-                            {% if m.tipo.lower() == 'ingreso' %}
+                            {% if tipo.lower() == 'ingreso' %}
                                 <span class="badge-formal badge-ingreso"><i class="fas fa-arrow-up"></i> INGRESO</span>
-                            {% else %}
+                            {% elif tipo.lower() == 'egreso' %}
                                 <span class="badge-formal badge-egreso"><i class="fas fa-arrow-down"></i> EGRESO</span>
+                            {% else %}
+                                <span class="badge-formal" style="background:#e2e8f0; color:#475569;"><i class="fas fa-exchange-alt"></i> TRANSF.</span>
                             {% endif %}
                         </td>
-                        <td class="monto-valor">${{ "{:,.2f}".format(m.monto) }}</td>
-                        <td style="color: #64748b;">{{ m.cuenta_origen }}</td>
+                        <td style="font-weight:700;">$ {{ "{:,.2f}".format(monto) }}</td>
+                        <td style="color: #64748b;">{{ cuenta }}</td>
                         <td>
-                            <div style="font-weight: 600; text-transform: uppercase;">{{ m.detalle }}</div>
-                            <div style="font-size: 0.7rem; color: #94a3b8;">{{ m.motivo if m.motivo else '' }}</div>
-                        </td>
-                        <td style="text-align: center;">
-                            <a href="{{ url_for('home.eliminar_movimiento', mid=m.id) }}" style="color: #cbd5e1;" onclick="return confirm('¿Eliminar?')">
-                                <i class="fas fa-trash-alt"></i>
-                            </a>
+                            <div style="font-weight: 600;">{{ motivo }}</div>
                         </td>
                     </tr>
                     {% endfor %}
@@ -196,7 +181,7 @@
 
         <div class="pagination-bar">
             {% if page > 1 %}
-                <a href="{{ url_for('home.historial', page=page-1, q=filtros.q, tipo=filtros.tipo, desde=filtros.desde, hasta=filtros.hasta) }}" style="text-decoration: none; color: var(--pocket-blue); font-weight: 700;">← ANTERIORES</a>
+                <a href="{{ url_for('historial.ver_historial', page=page-1, q=filtros.q, tipo=filtros.tipo, desde=filtros.desde, hasta=filtros.hasta) }}" style="text-decoration: none; color: var(--pocket-blue); font-weight: 700;">← ANTERIORES</a>
             {% else %}
                 <span style="color: #cbd5e1;">← ANTERIORES</span>
             {% endif %}
@@ -204,7 +189,7 @@
             <span style="font-size: 0.8rem; font-weight: 700; color: #64748b;">PÁGINA {{ page }}</span>
 
             {% if hay_mas_viejos %}
-                <a href="{{ url_for('home.historial', page=page+1, q=filtros.q, tipo=filtros.tipo, desde=filtros.desde, hasta=filtros.hasta) }}" style="text-decoration: none; color: var(--pocket-blue); font-weight: 700;">SIGUIENTES →</a>
+                <a href="{{ url_for('historial.ver_historial', page=page+1, q=filtros.q, tipo=filtros.tipo, desde=filtros.desde, hasta=filtros.hasta) }}" style="text-decoration: none; color: var(--pocket-blue); font-weight: 700;">SIGUIENTES →</a>
             {% else %}
                 <span style="color: #cbd5e1;">SIGUIENTES →</span>
             {% endif %}
@@ -213,7 +198,6 @@
 </div>
 
 <script>
-    // Tu función de filtrado adaptada a la nueva ruta /historial
     function filtrarMovimientos() {
         const q = document.getElementById("busquedaMovimiento").value;
         const tipo = document.getElementById("filtroTipo").value;
@@ -225,7 +209,5 @@
 
     document.getElementById("btnFiltrar").onclick = filtrarMovimientos;
     document.getElementById("busquedaMovimiento").onkeypress = (e) => { if(e.key === 'Enter') filtrarMovimientos(); };
-
-    // Aquí pegarías tus funciones de exportación (Excel/PDF) que ya tenés armadas
 </script>
 {% endblock %}
