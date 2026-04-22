@@ -41,11 +41,21 @@ def ver_historial():
         params.extend([desde, hasta])
 
     try:
-        # 2. Obtener la suma total filtrada (para el badge)
-        cursor.execute(f"SELECT SUM(monto) {query_base}", params)
+        # 2. Obtener la suma neta filtrada (Ingresos - Egresos)
+        sql_suma = f"""
+            SELECT 
+                SUM(CASE WHEN tipo = 'Ingreso' THEN monto ELSE 0 END) - 
+                SUM(CASE WHEN tipo = 'Egreso' THEN monto ELSE 0 END) as neto
+            {query_base}
+        """
+        cursor.execute(sql_suma, params)
         res_suma = cursor.fetchone()
-        # Manejo por si devuelve tupla o dict
-        suma_total_filtrada = (res_suma["sum"] if isinstance(res_suma, dict) else res_suma[0]) or 0
+        
+        # El nombre del campo en el resultado será 'neto' (o el índice 0)
+        if isinstance(res_suma, dict):
+            suma_total_filtrada = res_suma["neto"] or 0
+        else:
+            suma_total_filtrada = res_suma[0] or 0
 
         # 3. Obtener los movimientos paginados
         # Agregamos orden, límite y offset
