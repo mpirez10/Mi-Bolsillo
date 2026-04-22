@@ -91,6 +91,129 @@
         background: #f8fafc;
         border-top: 1px solid #f1f5f9;
     }
+    /* 6. MODO IMPRESIÓN - Estilo Ingeniería Pro (FIX DEFINITIVO) */
+@media print {
+
+    html, body {
+        height: auto;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Mostrar solo el reporte */
+    body > *:not(#reporte-impresion-formal) {
+        display: none !important;
+    }
+
+    #reporte-impresion-formal { 
+        display: block !important; 
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        color: #0f172a;
+        width: 100%;
+        margin: 0 !important;
+        padding: 0 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    @page { 
+        size: A4 portrait; 
+        margin: 1.2cm; 
+    }
+
+    /* 🔥 CONTROL REAL DE ESPACIADO (SIN ROMPER LAYOUT) */
+    h1, h2, h3, p {
+        margin: 2px 0 !important;
+    }
+    img {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    }
+
+    /* ❗ NO tocar todos los div (eso rompía todo antes) */
+
+    /* HEADER */
+    .pdf-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        border-bottom: 3px solid #0f172a;
+        padding-bottom: 8px;
+        margin-bottom: 12px;
+        page-break-inside: avoid;
+    }
+
+    /* BLOQUES SUPERIORES */
+    .pdf-resumen {
+        margin-bottom: 10px !important;
+        page-break-inside: avoid;
+    }
+
+    /* TÍTULO DE SECCIÓN (CLAVE para eliminar espacio fantasma) */
+    h3 {
+        margin: 6px 0 2px 0 !important;
+        padding: 0 !important;
+        border-bottom: 2px solid #0f172a;
+    }
+
+    /* TABLA */
+    table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        margin: 0 !important;
+        page-break-inside: auto;
+    }
+
+    thead {
+        display: table-header-group;
+    }
+
+    thead tr {
+        background: #f1f5f9 !important;
+    }
+
+    th { 
+        color: #0f172a !important; 
+        text-align: left; 
+        padding: 6px !important;
+        font-size: 8pt; 
+        text-transform: uppercase;
+        border-bottom: 2px solid #0f172a;
+    }
+
+    td { 
+        padding: 6px !important;
+        border-bottom: 1px solid #e2e8f0; 
+        font-size: 8.5pt; 
+        color: #334155;
+    }
+
+    tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+
+    /* Zebra */
+    tr:nth-child(even) {
+        background-color: #f8fafc !important;
+    }
+
+    /* COLORES */
+    .text-success { color: #059669 !important; font-weight: 700; }
+    .text-danger { color: #dc2626 !important; font-weight: 700; }
+
+    /* FOOTER */
+    .pdf-footer {
+        margin-top: 15px;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 6px;
+        text-align: center;
+        font-size: 8pt;
+        color: #64748b;
+        page-break-inside: avoid;
+    }
+
+}
 </style>
 
 <div class="historial-container">
@@ -131,6 +254,8 @@
             </div>
 
             <div class="acciones-filtros" style="display: flex; gap: 8px;">
+                <button onclick="exportarAExcel()" class="btn-export btn-excel" title="Excel"><i class="fas fa-file-excel"></i></button>
+                <button onclick="exportarAPDF()" class="btn-export btn-pdf" title="PDF"><i class="fas fa-file-pdf"></i></button>
                 <button id="btnFiltrar" class="btn-primario" style="background: var(--pocket-blue); color: white; border: none; padding: 0 20px; border-radius: 8px; font-weight: 700; cursor: pointer; height: 42px;">FILTRAR</button>
                 <button onclick="window.location.href='/historial'" class="btn-secundario" style="background: #cbd5e1; color: #1e293b; border: none; width: 42px; border-radius: 8px; cursor: pointer;"><i class="fas fa-sync-alt"></i></button>
             </div>
@@ -209,5 +334,180 @@
 
     document.getElementById("btnFiltrar").onclick = filtrarMovimientos;
     document.getElementById("busquedaMovimiento").onkeypress = (e) => { if(e.key === 'Enter') filtrarMovimientos(); };
+
+    function exportarAExcel() {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // 1. Datos de cabecera (Si no tenés el ID 'userName', usa 'Usuario')
+    const nombreUsuario = "{{ current_user.nombre_completo }}" || "Usuario";
+    const q = document.getElementById("busquedaMovimiento")?.value.trim() || urlParams.get('q') || "Sin filtro";
+    const tipo = document.getElementById("filtroTipo")?.value || urlParams.get('tipo') || "Todos";
+    const totalNeto = document.getElementById('sumaTotalFiltrada')?.innerText.trim() || '$ 0.00';
+    
+    // 2. Selección de filas (buscamos todas las TR de la tabla)
+    const filas = document.querySelectorAll("table tr");
+    let csv = [];
+    
+    // Encabezados del reporte
+    csv.push(`"REPORTE DE MOVIMIENTOS - ${nombreUsuario.toUpperCase()}"`);
+    csv.push(`"Filtro: ${q} | Operación: ${tipo}"`);
+    csv.push(`"Balance Neto: ${totalNeto.replace('$', '').trim()}"`);
+    csv.push(""); 
+
+    filas.forEach((fila, index) => {
+        // Obtenemos celdas de encabezado (th) o datos (td)
+        const cols = fila.querySelectorAll("th, td");
+        if (cols.length > 0) {
+            let filaData = [];
+            // Recorremos hasta cols.length - 1 para NO incluir la columna "Acciones"
+            for (let i = 0; i < cols.length - 1; i++) {
+                let texto = cols[i].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
+                // Escapamos comillas dobles para que Excel no se maree
+                texto = texto.replace(/"/g, '""'); 
+                filaData.push('"' + texto + '"');
+            }
+            csv.push(filaData.join(","));
+        }
+    });
+
+    const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + csv.join("\n");
+    const link = document.createElement("a");
+    link.setAttribute("href", encodeURI(csvContent));
+    link.setAttribute("download", `Reporte_Finanzas_${new Date().toLocaleDateString('es-UY')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+  function exportarAPDF() {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    const nombreUsuario = "{{ current_user.nombre_completo }}" || "Usuario";
+    const tipo = document.getElementById("filtroTipo")?.value || urlParams.get('tipo') || "TODOS";
+    const desde = document.getElementById("fechaDesde")?.value || urlParams.get('desde') || "Inicio";
+    const hasta = document.getElementById("fechaHasta")?.value || urlParams.get('hasta') || "Fin";
+    const totalNeto = document.getElementById('sumaTotalFiltrada')?.innerText.trim() || '$ 0.00';
+    const fechaHora = new Date().toLocaleString('es-UY');
+
+    let filasHtml = '';
+    const filas = document.querySelectorAll("table tr"); 
+    
+    filas.forEach((fila, index) => {
+        if (index > 0 && fila.style.display !== 'none') {
+            const cols = fila.querySelectorAll("td");
+            if (cols.length >= 5) {
+                const fecha   = cols[0].innerText.trim();
+                const tTipo   = cols[1].innerText.trim();
+                const monto   = cols[2].innerText.trim();
+                const cuenta  = cols[3].innerText.trim();
+                const detalle = cols[4].innerText.trim();
+
+                let claseMonto = tTipo.toUpperCase().includes("INGRESO") 
+                    ? 'text-success' 
+                    : (tTipo.toUpperCase().includes("EGRESO") ? 'text-danger' : '');
+
+                filasHtml += `
+                    <tr>
+                        <td>${fecha}</td>
+                        <td style="font-weight: bold; color: #64748b;">${tTipo.toUpperCase()}</td>
+                        <td class="${claseMonto}">${monto}</td>
+                        <td>${cuenta}</td>
+                        <td style="text-transform: uppercase;">${detalle}</td>
+                    </tr>`;
+            }
+        }
+    });
+
+    filasHtml = filasHtml.trim();
+
+    const ventanaReporte = document.createElement('div');
+    ventanaReporte.id = 'reporte-impresion-formal'; 
+
+    ventanaReporte.innerHTML = `
+<section style="padding: 10px; background: white; font-family: 'Segoe UI', Arial, sans-serif; color: #1e293b;">
+    
+    <div class="pdf-header" style="
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 3px solid #0f172a;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+">
+
+    <!-- IZQUIERDA: LOGO + MARCA -->
+    <div style="display: flex; align-items: center; gap: 10px;">
+    
+    <img src="{{ url_for('static', filename='img/loguito.png') }}" 
+     style="height: 50px; object-fit: contain;">
+    <div>
+        <h1 style="margin: 0; font-size: 18pt; font-weight: 900; color: #0f172a;">
+            MI BOLSILLO
+        </h1>
+        <p style="margin: 0; font-size: 8pt; color: #64748b; font-weight: 600;">
+            Software de Gestión de Finanzas y Negocios
+        </p>
+    </div>
+
+</div>
+
+    <!-- DERECHA: INFO -->
+    <div style="text-align: right;">
+        <h2 style="margin: 0; font-size: 10pt; font-weight: 700;">
+            REPORTE DE MOVIMIENTOS
+        </h2>
+        <p style="margin: 0; font-size: 8pt; color: #64748b;">
+            Emitido: <strong>${fechaHora}</strong>
+        </p>
+        <p style="margin: 0; font-size: 8pt; color: #64748b;">
+            Usuario: ${nombreUsuario}
+        </p>
+    </div>
+
+</div>
+
+    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+        <div style="font-size: 8pt;">
+            <div><strong>PERIODO:</strong> ${desde} - ${hasta}</div>
+            <div><strong>TIPO:</strong> ${tipo}</div>
+        </div>
+        <div style="font-size: 10pt; font-weight: 800;">
+            ${totalNeto}
+        </div>
+    </div>
+
+    <h3 style="margin: 4px 0 2px 0; font-size: 9pt; border-bottom: 2px solid #0f172a;">
+        Detalle Cronológico de Movimientos
+    </h3>
+
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr>
+                <th style="padding: 4px; font-size: 8pt;">FECHA</th>
+                <th style="padding: 4px; font-size: 8pt;">TIPO</th>
+                <th style="padding: 4px; font-size: 8pt;">MONTO</th>
+                <th style="padding: 4px; font-size: 8pt;">CUENTA</th>
+                <th style="padding: 4px; font-size: 8pt;">DETALLE</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${filasHtml}
+        </tbody>
+    </table>
+    <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 10px; text-align: center; font-size: 8pt; color: #94a3b8;">
+            Este reporte fue generado automáticamente por el sistema Mi Bolsillo - TutuCode ®. </div>
+
+</section>
+`;
+
+    document.body.appendChild(ventanaReporte);
+
+    setTimeout(() => {
+        window.print();
+        setTimeout(() => {
+            ventanaReporte.remove();
+        }, 300);
+    }, 50);
+}
 </script>
 {% endblock %}
