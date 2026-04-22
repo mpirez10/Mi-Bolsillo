@@ -1,6 +1,5 @@
 from flask import Blueprint, render_template, request
 from flask_login import login_required, current_user
-from . import db
 from sqlalchemy import or_
 from datetime import datetime
 from db import get_db  # <--- Esto es lo que usás ahora
