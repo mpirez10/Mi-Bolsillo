@@ -2,525 +2,254 @@
 
 {% block content %}
 <style>
-    /* 1. VARIABLES Y BASES - El cimiento de la web */
-    :root {
-    --pocket-blue: #0056b3;    /* Un azul institucional fuerte */
-    --pocket-green: #28a745;   /* El verde de los ingresos */
+:root {
+    --pocket-blue: #0056b3;
+    --pocket-green: #28a745;
     --pocket-light-blue: #e7f1ff;
-    --pocket-light-green: #e8f5e9;
     --border: #dee2e6;
     --bg-main: #f4f7f6;
     --text-dark: #212529;
 }
 
-    .dashboard-layout { 
-        display: grid; 
-        grid-template-columns: 1fr 2.5fr; 
-        gap: 20px; 
-        margin-top: 10px; 
-    }
-    
-    .card { 
-        background: white; 
-        border-radius: 16px; 
-        border: 1px solid var(--border); 
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        overflow: hidden;
-        margin-bottom: 20px;
-    }
+/* LAYOUT */
+.dashboard-layout { 
+    display: grid; 
+    grid-template-columns: 300px 1fr; 
+    gap: 20px; 
+}
 
-    /* 2. SIDEBAR Y SALDO - Lo que ves a la izquierda */
-    .saldo-card { 
-        background: linear-gradient(135deg, var(--pocket-blue), #1d4ed8); 
-        color: white; padding: 24px; text-align: center; border: none;
-    }
-    .saldo-monto { font-size: 2.2rem; font-weight: 800; margin-top: 5px; letter-spacing: -1px; }
+/* CARD BASE */
+.card { 
+    background: white; 
+    border-radius: 14px; 
+    border: 1px solid var(--border); 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
 
-    .cuenta-item {
-        display: flex; justify-content: space-between; align-items: center;
-        padding: 14px 15px; border-bottom: 1px solid #f1f5f9;
-    }
-    .btn-delete-small { color: #cbd5e1; padding: 5px; cursor: pointer; transition: 0.2s; }
-    .btn-delete-small:hover { color: var(--danger); }
+/* SIDEBAR */
+.sidebar-card {
+    padding: 18px;
+}
 
-    /* 3. FORMULARIOS E INPUTS - Para que no se te deformen los filtros */
-    /* 3. FILTROS DEFINITIVOS - Alineación de Ingeniería */
-    .filtros-grid {
-        display: flex; 
-        gap: 12px; 
-        padding: 15px;
-        background: #f8fafc; /* Fondo sutil para agrupar */
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        align-items: flex-end; /* LA CLAVE: Todo apoya en la misma base */
-        flex-wrap: wrap;
-        margin-bottom: 20px;
-    }
-
-    /* Etiquetas de texto arriba de los inputs */
-    .filtros-grid small {
-        display: block;
-        color: #64748b;
-        font-weight: 700;
-        margin-bottom: 5px;
-        text-transform: uppercase;
-        font-size: 0.65rem;
-        letter-spacing: 0.5px;
-    }
-
-    .search-container { flex: 2; min-width: 200px; position: relative; }
-    .fecha-inputs { display: flex; gap: 8px; flex: 1.5; min-width: 280px; }
-
-    /* Unificamos altura de todo a 42px */
-    .form-control, .btn-export, .btn-limpiar {
-        height: 42px !important; 
-        box-sizing: border-box;
-    }
-
-    .form-control {
-        padding: 8px 14px; 
-        border-radius: 8px; 
-        border: 1px solid var(--border);
-        font-size: 0.9rem; 
-        width: 100%;
-        background: white;
-    }
-
-    /* Estilo Blanco y Azul Minimalista para el botón Filtrar */
-.btn-primario {
-    height: 42px; /* Alineado con los inputs */
-    background-color: white; /* Fondo blanco */
-    color: var(--pocket-blue); /* Letras azules (usando tu variable) */
-    border: 2px solid white; /* Borde blanco para definir la forma */
-    border-radius: 8px; /* Esquinas redondeadas */
-    padding: 0 20px;
-    font-weight: 700; /* Negrita para que se lea bien */
-    font-size: 0.85rem;
-    text-transform: uppercase; /* Todo mayúsculas */
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
+/* CUENTAS */
+.cuenta-item {
+    display: flex; 
+    justify-content: space-between; 
     align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+    padding: 10px 0; 
+    border-bottom: 1px solid #f1f5f9;
 }
 
-/* Efecto al pasar el mouse (Invertir colores) */
-.btn-primario:hover {
-    background-color: var(--pocket-blue); /* Fondo azul */
-    color: white; /* Letras blancas */
-    border-color: var(--pocket-blue); /* Borde azul */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Sombra más pronunciada */
+/* BOTONES */
+.btn {
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: none;
 }
 
-.btn-primario:active {
-    transform: translateY(1px); /* Efecto de pulsado */
+.btn-primary {
+    background: var(--pocket-blue);
+    color: white;
 }
 
-    /* Botones alineados y sin sombras raras */
-    .acciones-filtros { 
-        display: flex; 
-        gap: 8px; 
+.btn-success {
+    background: var(--pocket-green);
+    color: white;
+}
+
+/* HEADER MOVIMIENTOS */
+.header-mov {
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    margin-bottom:15px;
+}
+
+/* FILTROS */
+.filtros {
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:15px;
+}
+
+.form-control {
+    height: 40px;
+    border-radius: 8px;
+    border:1px solid var(--border);
+    padding: 8px;
+}
+
+/* TABLA */
+table {
+    width:100%;
+    border-collapse: collapse;
+}
+
+th {
+    background:#f8fafc;
+    padding:12px;
+    font-size:0.75rem;
+    color:#64748b;
+    text-transform:uppercase;
+}
+
+td {
+    padding:12px;
+    border-bottom:1px solid #f1f5f9;
+}
+
+tr:hover {
+    background:#f9fafb;
+}
+
+/* BADGES */
+.badge {
+    padding:4px 8px;
+    border-radius:6px;
+    font-size:0.7rem;
+    font-weight:700;
+}
+
+.ingreso { background:#ecfdf5; color:#10b981;}
+.egreso { background:#fef2f2; color:#ef4444;}
+.transfer { background:#eff6ff; color:#3b82f6;}
+
+/* RESPONSIVE */
+@media (max-width:768px){
+    .dashboard-layout{
+        grid-template-columns:1fr;
     }
-
-    .btn-export, .btn-limpiar {
-        width: 42px; /* Los hacemos cuadrados para que se vean prolijos */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 8px;
-        border: none;
-        cursor: pointer;
-        transition: 0.2s;
-        color: white;
-    }
-
-    .btn-excel { background: #10b981; }
-    .btn-pdf { background: #ef4444; }
-    .btn-limpiar { 
-        background: white; 
-        border: 1px solid var(--border); 
-        color: #94a3b8; 
-    }
-
-    .btn-export:hover {
-        filter: brightness(0.9);
-        transform: translateY(-1px);
-    }
-
-    .btn-export:active { transform: translateY(0); }
-
-    /* Estética de la Tabla */
-    .status-badge { padding: 5px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; }
-    
-    table { width: 100%; border-collapse: collapse; }
-    th { background: #f8fafc; padding: 12px 15px; text-align: left; font-size: 0.75rem; color: var(--text-muted); border-bottom: 2px solid var(--border); }
-    td { padding: 12px 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
-
-    /* 5. MODO RESPONSIVE - Para cuando lo mires en el celular */
-    @media screen and (max-width: 768px) {
-        .dashboard-layout { grid-template-columns: 1fr; }
-        thead { display: none; }
-        tbody tr {
-            display: grid !important;
-            grid-template-areas: "fecha acciones" "tipo tipo" "monto monto" "detalle detalle";
-            grid-template-columns: 1fr auto;
-            background: white; border: 1px solid var(--border) !important;
-            border-radius: 12px; margin-bottom: 15px; padding: 16px !important; gap: 10px;
-        }
-        tbody td { display: block; padding: 0 !important; border: none !important; }
-        td:nth-child(1) { grid-area: fecha; color: var(--text-muted); }
-        td:nth-child(3) { grid-area: monto; font-size: 1.3rem !important; font-weight: 800; }
-        td:nth-child(4) { display: none; } 
-        td:nth-child(5) { grid-area: detalle; border-top: 1px dashed #eee !important; padding-top: 10px !important; }
-        td:nth-child(6) { grid-area: acciones; display: flex; justify-content: flex-end; }
-    }
-
- /* 6. MODO IMPRESIÓN - Estilo Ingeniería Pro */
-/* 6. MODO IMPRESIÓN - Estilo Ingeniería Pro (FIX DEFINITIVO) */
-@media print {
-
-    html, body {
-        height: auto;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    /* Mostrar solo el reporte */
-    body > *:not(#reporte-impresion-formal) {
-        display: none !important;
-    }
-
-    #reporte-impresion-formal { 
-        display: block !important; 
-        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        color: #0f172a;
-        width: 100%;
-        margin: 0 !important;
-        padding: 0 !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
-
-    @page { 
-        size: A4 portrait; 
-        margin: 1.2cm; 
-    }
-
-    /* 🔥 CONTROL REAL DE ESPACIADO (SIN ROMPER LAYOUT) */
-    h1, h2, h3, p {
-        margin: 2px 0 !important;
-    }
-    img {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-    }
-
-    /* ❗ NO tocar todos los div (eso rompía todo antes) */
-
-    /* HEADER */
-    .pdf-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-        border-bottom: 3px solid #0f172a;
-        padding-bottom: 8px;
-        margin-bottom: 12px;
-        page-break-inside: avoid;
-    }
-
-    /* BLOQUES SUPERIORES */
-    .pdf-resumen {
-        margin-bottom: 10px !important;
-        page-break-inside: avoid;
-    }
-
-    /* TÍTULO DE SECCIÓN (CLAVE para eliminar espacio fantasma) */
-    h3 {
-        margin: 6px 0 2px 0 !important;
-        padding: 0 !important;
-        border-bottom: 2px solid #0f172a;
-    }
-
-    /* TABLA */
-    table {
-        width: 100% !important;
-        border-collapse: collapse !important;
-        margin: 0 !important;
-        page-break-inside: auto;
-    }
-
-    thead {
-        display: table-header-group;
-    }
-
-    thead tr {
-        background: #f1f5f9 !important;
-    }
-
-    th { 
-        color: #0f172a !important; 
-        text-align: left; 
-        padding: 6px !important;
-        font-size: 8pt; 
-        text-transform: uppercase;
-        border-bottom: 2px solid #0f172a;
-    }
-
-    td { 
-        padding: 6px !important;
-        border-bottom: 1px solid #e2e8f0; 
-        font-size: 8.5pt; 
-        color: #334155;
-    }
-
-    tr {
-        page-break-inside: avoid;
-        page-break-after: auto;
-    }
-
-    /* Zebra */
-    tr:nth-child(even) {
-        background-color: #f8fafc !important;
-    }
-
-    /* COLORES */
-    .text-success { color: #059669 !important; font-weight: 700; }
-    .text-danger { color: #dc2626 !important; font-weight: 700; }
-
-    /* FOOTER */
-    .pdf-footer {
-        margin-top: 15px;
-        border-top: 1px solid #e2e8f0;
-        padding-top: 6px;
-        text-align: center;
-        font-size: 8pt;
-        color: #64748b;
-        page-break-inside: avoid;
-    }
-
 }
 </style>
 
 <div class="dashboard-layout">
-    <aside>
-        <div class="card" style="padding: 18px; margin-bottom: 20px; border: 2px solid var(--pocket-green); background-color: var(--pocket-blue); color: white;">
-    
-    <h3 style="margin: 0 0 15px 0; font-size: 1rem; color: var(--pocket-green);">
-        <i class="fas fa-university" style="color:white;"></i> Mis Cuentas
-    </h3>
 
-    <div class="cuentas-lista">
-        {% for c in cuentas %}
-        <div class="cuenta-item" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-            <div class="cuenta-info">
-                <span style="font-weight: 600; color: white;">{{ c.nombre }}</span>
-                <a href="{{ url_for('cuentas.eliminar_cuenta', id=c.id) }}" 
-                   class="btn-delete-small"
-                   style="color: rgba(255,255,255,0.5);"
-                   onclick="return confirm('¿Borrar esta cuenta?')">
-                    <i class="fas fa-trash-alt"></i>
-                </a>
-            </div>
-            
-            <span style="font-weight: 700; 
-                {% if c.saldo > 0 %} color: #2ecc71; 
-                {% elif c.saldo < 0 %} color: #ff4d4d; 
-                {% else %} color: white; {% endif %}">
-                ${{ "{:,.2f}".format(c.saldo) }}
-            </span>
+<!-- SIDEBAR -->
+<aside>
+
+<div class="card sidebar-card">
+    <h3>💼 Cuentas</h3>
+
+    {% for c in cuentas %}
+    <div class="cuenta-item">
+        <span>{{ c.nombre }}</span>
+        <span>
+            {% if c.saldo > 0 %}
+                <span style="color:#10b981;">${{ "{:,.2f}".format(c.saldo) }}</span>
+            {% elif c.saldo < 0 %}
+                <span style="color:#ef4444;">${{ "{:,.2f}".format(c.saldo) }}</span>
+            {% else %}
+                $0
+            {% endif %}
+        </span>
+    </div>
+    {% endfor %}
+
+    <a href="/agregar_cuenta" class="btn btn-primary" style="margin-top:10px; display:inline-block;">
+        + Nueva Cuenta
+    </a>
+</div>
+
+<div class="card sidebar-card">
+    <h3>⚠️ Deudas</h3>
+
+    {% if deudas %}
+        {% for d in deudas[:3] %}
+        <div class="cuenta-item">
+            <span>{{ d.deudor }}</span>
+            <span style="color:#ef4444;">${{ "{:,.2f}".format(d.monto) }}</span>
         </div>
         {% endfor %}
-    </div>
-
-    <div style="display: flex; justify-content: center;">
-        <a href="/agregar_cuenta" class="btn" 
-           style="width: auto; padding: 6px 15px; margin-top: 15px; font-size: 0.75rem; 
-                  background-color: var(--pocket-blue); border: 1px solid var(--pocket-green); 
-                  color: white; border-radius: 8px; text-decoration: none; display: flex; align-items: center; gap: 8px;">
-            <i class="fas fa-plus-circle" style="color: var(--pocket-green);"></i> Nueva Cuenta
-        </a>
-    </div>
+    {% else %}
+        <p>Sin deudas</p>
+    {% endif %}
 </div>
 
-       <div class="card" style="border: 2px solid var(--pocket-blue); border-top: 4px solid var(--pocket-green); padding: 18px; background-color: #f59e0b;">
-        <h3 style="margin: 0 0 12px 0; font-size: 1rem; color: white; display: flex; align-items: center; gap: 8px; font-weight: 800;">
-            <i class="fas fa-hand-holding-dollar" style="color:white;"></i> DEUDAS
-        </h3>
-        {% if deudas %}
-            {% for d in deudas[:3] %} 
-            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.2);">
-                <span style="color: #ef4444; font-weight: 800; text-transform: uppercase;">{{ d.deudor if d.deudor != 'YO' else 'A ' + d.acreedor }}</span>
-                <span style="color: #ef4444; font-weight: 900;">${{ "{:,.2f}".format(d.monto) }}</span>
-            </div>
-            {% endfor %}
-        {% else %}
-            <p style="font-size: 0.8rem; color: white; text-align: center; margin: 0;">Sin deudas ✅</p>
-        {% endif %}
-    </div>
-        <div class="card chart-card" style="background-color: var(--pocket-blue); border-radius: 16px; border: 2px solid var(--pocket-green); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
-        <h3 style="font-size: 0.9rem; margin-bottom: 10px; color: white;">
-            <i class="fas fa-chart-pie" style="color: white;"></i> BALANCE
-        </h3>
-        <div style="height: 200px;"><canvas id="balanceChart"></canvas></div>
-    </div>
-    </aside>
+</aside>
 
+<!-- MAIN -->
 <main>
-    <div class="card" style="padding: 20px; border: 2px solid var(--pocket-green); background: white; border-radius: 16px;">
-        
-<div style="background-color: var(--pocket-blue); border: 2px solid var(--pocket-green); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
-    
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h3 style="margin: 0; font-size: 1.2rem; color: white; font-weight: 800;">
-            <i class="fas fa-exchange-alt"></i> MOVIMIENTOS
-        </h3>
-        <a href="/movimiento" class="btn" style="padding: 8px 16px; font-size: 0.85rem; background-color: var(--pocket-green); color: white; border-radius: 8px; text-decoration: none; display: flex; align-items: center; gap: 8px; font-weight: 700;">
-            <i class="fas fa-plus"></i> NUEVO
+
+<div class="card" style="padding:20px;">
+
+<div class="header-mov">
+    <h2>Movimientos</h2>
+
+    <a href="/movimiento" class="btn btn-success">
+        + Nuevo
+    </a>
+</div>
+
+<!-- FILTROS -->
+<div class="filtros">
+    <input type="text" id="busquedaMovimiento" value="{{ filtros.q }}" placeholder="Buscar..." class="form-control">
+
+    <select id="filtroTipo" class="form-control">
+        <option value="">Todos</option>
+        <option value="INGRESO">Ingreso</option>
+        <option value="EGRESO">Egreso</option>
+        <option value="TRANSFERENCIA">Transferencia</option>
+    </select>
+
+    <input type="date" id="fechaDesde" value="{{ filtros.desde }}" class="form-control">
+    <input type="date" id="fechaHasta" value="{{ filtros.hasta }}" class="form-control">
+
+    <button id="btnFiltrar" class="btn btn-primary">Filtrar</button>
+</div>
+
+<!-- TABLA -->
+<table>
+<thead>
+<tr>
+    <th>Fecha</th>
+    <th>Tipo</th>
+    <th>Monto</th>
+    <th>Cuenta</th>
+    <th>Detalle</th>
+    <th></th>
+</tr>
+</thead>
+
+<tbody>
+{% for m in movimientos %}
+<tr>
+    <td>{{ m.fecha.strftime('%d/%m/%Y') }}</td>
+
+    <td>
+        {% if m.tipo.lower() == 'ingreso' %}
+            <span class="badge ingreso">Ingreso</span>
+        {% elif m.tipo.lower() == 'egreso' %}
+            <span class="badge egreso">Egreso</span>
+        {% else %}
+            <span class="badge transfer">Transfer</span>
+        {% endif %}
+    </td>
+
+    <td><strong>${{ "{:,.2f}".format(m.monto) }}</strong></td>
+
+    <td>{{ m.cuenta_origen }}</td>
+
+    <td>
+        <strong>{{ m.detalle }}</strong><br>
+        <small>{{ m.motivo if m.motivo else '' }}</small>
+    </td>
+
+    <td>
+        <a href="{{ url_for('home.eliminar_movimiento', mid=m.id) }}" onclick="return confirm('¿Eliminar?')">
+            🗑
         </a>
-    </div>
+    </td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
 
-    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(16, 185, 129, 0.3);">
-        <div style="background: var(--pocket-blue); padding: 10px; border-radius: 8px; border: 2px solid var(--pocket-green);">
-            <i class="fas fa-calculator" style="color:white;"></i>
-        </div>
-        <div>
-            <small style="color:white; font-weight: 700; text-transform: uppercase; font-size: 0.65rem; opacity: 0.9;">Total Filtrado</small>
-            <h2 id="sumaTotalFiltrada" style="margin: 0; font-size: 1.5rem; color: white; font-weight: 800;"> 
-                $ {{ "{:,.2f}".format(suma_total_filtrada) }}
-            </h2>
-        </div>
-    </div>
-        <div style="background: var(--pocket-blue); padding: 10px; border-radius: 8px; border: 2px solid var(--pocket-green);">
-        <div class="search-container" style="width: 100%; margin-bottom: 15px;">
-            <small style="color: white; font-weight: 700; text-transform: uppercase; font-size: 0.7rem;">Buscar Movimiento</small>
-            <div style="position: relative; margin-top: 5px;">
-                <i class="fas fa-search" style="position: absolute; left: 12px; top: 12px; color: #94a3b8;"></i>
-                <input type="text" id="busquedaMovimiento" value="{{ filtros.q }}" placeholder="Detalle, cuenta o motivo..." class="form-control" style="padding-left: 40px; width: 100%; background: white; border-radius: 8px; border: none; height: 40px;">
-            </div>
-        </div>
-        
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; width: 100%; flex-wrap: wrap; gap: 15px;">
-            <div>
-                <small style="color: white; font-weight: 700; text-transform: uppercase; font-size: 0.7rem;">Reportes y Acción</small>
-                <div style="display: flex; gap: 8px; margin-top: 5px;">
-                    <button onclick="exportarAExcel()" class="btn-export btn-excel" style="background: #10b981; color: white; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer;"><i class="fas fa-file-excel"></i></button>
-                    <button onclick="exportarAPDF()" class="btn-export btn-pdf" style="background: #ef4444; color: white; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer;"><i class="fas fa-file-pdf"></i></button>
-                    <button onclick="limpiarFiltros()" class="btn-limpiar" style="background: white; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer;"><i class="fas fa-sync-alt"></i></button>
-                    <button type="button" id="btnFiltrar" class="btn-primario" style="font-weight: 800;">FILTRAR</button>
-                </div>
-            </div>
-
-            <div style="flex: 1; min-width: 150px;">
-                <small style="color: white; font-weight: 700; text-transform: uppercase; font-size: 0.7rem;">Tipo</small>
-                <select id="filtroTipo" class="form-control" style="background: white; border-radius: 8px; border: none; width: 100%; padding: 8px; margin-top: 5px; font-weight: 600; height: 40px;">
-                    <option value="">TODOS</option>
-                    <option value="INGRESO">INGRESO</option>
-                    <option value="EGRESO">EGRESO</option>
-                    <option value="TRANSFERENCIA">TRANSF.</option>
-                </select>
-            </div>
-
-            <div style="display: flex; gap: 10px; flex: 0 1 auto; min-width: 280px;">
-                <div style="flex: 1;">
-                    <small style="color: white; font-weight: 700; text-transform: uppercase; font-size: 0.7rem;">Desde</small>
-                    <input type="date" id="fechaDesde" class="form-control" value="{{ filtros.desde }}" style="width: 100%; border-radius: 8px; border: none; padding: 7px; margin-top: 5px; height: 40px;">
-                </div>
-                <div style="flex: 1;">
-                    <small style="color: white; font-weight: 700; text-transform: uppercase; font-size: 0.7rem;">Hasta</small>
-                    <input type="date" id="fechaHasta" class="form-control" value="{{ filtros.hasta }}" style="width: 100%; border-radius: 8px; border: none; padding: 7px; margin-top: 5px; height: 40px;">
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 25px; padding-top: 15px; border-top: 1px solid rgba(16, 185, 129, 0.3);">
-        <div>
-            {% if page > 1 %}
-                <a href="{{ url_for('home.index', page=page-1, q=filtros.q, tipo=filtros.tipo, desde=filtros.desde, hasta=filtros.hasta) }}" 
-                   style="background-color: transparent; border: 2px solid var(--pocket-green); color: white; padding: 6px 14px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 6px;">
-                   <i class="fas fa-arrow-left"></i> MÁS NUEVOS
-                </a>
-            {% else %}
-                <button style="background-color: rgba(226, 232, 240, 0.1); color: #64748b; padding: 6px 14px; border-radius: 8px; border: 1px solid #64748b; font-weight: 700; font-size: 0.75rem; cursor: not-allowed;" disabled>
-                   <i class="fas fa-arrow-left"></i> MÁS NUEVOS
-                </button>
-            {% endif %}
-        </div>
-
-        <span style="font-weight: 800; color: var(--pocket-blue); background: var(--pocket-light-blue); padding: 4px 14px; border-radius: 8px; font-size: 0.8rem;">
-            Página {{ page }}
-        </span>
-
-        <div>
-            {% if hay_mas_viejos %}
-                <a href="{{ url_for('home.index', page=page+1, q=filtros.q, tipo=filtros.tipo, desde=filtros.desde, hasta=filtros.hasta) }}" 
-                   style="background-color: transparent; border: 2px solid var(--pocket-green); color: white; padding: 6px 14px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 6px;">
-                   MÁS VIEJOS <i class="fas fa-arrow-right"></i>
-                </a>
-            {% else %}
-                <button style="background-color: rgba(226, 232, 240, 0.1); color: #64748b; padding: 6px 14px; border-radius: 8px; border: 1px solid #64748b; font-weight: 700; font-size: 0.75rem; cursor: not-allowed;" disabled>
-                   MÁS VIEJOS <i class="fas fa-arrow-right"></i>
-                </button>
-            {% endif %}
-        </div>
-    </div>
-</div>
 </div>
 
-{% if not es_busqueda_activa and page == 3 %}
-    <p style="text-align: center; color: #64748b; font-size: 0.8rem; margin-top: 8px; font-weight: 600;">
-        <i class="fas fa-info-circle"></i> Para ver movimientos más antiguos, haz uso de los filtros de búsqueda de arriba.
-    </p>
-{% endif %}
-        <div class="table-responsive" style="border-radius: 12px; overflow: hidden; border: 2px solid var(--pocket-green); margin-top: 10px;">
-            <table style="width: 100%; border-collapse: collapse; background-color: white;">
-                <thead>
-                    <tr style="background-color:white;">
-                        <th style="padding: 15px 10px; text-align: left; font-size: 0.75rem; text-transform: uppercase; color:var(--pocket-blue); font-weight: 800;">Fecha</th>
-                        <th style="padding: 15px 10px; text-align: left; font-size: 0.75rem; text-transform: uppercase; color:var(--pocket-blue); font-weight: 800;">Tipo</th>
-                        <th style="padding: 15px 10px; text-align: left; font-size: 0.75rem; text-transform: uppercase; color:var(--pocket-blue); font-weight: 800;">Monto</th>
-                        <th style="padding: 15px 10px; text-align: left; font-size: 0.75rem; text-transform: uppercase; color:var(--pocket-blue); font-weight: 800;">Cuenta</th>
-                        <th style="padding: 15px 10px; text-align: left; font-size: 0.75rem; text-transform: uppercase; color:var(--pocket-blue); font-weight: 800;">Detalle</th>
-                        <th style="padding: 15px 10px; text-align: center; font-size: 0.75rem; text-transform: uppercase; color:var(--pocket-blue); font-weight: 800;">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for m in movimientos %}
-                    <tr style="border-bottom: 1px solid #f1f5f9;">
-                        <td style="padding: 12px 10px; font-size: 0.8rem; color: #64748b;">{{ m.fecha.strftime('%d/%m/%Y') }}</td>
-                        <td style="padding: 12px 10px;">
-                            {% if m.tipo.lower() == 'ingreso' %}
-                                <span class="status-badge" style="background: #ecfdf5; color: #10b981; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700;">
-                                    <i class="fas fa-arrow-up"></i> INGRESO
-                                </span>
-                            {% elif m.tipo.lower() == 'egreso' %}
-                                <span class="status-badge" style="background: #fef2f2; color: #ef4444; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700;">
-                                    <i class="fas fa-arrow-down"></i> EGRESO
-                                </span>
-                            {% else %}
-                                <span class="status-badge" style="background: #eff6ff; color: #3b82f6; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700;">
-                                    <i class="fas fa-sync"></i> TRANSF.
-                                </span>
-                            {% endif %}
-                        </td>
-                        <td style="padding: 12px 10px; font-weight: 700; color: #1e293b;">${{ "{:,.2f}".format(m.monto) }}</td>
-                        <td style="padding: 12px 10px; font-size: 0.85rem; color: #475569;">{{ m.cuenta_origen }}</td>
-                        <td style="padding: 12px 10px;">
-                            <div style="font-size: 0.9rem; font-weight: 700; color: #1e293b; text-transform: uppercase;">{{ m.detalle }}</div>
-                            <div style="font-size: 0.7rem; color: #94a3b8;">{{ m.motivo if m.motivo else '' }}</div>
-                        </td>
-                        <td style="padding: 12px 10px; text-align: center;">
-                            <a href="{{ url_for('home.eliminar_movimiento', mid=m.id) }}" style="color: #cbd5e1;" onclick="return confirm('¿Eliminar?')">
-                                <i class="fas fa-trash-alt"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
 </main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
