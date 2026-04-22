@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify, f
 from flask_login import LoginManager, current_user, login_required
 from werkzeug.security import generate_password_hash
 from db import get_db, init_db
-from models import Usuario
+from routes.models import Usuario
 
 
 # --- CONFIGURACIÓN DE APP ---
