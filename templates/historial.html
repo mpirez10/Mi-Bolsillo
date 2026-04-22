@@ -41,66 +41,54 @@
         margin-bottom: 24px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
-
-    .filtros-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Grid real, no más encimados */
-        gap: 20px;
-        align-items: end;
-    }
-
-    /* Contenedor específico para las fechas para que no se separen */
-    .fecha-inputs-wrapper {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-    }
-
-    .form-group {
+        .filtros-grid {
         display: flex;
-        flex-direction: column;
-        gap: 6px;
+        flex-direction: column; /* Apilamos las filas */
+        gap: 15px;
     }
 
-    .form-group label {
-        font-size: 0.7rem;
-        font-weight: 800;
-        color: #64748b;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+    .filtros-fila {
+        display: flex;
+        gap: 20px;
+        align-items: flex-end;
+        flex-wrap: wrap; /* Para que sea responsive */
     }
 
-    .form-control {
-        height: 45px;
-        border-radius: 8px;
-        border: 1px solid var(--border);
-        padding: 8px 12px;
-        font-size: 0.9rem;
-        transition: border-color 0.2s;
+    /* La búsqueda ocupa más espacio en la primera fila */
+    .form-group.flex-grow {
+        flex: 2;
+        min-width: 250px;
     }
 
-    .form-control:focus {
-        border-color: var(--pocket-blue);
-        outline: none;
+    .form-group.flex-small {
+        flex: 1;
+        min-width: 150px;
     }
 
-    /* BOTONES */
+    /* Botones alineados a la derecha en la segunda fila */
     .acciones-filtros {
         display: flex;
-        gap: 10px;
+        gap: 8px;
+        flex-wrap: nowrap;
     }
 
-    .btn-filtrar {
-        background: var(--pocket-blue);
-        color: white;
-        border: none;
-        padding: 0 25px;
-        border-radius: 8px;
-        font-weight: 700;
+    .btn-icon {
+        width: 45px;
         height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        border: 1px solid var(--border);
         cursor: pointer;
-        flex-grow: 1;
+        background: white;
+        transition: all 0.2s;
     }
+
+    .btn-pdf { color: #e11d48; border-color: #fda4af; }
+    .btn-excel { color: #10b981; border-color: #6ee7b7; }
+    .btn-reset { color: #64748b; }
+
 
     /* BADGES */
     .badge-formal { padding: 6px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
@@ -256,14 +244,16 @@
         </div>
     </div>
 
-    <div class="filtros-card">
-        <div class="filtros-grid">
-            <div class="form-group">
+   <div class="filtros-card">
+    <div class="filtros-grid">
+        
+        <div class="filtros-fila">
+            <div class="form-group flex-grow">
                 <label>Búsqueda</label>
                 <input type="text" id="busquedaMovimiento" value="{{ filtros.q }}" placeholder="Detalle o cuenta..." class="form-control">
             </div>
 
-            <div class="form-group">
+            <div class="form-group flex-small">
                 <label>Operación</label>
                 <select id="filtroTipo" class="form-control">
                     <option value="TODOS" {% if filtros.tipo == 'TODOS' %}selected{% endif %}>TODOS</option>
@@ -272,10 +262,12 @@
                     <option value="Transferencia" {% if filtros.tipo == 'Transferencia' %}selected{% endif %}>TRANSFERENCIA</option>
                 </select>
             </div>
+        </div>
 
-            <div class="form-group">
+        <div class="filtros-fila">
+            <div class="form-group flex-grow">
                 <label>Rango de Fechas</label>
-                <div class="fecha-inputs-wrapper">
+                <div class="fecha-inputs-wrapper" style="display: flex; gap: 10px;">
                     <input type="date" id="fechaDesde" class="form-control" value="{{ filtros.desde }}">
                     <input type="date" id="fechaHasta" class="form-control" value="{{ filtros.hasta }}">
                 </div>
@@ -283,13 +275,25 @@
 
             <div class="form-group">
                 <div class="acciones-filtros">
-                    <button id="btnFiltrar" class="btn-filtrar">APLICAR</button>
-                    <button onclick="window.location.href='/historial'" class="form-control" style="width: 45px; cursor: pointer;" title="Limpiar"><i class="fas fa-sync-alt"></i></button>
-                    <button onclick="exportarAExcel()" class="form-control" style="width: 45px; background: #10b981; color: white; border: none; cursor: pointer;"><i class="fas fa-file-excel"></i></button>
+                    <button id="btnFiltrar" class="btn-filtrar" style="min-width: 120px;">APLICAR</button>
+                    
+                    <button onclick="window.location.href='/historial'" class="btn-icon btn-reset" title="Limpiar Filtros">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    
+                    <button onclick="exportarAExcel()" class="btn-icon btn-excel" title="Excel">
+                        <i class="fas fa-file-excel"></i>
+                    </button>
+                    
+                    <button onclick="exportarAPDF()" class="btn-icon btn-pdf" title="PDF">
+                        <i class="fas fa-file-pdf"></i>
+                    </button>
                 </div>
             </div>
         </div>
+
     </div>
+</div>
 
     <div class="resultados-card">
         <div style="overflow-x: auto;">
