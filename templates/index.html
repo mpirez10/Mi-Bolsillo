@@ -56,7 +56,7 @@
 
 /* Header de la sección de movimientos */
 .movimientos-header {
-    background: #f8fafc;
+    background: var(--pocket-blue);
     padding: 15px 20px;
     border-bottom: 1px solid var(--border);
     display: flex;
@@ -67,7 +67,7 @@
 .movimientos-header h3 {
     margin: 0;
     font-size: 1rem;
-    color: var(--pocket-blue);
+    color: white;
     font-weight: 800;
 }
 
@@ -378,11 +378,6 @@ details[open] .toggle-icon { transform: rotate(180deg); }
 
     .btn-excel { background: #10b981; }
     .btn-pdf { background: #ef4444; }
-    .btn-limpiar { 
-        background: white; 
-        border: 1px solid var(--border); 
-        color: #94a3b8; 
-    }
 
     .btn-export:hover {
         filter: brightness(0.9);
@@ -719,69 +714,6 @@ details[open] .toggle-icon { transform: rotate(180deg); }
         });
     }
 
-// 2. FUNCIÓN DE FILTRADO - Versión Definitiva
-function filtrarMovimientos() {
-    console.log("Botón presionado, iniciando filtrado..."); // Esto te avisa si la función arranca
-
-    // 1. Capturamos los elementos (con ? para evitar errores si alguno no existe)
-    const elQ = document.getElementById("busquedaMovimiento");
-    const elCuenta = document.getElementById("filtroCuenta");
-    const elTipo = document.getElementById("filtroTipo");
-    const elDesde = document.getElementById("fechaDesde");
-    const elHasta = document.getElementById("fechaHasta");
-
-    // Extraemos valores
-    const q = elQ ? elQ.value.trim() : "";
-    const cuenta = elCuenta ? elCuenta.value : "TODAS";
-    const tipo = elTipo ? elTipo.value : "TODOS";
-    const desde = elDesde ? elDesde.value : "";
-    const hasta = elHasta ? elHasta.value : "";
-
-    // 2. Validaciones de fechas
-    if (desde || hasta) {
-        if (!desde || !hasta) {
-            alert("Por favor, seleccioná ambas fechas.");
-            return;
-        }
-        const fechaInicio = new Date(desde);
-        const fechaFin = new Date(hasta);
-        const diferenciaDias = (fechaFin - fechaInicio) / (1000 * 60 * 60 * 24);
-
-        if (diferenciaDias < 0) {
-            alert("La fecha 'Desde' no puede ser posterior.");
-            return;
-        }
-        if (diferenciaDias > 31) {
-            alert("Máximo 31 días permitidos.");
-            return;
-        }
-    }
-
-    // 3. Construcción de URL
-    let url = `/?q=${encodeURIComponent(q)}&cuenta=${cuenta}&tipo=${tipo}&desde=${desde}&hasta=${hasta}`;
-    
-    console.log("Redirigiendo a:", url);
-    window.location.href = url;
-}
-
-// --- ASIGNACIÓN DE EVENTOS ---
-// Usamos este método que es más robusto para que no falle
-window.onload = function() {
-    const btn = document.getElementById("btnFiltrar");
-    if (btn) {
-        btn.onclick = filtrarMovimientos;
-        console.log("Evento asignado al botón filtrar correctamente.");
-    } else {
-        console.error("No se encontró el botón con ID 'btnFiltrar'");
-    }
-
-    const inputQ = document.getElementById("busquedaMovimiento");
-    if (inputQ) {
-        inputQ.onkeypress = function(e) {
-            if (e.key === 'Enter') filtrarMovimientos();
-        };
-    }
-};
 function exportarAExcel() {
     const urlParams = new URLSearchParams(window.location.search);
     
@@ -901,7 +833,7 @@ function exportarAExcel() {
     <!-- DERECHA: INFO -->
     <div style="text-align: right;">
         <h2 style="margin: 0; font-size: 10pt; font-weight: 700;">
-            REPORTE DE MOVIMIENTOS
+            REPORTE DE ÚLTIMOS MOVIMIENTOS
         </h2>
         <p style="margin: 0; font-size: 8pt; color: #64748b;">
             Emitido: <strong>${fechaHora}</strong>
@@ -914,10 +846,6 @@ function exportarAExcel() {
 </div>
 
     <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-        <div style="font-size: 8pt;">
-            <div><strong>PERIODO:</strong> ${desde} - ${hasta}</div>
-            <div><strong>TIPO:</strong> ${tipo}</div>
-        </div>
         <div style="font-size: 10pt; font-weight: 800;">
             ${totalNeto}
         </div>
@@ -956,13 +884,5 @@ function exportarAExcel() {
         }, 300);
     }, 50);
 }
-        function limpiarFiltros() {
-    document.getElementById("busquedaMovimiento").value = "";
-    document.getElementById("fechaDesde").value = "";
-    document.getElementById("fechaHasta").value = "";
-    document.getElementById("filtroTipo").value = "";
-    filtrarMovimientos();
-}
-    // Ejecutamos al cargar para calcular el total inicial
 </script>
 {% endblock %}
