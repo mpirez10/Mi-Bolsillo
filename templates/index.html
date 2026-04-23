@@ -781,44 +781,38 @@ function exportarAExcel() {
     document.body.removeChild(link);
 }
 
-function exportarAPDF() {
+async function exportarAPDF() {
     const nombreUsuario = "{{ current_user.nombre_completo }}" || "Usuario";
     const fechaHora = new Date().toLocaleString('es-UY');
 
-    // 1. Cargamos los últimos 30 movimientos directamente desde el servidor usando Jinja
-    // Esto crea una lista real en JavaScript con los datos de tu base de datos
-    const ultimosMovimientos = [
-        {% for m in movimientos_totales[:30] %}
-        {
-            fecha: "{{ m.fecha.strftime('%d/%m/%Y') }}",
-            tipo: "{{ m.tipo.upper() }}",
-            monto: "${{ "{:,.2f}".format(m.monto) }}",
-            cuenta: "{{ m.cuenta.nombre }}",
-            detalle: "{{ m.detalle.upper() }}"
-        },
-        {% endfor %}
-    ];
+    try {
+        // 1. Llamamos a tu nueva API para traer los 30 movimientos reales
+        const respuesta = await fetch('/api/ultimos_movimientos');
+        if (!respuesta.ok) throw new Error('Error al obtener datos');
+        const movimientos = await respuesta.json();
 
-    let filasHtml = '';
-    
-    // 2. Generamos las filas del PDF usando esa lista (no la tabla de la pantalla)
-    ultimosMovimientos.forEach(m => {
-        let claseMonto = m.tipo.includes("INGRESO") ? 'text-success' : 'text-danger';
+        let filasHtml = '';
 
-        filasHtml += `
-            <tr>
-                <td>${m.fecha}</td>
-                <td style="font-weight: bold; color: #64748b;">${m.tipo}</td>
-                <td class="${claseMonto}">${m.monto}</td>
-                <td>${m.cuenta}</td>
-                <td style="text-transform: uppercase;">${m.detalle}</td>
-            </tr>`;
-    });
+        // 2. Armamos las filas con los datos que vinieron de la API
+        movimientos.forEach(m => {
+            // Normalizamos el tipo para que el color coincida (Ingreso/Egreso)
+            let claseMonto = m.tipo.toUpperCase().includes("INGRESO") ? 'text-success' : 'text-danger';
 
-    const ventanaReporte = document.createElement('div');
-    ventanaReporte.id = 'reporte-impresion-formal'; 
+            filasHtml += `
+                <tr>
+                    <td>${m.fecha}</td>
+                    <td style="font-weight: bold; color: #64748b;">${m.tipo.toUpperCase()}</td>
+                    <td class="${claseMonto}">${m.monto}</td>
+                    <td>${m.cuenta}</td>
+                    <td style="text-transform: uppercase;">${m.detalle}</td>
+                </tr>`;
+        });
 
-    ventanaReporte.innerHTML = `
+        // 3. Generamos el contenedor del reporte
+        const ventanaReporte = document.createElement('div');
+        ventanaReporte.id = 'reporte-impresion-formal'; 
+
+        ventanaReporte.innerHTML = `
 <section style="padding: 10px; background: white; font-family: 'Segoe UI', Arial, sans-serif; color: #1e293b;">
     <div class="pdf-header" style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #0f172a; padding-bottom: 8px; margin-bottom: 10px;">
         <div style="display: flex; align-items: center; gap: 10px;">
@@ -829,14 +823,14 @@ function exportarAPDF() {
             </div>
         </div>
         <div style="text-align: right;">
-            <h2 style="margin: 0; font-size: 10pt; font-weight: 700;">REPORTE DE MOVIMIENTOS</h2>
+            <h2 style="margin: 0; font-size: 10pt; font-weight: 700;">REPORTE DE ÚLTIMOS 30 MOVIMIENTOS</h2>
             <p style="margin: 0; font-size: 8pt; color: #64748b;">Emitido: <strong>${fechaHora}</strong></p>
             <p style="margin: 0; font-size: 8pt; color: #64748b;">Usuario: ${nombreUsuario}</p>
         </div>
     </div>
 
     <h3 style="margin: 4px 0 12px 0; font-size: 14pt; text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 5px;">
-        Detalle de últimos 30 movimientos
+        Detalle Cronológico de Actividad
     </h3>
 
     <table style="width: 100%; border-collapse: collapse;">
@@ -858,14 +852,20 @@ function exportarAPDF() {
     </div>
 </section>`;
 
-    document.body.appendChild(ventanaReporte);
+        document.body.appendChild(ventanaReporte);
 
-    setTimeout(() => {
-        window.print();
+        // 4. Disparamos la impresión
         setTimeout(() => {
-            ventanaReporte.remove();
-        }, 300);
-    }, 50);
+            window.print();
+            setTimeout(() => {
+                ventanaReporte.remove();
+            }, 300);
+        }, 50);
+
+    } catch (error) {
+        console.error("Error al exportar:", error);
+        alert("No se pudo obtener la información para el PDF.");
+    }
 }
     function togglePrivacidad(event) {
     // Evitamos que el clic en el ojo abra/cierre el acordeón (details)
