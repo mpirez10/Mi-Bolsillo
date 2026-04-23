@@ -158,7 +158,7 @@
 .debts-card { border-left: 4px solid #f59e0b; }
 .debts-card .summary-header { color: #d97706; }
 
-.chart-card { border-left: 4px solid var(--money-green); padding: 15px; }
+.chart-card { border-left: 4px solid var(--money-green) !important; padding: 15px; }
 
 /* Contenido Interno */
 .card-content {
@@ -232,11 +232,6 @@ details[open] .toggle-icon { transform: rotate(180deg); }
     text-transform: uppercase;
 }
     
-   
-
-
-
-    /* 3. FORMULARIOS E INPUTS - Para que no se te deformen los filtros */
     /* 3. FILTROS DEFINITIVOS - Alineación de Ingeniería */
     .filtros-grid {
         display: flex; 
@@ -592,15 +587,21 @@ details[open] .toggle-icon { transform: rotate(180deg); }
         {% endif %}
     </div>
 </details>
-        <div class="sidebar-card chart-card">
-            <div class="card-header-static">
-                <i class="fas fa-chart-pie"></i>
-                <span>Balance</span>
-            </div>
-            <div class="chart-container">
-                <canvas id="balanceChart"></canvas>
-            </div>
+        <details class="sidebar-card chart-card" open>
+    <summary>
+        <div class="summary-header">
+            <i class="fas fa-chart-pie"></i>
+            <span>Balance General</span>
         </div>
+        <i class="fas fa-chevron-down toggle-icon"></i>
+    </summary>
+    
+    <div class="card-content">
+        <div class="chart-container" style="height: 220px; position: relative;">
+            <canvas id="balanceChart"></canvas>
+        </div>
+    </div>
+</details>
 
     </aside>
     <main class="main-content">
@@ -945,5 +946,11 @@ function exportarAExcel() {
         montosLista.forEach(m => m.innerText = m.getAttribute('data-valor'));
     }
 }
+    document.querySelector('.chart-card').addEventListener('toggle', (e) => {
+    if (e.target.open) {
+        // Esto obliga a Chart.js a recalcular el tamaño del canvas
+        Chart.getChart("balanceChart").resize();
+    }
+});
 </script>
 {% endblock %}
