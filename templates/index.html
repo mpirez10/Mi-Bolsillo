@@ -103,13 +103,13 @@
 }
 
 .table-formal thead th {
-    background: #f8fafc;
-    color: #64748b;
+    background: var(--pocket-blue--);
+    color: white;
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     padding: 12px 15px;
-    border-bottom: 2px solid #edf2f7;
+    border-bottom: 2px solid white;
     text-align: left;
 }
 
@@ -619,10 +619,9 @@ details[open] .toggle-icon { transform: rotate(180deg); }
             </div>
 
            <div class="acciones-filtros">
+                        <a href="{{ url_for('historial.ver_historial') }}" class="btn btn-info"><i class="fas fa-history"></i>Historial de movimientos</a>
                         <button onclick="exportarAExcel()" class="btn-export btn-excel" title="Excel"><i class="fas fa-file-excel"></i></button>
                         <button onclick="exportarAPDF()" class="btn-export btn-pdf" title="PDF"><i class="fas fa-file-pdf"></i></button>
-                        <a href="{{ url_for('historial.ver_historial') }}" class="btn btn-info">
-                        <i class="fas fa-history"></i>Historial de movimientos</a>
                     </div>
             <div style="padding: 15px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
                 {% if page > 1 %}
