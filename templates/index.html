@@ -529,7 +529,7 @@ details[open] .toggle-icon { transform: rotate(180deg); }
             <button type="button" onclick="togglePrivacidad(event)" style="background: none; border: none; color: var(--pocket-blue); cursor: pointer; padding: 0 5px;">
                 <i id="ojo-icono" class="fas fa-eye" style="font-size: 0.8rem;"></i>
             </button>
-            <span id="total-general-header" style="margin-right: 5px; font-size: 0.85rem; color: #64748b;" data-valor="${{ "{:,.2f}".format(cuentas|sum(attribute='saldo')) }}">
+            <span id="total-general-header" style="margin-right: 5px; font-size: 0.85rem; color: var(--pocket-blue);" data-valor="${{ "{:,.2f}".format(cuentas|sum(attribute='saldo')) }}">
                 ${{ "{:,.2f}".format(cuentas|sum(attribute='saldo')) }}
             </span>
         </div>
