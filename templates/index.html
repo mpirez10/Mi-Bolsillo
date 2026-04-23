@@ -377,45 +377,45 @@ details[open] .toggle-icon { transform: rotate(180deg); }
 /* 🔥 MOBILE ULTRA PRO FINTECH */
 /* ============================= */
 @media screen and (max-width: 768px) {
-    /* 1. ELIMINAMOS MÁRGENES DEL CONTENEDOR */
+    /* CONTENEDOR PRINCIPAL */
     .container, .dashboard-layout {
-        max-width: 100% !important; /* Que use todo el ancho */
-        margin: 0 !important;
-        padding: 0 0 100px 0 !important; /* Sin nada a los costados, solo espacio abajo */
         width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Centra las cards */
+        padding: 10px 12px 100px 12px; /* Este 12px es el 'respiro' constante a los lados */
+        gap: 15px; /* Separación entre cards */
     }
 
-    /* 2. CARDS A TODO ANCHO */
+    /* LAS CARDS */
     .card, 
     .movimientos-container, 
-    .resumen-container, 
-    .dashboard-grid, 
     tbody tr {
-        width: 100% !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-        border-left: none !important;  /* Sacamos borde lateral para que pegue justo */
-        border-right: none !important;
-        border-radius: 0 !important;   /* Al ser full-width, quedan mejor cuadradas o con radio solo arriba/abajo */
-        box-shadow: none !important;   /* Opcional: una línea sutil abajo queda más limpio */
-        border-bottom: 1px solid var(--border-soft) !important;
+        width: 100%; /* Ocupa todo el ancho disponible del container (restando el padding) */
+        max-width: 500px; /* Por si lo abren en una tablet, que no sea gigante */
+        background: var(--card-bg);
+        border-radius: 18px;
+        padding: 16px;
+        margin: 0 auto; /* Refuerza el centrado */
+        border: 1px solid var(--border-soft);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
 
-    /* 3. AJUSTE DE CONTENIDO INTERNO */
-    /* Para que el texto de adentro no toque el vidrio, le damos el margen acá */
-    .card, tbody tr {
-        padding: 16px 20px !important; 
-    }
-
-    /* 4. EL NAVBAR TAMBIÉN FULL */
-    .nav-bar {
-        padding: 15px 20px !important;
+    /* TABLA A CARDS (Ajuste fino) */
+    tbody {
+        display: flex;
+        flex-direction: column;
         width: 100%;
+        gap: 12px;
     }
 
-    /* 5. TABLA TRANSFOMADA (Ajuste de bordes) */
     tbody tr {
-        margin-bottom: 2px !important; /* Un separador mínimo entre transacciones */
+        display: grid; /* Mantenés tu diseño de grid que quedó impecable */
+        grid-template-areas: 
+            "fecha acciones"
+            "monto monto"
+            "tipo cuenta"
+            "detalle detalle";
     }
 }
 /* 6. MODO IMPRESIÓN - Estilo Ingeniería Pro (FIX DEFINITIVO) */
