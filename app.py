@@ -165,7 +165,7 @@ def guardar_turno():
     # 2. REDIRECCIÓN CORRECTA: Usamos 'eid' que es la variable que definimos arriba
     return redirect(url_for('ver_agenda', id=eid))
 
-@bp.route('/api/ultimos_movimientos')
+@app.route('/api/ultimos_movimientos')
 @login_required
 def api_movimientos():
     conn = get_db()
