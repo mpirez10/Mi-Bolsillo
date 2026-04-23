@@ -375,6 +375,62 @@ details[open] .toggle-icon { transform: rotate(180deg); }
         display: flex; 
         gap: 8px; 
     }
+    .pagination-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 15px 25px;
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr; /* Tres columnas: Izquierda (pag), Centro (botones), Derecha (pag) */
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.centro-acciones {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Botón Historial estilo Pocket */
+.btn-historial-pocket {
+    background: var(--pocket-blue);
+    color: white !important;
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: opacity 0.2s;
+}
+
+/* Botones de exportación circulares o cuadrados pequeños */
+.btn-mini-export {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    color: white;
+    font-size: 1rem;
+}
+
+.bg-excel { background-color: #10b981; }
+.bg-pdf { background-color: #ef4444; }
+
+.nav-paginacion {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
 
     .btn-export, .btn-limpiar {
         width: 42px; /* Los hacemos cuadrados para que se vean prolijos */
@@ -630,26 +686,49 @@ details[open] .toggle-icon { transform: rotate(180deg); }
                 </a>
             </div>
 
-           <div class="acciones-filtros">
-                        <a href="{{ url_for('historial.ver_historial') }}" class="btn btn-info"><i class="fas fa-history"></i>Historial de movimientos</a>
-                        <button onclick="exportarAExcel()" class="btn-export btn-excel" title="Excel"><i class="fas fa-file-excel"></i></button>
-                        <button onclick="exportarAPDF()" class="btn-export btn-pdf" title="PDF"><i class="fas fa-file-pdf"></i></button>
-                    </div>
-            <div style="padding: 15px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
-                {% if page > 1 %}
-                    <a href="{{ url_for('home.index', page=page-1, q=filtros.q, tipo=filtros.tipo, desde=filtros.desde, hasta=filtros.hasta) }}" style="text-decoration: none; color: var(--pocket-blue); font-size: 0.75rem; font-weight: 700;">← ANTERIORES</a>
-                {% else %}
-                    <span style="color: #cbd5e1; font-size: 0.75rem;">← ANTERIORES</span>
-                {% endif %}
+           <div class="pagination-card">
+    
+    <div class="nav-paginacion" style="justify-content: flex-start;">
+        {% if page > 1 %}
+            <a href="{{ url_for('home.index', page=page-1, q=filtros.q, tipo=filtros.tipo, desde=filtros.desde, hasta=filtros.hasta) }}" 
+               style="text-decoration: none; color: var(--pocket-blue); font-size: 1.2rem; font-weight: 900;">
+               <i class="fas fa-chevron-left"></i>
+            </a>
+        {% else %}
+            <span style="color: #cbd5e1; font-size: 1.2rem;"><i class="fas fa-chevron-left"></i></span>
+        {% endif %}
+    </div>
 
-                <span style="background: #f1f5f9; padding: 4px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; color: #475569;">Pág. {{ page }}</span>
+    <div class="centro-acciones">
+        <a href="{{ url_for('historial.ver_historial') }}" class="btn-historial-pocket">
+            <i class="fas fa-history"></i> HISTORIAL
+        </a>
+        
+        <button onclick="exportarAExcel()" class="btn-mini-export bg-excel" title="Exportar a Excel">
+            <i class="fas fa-file-excel"></i>
+        </button>
+        
+        <button onclick="exportarAPDF()" class="btn-mini-export bg-pdf" title="Exportar a PDF">
+            <i class="fas fa-file-pdf"></i>
+        </button>
 
-                {% if hay_mas_viejos %}
-                    <a href="{{ url_for('home.index', page=page+1, q=filtros.q, tipo=filtros.tipo, desde=filtros.desde, hasta=filtros.hasta) }}" style="text-decoration: none; color: var(--pocket-blue); font-size: 0.75rem; font-weight: 700;">SIGUIENTES →</a>
-                {% else %}
-                    <span style="color: #cbd5e1; font-size: 0.75rem;">SIGUIENTES →</span>
-                {% endif %}
-            </div>
+        <span style="background: #f1f5f9; padding: 6px 15px; border-radius: 8px; font-size: 0.8rem; font-weight: 800; color: #475569; margin-left: 10px;">
+            PÁG. {{ page }}
+        </span>
+    </div>
+
+    <div class="nav-paginacion" style="justify-content: flex-end;">
+        {% if hay_mas_viejos %}
+            <a href="{{ url_for('home.index', page=page+1, q=filtros.q, tipo=filtros.tipo, desde=filtros.desde, hasta=filtros.hasta) }}" 
+               style="text-decoration: none; color: var(--pocket-blue); font-size: 1.2rem; font-weight: 900;">
+               <i class="fas fa-chevron-right"></i>
+            </a>
+        {% else %}
+            <span style="color: #cbd5e1; font-size: 1.2rem;"><i class="fas fa-chevron-right"></i></span>
+        {% endif %}
+    </div>
+
+</div>
 
             <div style="overflow-x: auto; border-radius: 12px; border: 1px solid var(--border);">
     <table class="table-formal">
