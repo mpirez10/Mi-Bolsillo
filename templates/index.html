@@ -377,104 +377,45 @@ details[open] .toggle-icon { transform: rotate(180deg); }
 /* 🔥 MOBILE ULTRA PRO FINTECH */
 /* ============================= */
 @media screen and (max-width: 768px) {
-    :root {
-        --bg-main: #f8fafc;
-        --card-bg: #ffffff;
-        --border-soft: #e2e8f0;
-        --text-soft: #64748b;
-    }
-
-    /* 1. EL CONTENEDOR TIPO APP (Lo que pedías de los bordes) */
+    /* 1. ELIMINAMOS MÁRGENES DEL CONTENEDOR */
     .container, .dashboard-layout {
-        max-width: 480px !important; /* Forzamos el ancho de celular tipo iPhone/Android */
-        margin: 0 auto !important;
-        padding: 12px 16px 100px 16px !important; /* 100px abajo para que la barra no tape nada */
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        width: 90%;
+        max-width: 100% !important; /* Que use todo el ancho */
+        margin: 0 !important;
+        padding: 0 0 100px 0 !important; /* Sin nada a los costados, solo espacio abajo */
+        width: 100%;
     }
 
-    /* 2. HEADER Y NAVBAR (Despegados de los bordes) */
-    .header-full {
-        background: white;
-        margin-bottom: 10px;
+    /* 2. CARDS A TODO ANCHO */
+    .card, 
+    .movimientos-container, 
+    .resumen-container, 
+    .dashboard-grid, 
+    tbody tr {
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        border-left: none !important;  /* Sacamos borde lateral para que pegue justo */
+        border-right: none !important;
+        border-radius: 0 !important;   /* Al ser full-width, quedan mejor cuadradas o con radio solo arriba/abajo */
+        box-shadow: none !important;   /* Opcional: una línea sutil abajo queda más limpio */
+        border-bottom: 1px solid var(--border-soft) !important;
     }
 
-    .nav-bar {
-        justify-content: center !important;
-        padding: 15px 0;
-    }
-
-    /* 3. TRANSFORMACIÓN DE TABLA A CARDS (Metodología Pro) */
-    .movimientos-table thead, thead {
-        display: none; /* Chau encabezados feos en celu */
-    }
-
-    .movimientos-table tbody, tbody {
-        display: block;
-        width: 90%;
-    }
-
-    .movimientos-table tbody tr, tbody tr {
-        display: grid;
-        grid-template-areas: 
-            "fecha acciones"
-            "monto monto"
-            "tipo cuenta"
-            "detalle detalle";
-        grid-template-columns: 1fr auto;
-        background: var(--card-bg);
-        border-radius: 20px;
-        margin-bottom: 16px;
-        padding: 18px;
-        gap: 10px;
-        border: 1px solid var(--border-soft);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.04);
-        position: relative;
-    }
-
-    /* Estilos de las celdas dentro de la card */
-    tbody td {
-        display: block;
-        padding: 0;
-        border: none !important;
-    }
-
-    /* Ubicación de los datos (según tu grid-area) */
-    td:nth-child(1), .td-fecha { grid-area: fecha; font-size: 0.75rem; color: var(--text-soft); }
-    td:nth-child(3), .td-monto { 
-        grid-area: monto; 
-        font-size: 1.8rem; 
-        font-weight: 800; 
-        margin: 5px 0;
-        letter-spacing: -1px;
-    }
-    td:nth-child(2), .td-tipo { grid-area: tipo; }
-    td:nth-child(4), .td-cuenta { grid-area: cuenta; text-align: right; font-size: 0.8rem; font-weight: 600; color: var(--text-soft); }
-    
-    td:nth-child(5), .td-detalle { 
-        grid-area: detalle; 
-        border-top: 1px solid #f1f5f9 !important; 
-        padding-top: 12px !important;
-        margin-top: 5px;
-        font-size: 0.9rem;
-    }
-
-    td:nth-child(6), .td-accion { 
-        grid-area: acciones; 
-        display: flex; 
-        gap: 8px; 
-        justify-content: flex-end; 
-    }
-
-    /* 4. EFECTO FEEDBACK AL TOCAR */
+    /* 3. AJUSTE DE CONTENIDO INTERNO */
+    /* Para que el texto de adentro no toque el vidrio, le damos el margen acá */
     .card, tbody tr {
-        transition: transform 0.1s ease;
+        padding: 16px 20px !important; 
     }
 
-    .card:active, tbody tr:active {
-        transform: scale(0.97);
+    /* 4. EL NAVBAR TAMBIÉN FULL */
+    .nav-bar {
+        padding: 15px 20px !important;
+        width: 100%;
+    }
+
+    /* 5. TABLA TRANSFOMADA (Ajuste de bordes) */
+    tbody tr {
+        margin-bottom: 2px !important; /* Un separador mínimo entre transacciones */
     }
 }
 /* 6. MODO IMPRESIÓN - Estilo Ingeniería Pro (FIX DEFINITIVO) */
