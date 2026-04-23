@@ -373,17 +373,46 @@ details[open] .toggle-icon { transform: rotate(180deg); }
 }
 
 
-    /* 5. MODO RESPONSIVE - Optimización para Celulares */
+/* 5. MODO RESPONSIVE - Optimización total para Celulares */
 @media screen and (max-width: 768px) {
-    .dashboard-layout { 
-        grid-template-columns: 1fr; 
-        padding: 10px;
+    
+    /* Evitamos el scroll horizontal que se veía en tu captura */
+    body, html {
+        overflow-x: hidden;
+        width: 100%;
     }
 
-    /* Escondemos la cabecera original */
-    thead { display: none; }
+    /* 1. LAYOUT PRINCIPAL: Todo uno abajo del otro */
+    .dashboard-layout { 
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 15px; 
+        padding: 10px !important;
+    }
 
-    /* Transformamos cada fila en una tarjeta (Card) */
+    /* Si usás grid en los balances, lo pasamos a 1 sola columna */
+    .dashboard-grid, .resumen-container {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        grid-template-columns: 1fr !important;
+    }
+
+    .movimientos-container {
+        width: 100% !important;
+        margin-top: 10px;
+    }
+
+    /* 2. TABLA: Transformación a Cards */
+    thead { 
+        display: none; /* Chau encabezados de tabla */
+    }
+
+    table, tbody {
+        display: block !important;
+        width: 100% !important;
+    }
+
     tbody tr {
         display: grid !important;
         grid-template-areas: 
@@ -394,11 +423,11 @@ details[open] .toggle-icon { transform: rotate(180deg); }
         grid-template-columns: 1fr auto;
         background: white; 
         border: 1px solid #e2e8f0 !important;
-        border-radius: 16px; /* Más redondeado, más moderno */
+        border-radius: 16px; 
         margin-bottom: 16px; 
         padding: 16px !important; 
         gap: 8px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); /* Sombra suave */
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
 
     tbody td { 
@@ -407,7 +436,7 @@ details[open] .toggle-icon { transform: rotate(180deg); }
         border: none !important; 
     }
 
-    /* FECHA - Arriba a la izquierda */
+    /* FECHA */
     td:nth-child(1) { 
         grid-area: fecha; 
         font-size: 0.85rem;
@@ -415,57 +444,54 @@ details[open] .toggle-icon { transform: rotate(180deg); }
         font-weight: 500;
     }
 
-    /* TIPO - Estilo etiqueta/pill */
+    /* TIPO */
     td:nth-child(2) { 
         grid-area: tipo; 
         font-size: 0.75rem;
         text-transform: uppercase;
         font-weight: 700;
-        letter-spacing: 0.5px;
+        color: #64748b;
     }
 
-    /* MONTO - El protagonista del card */
+    /* MONTO (El más grande) */
     td:nth-child(3) { 
         grid-area: monto; 
-        font-size: 1.5rem !important; 
+        font-size: 1.6rem !important; 
         font-weight: 800; 
-        margin: 4px 0;
+        margin: 5px 0;
     }
 
-    /* CUENTA - La recuperamos pero chiquita a la derecha */
+    /* CUENTA (A la derecha del tipo) */
     td:nth-child(4) { 
         grid-area: cuenta; 
-        display: block;
         text-align: right;
         font-size: 0.8rem;
         color: #94a3b8;
         font-style: italic;
     }
 
-    /* DETALLE - Con separador sutil */
+    /* DETALLE (Con línea divisoria) */
     td:nth-child(5) { 
         grid-area: detalle; 
         border-top: 1px solid #f1f5f9 !important; 
         padding-top: 10px !important; 
+        margin-top: 5px;
         font-size: 0.9rem;
         color: #475569;
     }
 
-    /* ACCIONES - Botones arriba a la derecha */
+    /* ACCIONES (Botones de editar/borrar) */
     td:nth-child(6) { 
         grid-area: acciones; 
         display: flex; 
         justify-content: flex-end;
-        align-self: flex-start;
     }
 
-    /* Ajuste para que los botones de acción no queden gigantes */
     td:nth-child(6) .btn {
-        padding: 4px 8px !important;
+        padding: 5px 10px !important;
         font-size: 0.8rem !important;
     }
 }
-
  /* 6. MODO IMPRESIÓN - Estilo Ingeniería Pro */
 /* 6. MODO IMPRESIÓN - Estilo Ingeniería Pro (FIX DEFINITIVO) */
 @media print {
