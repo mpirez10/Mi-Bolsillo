@@ -373,102 +373,138 @@ details[open] .toggle-icon { transform: rotate(180deg); }
 }
 
 
-/* 5. MODO RESPONSIVE - Versión PRO REAL */
+/* ============================= */
+/* 🔥 MOBILE ULTRA PRO FINTECH */
+/* ============================= */
 @media screen and (max-width: 768px) {
-    
+
+    :root {
+        --bg-main: #f1f5f9;
+        --card-bg: #ffffff;
+        --primary: #0f4c81;
+        --success: #22c55e;
+        --danger: #dc2626;
+        --text-main: #0f172a;
+        --text-soft: #64748b;
+        --border-soft: #e2e8f0;
+    }
+
     * {
         box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
     }
 
-    html, body {
-        overflow-x: hidden;
+    body, html {
         margin: 0;
         padding: 0;
-        background-color: #f1f5f9;
+        background: var(--bg-main);
+        overflow-x: hidden;
+        font-family: 'Inter', sans-serif;
     }
 
-    /* LAYOUT PRINCIPAL */
-    .dashboard-layout { 
+    /* ============================= */
+    /* 🧱 LAYOUT PRINCIPAL */
+    /* ============================= */
+    .dashboard-layout {
         display: flex;
         flex-direction: column;
-        max-width: 500px; /* 🔥 clave para look premium */
+        max-width: 480px;
         margin: 0 auto;
         padding: 12px;
-        gap: 14px;
+        gap: 16px;
     }
 
-    /* CONTENEDORES */
-    .resumen-container, 
+    /* ============================= */
+    /* 💳 CARDS (EFECTO APP REAL) */
+    /* ============================= */
+    .card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 16px;
+        box-shadow: 
+            0 10px 25px rgba(0,0,0,0.06),
+            0 2px 6px rgba(0,0,0,0.04);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .card:active {
+        transform: scale(0.98);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    /* ============================= */
+    /* 📊 RESUMEN (CUENTAS / DEUDAS) */
+    /* ============================= */
+    .resumen-container,
     .dashboard-grid {
         display: flex;
         flex-direction: column;
         gap: 14px;
-        margin: 0;
-        padding: 0;
     }
 
-    /* CARDS */
-    .card {
-        width: 100%;
-        margin: 0;
-        border: none;
-        border-radius: 18px;
-        background: white;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
-        padding: 14px;
-    }
-
-    /* MOVIMIENTOS */
-    .movimientos-container {
-        width: 100%;
-        margin: 0;
-        padding: 0;
-    }
-
-    /* HEADER */
+    /* ============================= */
+    /* 📌 HEADER MOVIMIENTOS */
+    /* ============================= */
     .header-movimientos {
-        background: #0f4c81; /* 🔥 más sólido */
+        background: linear-gradient(135deg, #0f4c81, #1d4ed8);
         color: white;
-        padding: 12px 14px;
-        border-radius: 16px 16px 0 0;
+        padding: 14px;
+        border-radius: 18px 18px 0 0;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        font-weight: 600;
+        letter-spacing: 0.3px;
     }
 
     .btn-nuevo {
-        background: #22c55e;
+        background: var(--success);
         color: white;
-        border-radius: 10px;
-        padding: 8px 14px;
-        font-size: 0.8rem;
+        border-radius: 999px;
+        padding: 8px 16px;
+        font-size: 0.75rem;
         font-weight: 700;
-        box-shadow: 0 6px 14px rgba(34, 197, 94, 0.3);
+        box-shadow: 0 8px 18px rgba(34, 197, 94, 0.35);
+        transition: transform 0.1s ease;
     }
 
-    /* CONTROLES */
+    .btn-nuevo:active {
+        transform: scale(0.92);
+    }
+
+    /* ============================= */
+    /* 📦 CONTROLES */
+    /* ============================= */
     .controles-reporte {
-        background: white;
-        border-radius: 14px;
+        background: var(--card-bg);
+        border-radius: 16px;
         padding: 10px;
         display: flex;
-        justify-content: space-between;
         gap: 10px;
-        margin: 10px 0;
-        border: 1px solid #e2e8f0;
+        align-items: center;
+        justify-content: space-between;
+        border: 1px solid var(--border-soft);
     }
 
     .btn-export {
         flex: 1;
+        height: 42px;
         display: flex;
-        justify-content: center;
         align-items: center;
+        justify-content: center;
         background: #f8fafc;
-        border-radius: 10px;
-        padding: 10px;
+        border-radius: 12px;
+        transition: all 0.15s ease;
     }
 
-    /* TABLA → CARDS */
+    .btn-export:active {
+        background: #e2e8f0;
+        transform: scale(0.95);
+    }
+
+    /* ============================= */
+    /* 🔄 TABLA → CARDS */
+    /* ============================= */
     thead {
         display: none;
     }
@@ -491,12 +527,19 @@ details[open] .toggle-icon { transform: rotate(180deg); }
             "tipo cuenta"
             "detalle detalle";
         grid-template-columns: 1fr auto;
-        background: white;
-        border-radius: 18px;
+        background: var(--card-bg);
+        border-radius: 20px;
         margin-bottom: 14px;
         padding: 16px;
         gap: 10px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+        box-shadow: 
+            0 8px 20px rgba(0,0,0,0.05),
+            0 2px 6px rgba(0,0,0,0.04);
+        transition: transform 0.12s ease;
+    }
+
+    tbody tr:active {
+        transform: scale(0.97);
     }
 
     tbody td {
@@ -505,77 +548,112 @@ details[open] .toggle-icon { transform: rotate(180deg); }
         border: none;
     }
 
-    /* FECHA */
+    /* 📅 FECHA */
     td:nth-child(1) {
         grid-area: fecha;
-        font-size: 0.75rem;
-        color: #94a3b8;
+        font-size: 0.7rem;
+        color: var(--text-soft);
     }
 
-    /* MONTO */
+    /* 💰 MONTO */
     td:nth-child(3) {
         grid-area: monto;
-        font-size: 1.8rem;
-        font-weight: 800;
-        color: #0f172a;
-        margin: 4px 0;
+        font-size: 1.9rem;
+        font-weight: 900;
+        color: var(--text-main);
+        letter-spacing: -0.5px;
     }
 
-    /* TIPO */
+    /* 🏷 TIPO */
     td:nth-child(2) {
         grid-area: tipo;
     }
 
-    /* CUENTA */
+    /* 🏦 CUENTA */
     td:nth-child(4) {
         grid-area: cuenta;
         text-align: right;
         font-size: 0.75rem;
-        color: #64748b;
+        color: var(--text-soft);
         font-weight: 600;
     }
 
-    /* DETALLE */
+    /* 📝 DETALLE */
     td:nth-child(5) {
         grid-area: detalle;
-        border-top: 1px solid #f1f5f9;
+        border-top: 1px solid var(--border-soft);
         padding-top: 10px;
-        margin-top: 4px;
         font-size: 0.9rem;
-        color: #334155;
+        color: var(--text-main);
     }
 
-    /* ACCIONES */
+    /* ⚙️ ACCIONES */
     td:nth-child(6) {
         grid-area: acciones;
         display: flex;
-        gap: 8px;
+        gap: 6px;
         justify-content: flex-end;
+        opacity: 0.7;
     }
 
-    /* BADGES */
-    .badge-egreso, 
+    td:nth-child(6):active {
+        opacity: 1;
+    }
+
+    /* ============================= */
+    /* 🟢🔴 BADGES FINTECH */
+    /* ============================= */
+    .badge-egreso,
     .text-danger {
-        background-color: #fee2e2;
-        color: #dc2626;
-        padding: 4px 10px;
+        background: rgba(220, 38, 38, 0.1);
+        color: var(--danger);
+        padding: 4px 12px;
         border-radius: 999px;
         font-size: 0.65rem;
         font-weight: 800;
-        letter-spacing: 0.5px;
     }
 
     .badge-ingreso {
-        background-color: #dcfce7;
+        background: rgba(34, 197, 94, 0.12);
         color: #16a34a;
-        padding: 4px 10px;
+        padding: 4px 12px;
         border-radius: 999px;
         font-size: 0.65rem;
         font-weight: 800;
-        letter-spacing: 0.5px;
+    }
+
+    /* ============================= */
+    /* 🔽 NAVBAR INFERIOR PRO */
+    /* ============================= */
+    .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        max-width: 480px;
+        right: 0;
+        margin: auto;
+        background: #0f4c81;
+        display: flex;
+        justify-content: space-around;
+        padding: 10px 0;
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.15);
+    }
+
+    .bottom-nav a {
+        color: white;
+        font-size: 0.7rem;
+        text-align: center;
+        opacity: 0.7;
+        transition: all 0.15s ease;
+    }
+
+    .bottom-nav a.active {
+        opacity: 1;
+        transform: scale(1.1);
     }
 }
- /* 6. MODO IMPRESIÓN - Estilo Ingeniería Pro */
 /* 6. MODO IMPRESIÓN - Estilo Ingeniería Pro (FIX DEFINITIVO) */
 @media print {
 
