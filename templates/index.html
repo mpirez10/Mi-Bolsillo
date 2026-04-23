@@ -373,24 +373,98 @@ details[open] .toggle-icon { transform: rotate(180deg); }
 }
 
 
-    /* 5. MODO RESPONSIVE - Para cuando lo mires en el celular */
-    @media screen and (max-width: 768px) {
-        .dashboard-layout { grid-template-columns: 1fr; }
-        thead { display: none; }
-        tbody tr {
-            display: grid !important;
-            grid-template-areas: "fecha acciones" "tipo tipo" "monto monto" "detalle detalle";
-            grid-template-columns: 1fr auto;
-            background: white; border: 1px solid var(--border) !important;
-            border-radius: 12px; margin-bottom: 15px; padding: 16px !important; gap: 10px;
-        }
-        tbody td { display: block; padding: 0 !important; border: none !important; }
-        td:nth-child(1) { grid-area: fecha; color: var(--text-muted); }
-        td:nth-child(3) { grid-area: monto; font-size: 1.3rem !important; font-weight: 800; }
-        td:nth-child(4) { display: none; } 
-        td:nth-child(5) { grid-area: detalle; border-top: 1px dashed #eee !important; padding-top: 10px !important; }
-        td:nth-child(6) { grid-area: acciones; display: flex; justify-content: flex-end; }
+    /* 5. MODO RESPONSIVE - Optimización para Celulares */
+@media screen and (max-width: 768px) {
+    .dashboard-layout { 
+        grid-template-columns: 1fr; 
+        padding: 10px;
     }
+
+    /* Escondemos la cabecera original */
+    thead { display: none; }
+
+    /* Transformamos cada fila en una tarjeta (Card) */
+    tbody tr {
+        display: grid !important;
+        grid-template-areas: 
+            "fecha acciones"
+            "monto monto"
+            "tipo cuenta"
+            "detalle detalle";
+        grid-template-columns: 1fr auto;
+        background: white; 
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 16px; /* Más redondeado, más moderno */
+        margin-bottom: 16px; 
+        padding: 16px !important; 
+        gap: 8px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); /* Sombra suave */
+    }
+
+    tbody td { 
+        display: block; 
+        padding: 0 !important; 
+        border: none !important; 
+    }
+
+    /* FECHA - Arriba a la izquierda */
+    td:nth-child(1) { 
+        grid-area: fecha; 
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    /* TIPO - Estilo etiqueta/pill */
+    td:nth-child(2) { 
+        grid-area: tipo; 
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+
+    /* MONTO - El protagonista del card */
+    td:nth-child(3) { 
+        grid-area: monto; 
+        font-size: 1.5rem !important; 
+        font-weight: 800; 
+        margin: 4px 0;
+    }
+
+    /* CUENTA - La recuperamos pero chiquita a la derecha */
+    td:nth-child(4) { 
+        grid-area: cuenta; 
+        display: block;
+        text-align: right;
+        font-size: 0.8rem;
+        color: #94a3b8;
+        font-style: italic;
+    }
+
+    /* DETALLE - Con separador sutil */
+    td:nth-child(5) { 
+        grid-area: detalle; 
+        border-top: 1px solid #f1f5f9 !important; 
+        padding-top: 10px !important; 
+        font-size: 0.9rem;
+        color: #475569;
+    }
+
+    /* ACCIONES - Botones arriba a la derecha */
+    td:nth-child(6) { 
+        grid-area: acciones; 
+        display: flex; 
+        justify-content: flex-end;
+        align-self: flex-start;
+    }
+
+    /* Ajuste para que los botones de acción no queden gigantes */
+    td:nth-child(6) .btn {
+        padding: 4px 8px !important;
+        font-size: 0.8rem !important;
+    }
+}
 
  /* 6. MODO IMPRESIÓN - Estilo Ingeniería Pro */
 /* 6. MODO IMPRESIÓN - Estilo Ingeniería Pro (FIX DEFINITIVO) */
