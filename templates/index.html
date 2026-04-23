@@ -420,7 +420,7 @@ details[open] .toggle-icon { transform: rotate(180deg); }
 
     @page { 
         size: A4 portrait; 
-        margin: 1cm; 
+        margin: 0.5cm; 
     }
 
     /* 🔥 CONTROL REAL DE ESPACIADO (SIN ROMPER LAYOUT) */
@@ -842,9 +842,9 @@ async function exportarAPDF() {
             ${filasHtml}
         </tbody>
     </table>
-    <div style="margin-top: 1px; border-top: 1px solid #eee; padding-top: 10px; text-align: center; font-size: 8pt; color: #94a3b8;">
-        Este reporte fue generado automáticamente por el sistema Mi Bolsillo - TutuCode ®.
-    </div>
+    <div style="margin-top: 5px; border-top: 1px solid #eee; padding-top: 5px; text-align: center; font-size: 7pt; color: #94a3b8; page-break-inside: avoid;">
+    Este reporte fue generado automáticamente por el sistema Mi Bolsillo - TutuCode ®.
+</div>
 </section>`;
 
         document.body.appendChild(ventanaReporte);
