@@ -357,6 +357,21 @@
 
     </div>
 </div>
+         <div class="pagination-bar">
+            {% if page > 1 %}
+                <a href="{{ url_for('historial.ver_historial', page=page-1, q=filtros.q, tipo=filtros.tipo, desde=filtros.desde, hasta=filtros.hasta) }}" style="text-decoration: none; color: var(--pocket-blue); font-weight: 700;">← ANTERIORES</a>
+            {% else %}
+                <span style="color: #cbd5e1;">← ANTERIORES</span>
+            {% endif %}
+
+            <span style="font-size: 0.8rem; font-weight: 700; color: #64748b;">PÁGINA {{ page }}</span>
+
+            {% if hay_mas_viejos %}
+                <a href="{{ url_for('historial.ver_historial', page=page+1, q=filtros.q, tipo=filtros.tipo, desde=filtros.desde, hasta=filtros.hasta) }}" style="text-decoration: none; color: var(--pocket-blue); font-weight: 700;">SIGUIENTES →</a>
+            {% else %}
+                <span style="color: #cbd5e1;">SIGUIENTES →</span>
+            {% endif %}
+        </div>
 
     <div class="resultados-card">
         <div style="overflow-x: auto;">
@@ -401,22 +416,6 @@
         </div>
         </div>
 </div>
-
-        <div class="pagination-bar">
-            {% if page > 1 %}
-                <a href="{{ url_for('historial.ver_historial', page=page-1, q=filtros.q, tipo=filtros.tipo, desde=filtros.desde, hasta=filtros.hasta) }}" style="text-decoration: none; color: var(--pocket-blue); font-weight: 700;">← ANTERIORES</a>
-            {% else %}
-                <span style="color: #cbd5e1;">← ANTERIORES</span>
-            {% endif %}
-
-            <span style="font-size: 0.8rem; font-weight: 700; color: #64748b;">PÁGINA {{ page }}</span>
-
-            {% if hay_mas_viejos %}
-                <a href="{{ url_for('historial.ver_historial', page=page+1, q=filtros.q, tipo=filtros.tipo, desde=filtros.desde, hasta=filtros.hasta) }}" style="text-decoration: none; color: var(--pocket-blue); font-weight: 700;">SIGUIENTES →</a>
-            {% else %}
-                <span style="color: #cbd5e1;">SIGUIENTES →</span>
-            {% endif %}
-        </div>
     </div>
 </div>
 
