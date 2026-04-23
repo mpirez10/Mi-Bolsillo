@@ -165,21 +165,44 @@ def guardar_turno():
     # 2. REDIRECCIÓN CORRECTA: Usamos 'eid' que es la variable que definimos arriba
     return redirect(url_for('ver_agenda', id=eid))
 
-@app.route('/api/ultimos_movimientos')
+@bp.route('/api/ultimos_movimientos')
 @login_required
 def api_movimientos():
-    # Traemos los últimos 30 sin importar la paginación
-    movs = Movimiento.query.filter_by(user_id=current_user.id)\
-                           .order_by(Movimiento.fecha.desc())\
-                           .limit(30).all()
+    conn = get_db()
+    cursor = conn.cursor()
     
-    return jsonify([{
-        'fecha': m.fecha.strftime('%d/%m/%Y'),
-        'tipo': m.tipo,
-        'monto': f"$ {m.monto:,.2f}",
-        'cuenta': m.cuenta.nombre,
-        'detalle': m.detalle
-    } for m in movs])
+    try:
+        # Hacemos la consulta SQL pura para traer los últimos 30
+        # Usamos COALESCE para que si cuenta_destino es NULL (en egresos) no rompa nada
+        cursor.execute("""
+            SELECT fecha, tipo, monto, cuenta_origen, motivo 
+            FROM movimientos 
+            WHERE usuario_id = %s 
+            ORDER BY fecha DESC 
+            LIMIT 30
+        """, (current_user.id,))
+        
+        movs = cursor.fetchall()
+        
+        # Formateamos los datos para que el JavaScript los entienda
+        resultado = []
+        for m in movs:
+            resultado.append({
+                'fecha': m['fecha'].strftime('%d/%m/%Y') if hasattr(m['fecha'], 'strftime') else str(m['fecha']),
+                'tipo': m['tipo'],
+                'monto': f"$ {float(m['monto']):,.2f}",
+                'cuenta': m['cuenta_origen'],
+                'detalle': m['motivo']
+            })
+            
+        return jsonify(resultado)
+
+    except Exception as e:
+        print(f"Error en API: {e}")
+        return jsonify({"error": "No se pudieron cargar los movimientos"}), 500
+    finally:
+        cursor.close()
+        conn.close()
 
 @app.route('/actualizar_estado/<int:id>', methods=['POST'])
 @login_required
