@@ -794,20 +794,17 @@ async function exportarAPDF() {
         let filasHtml = '';
 
         // 2. Armamos las filas con los datos que vinieron de la API
-        movimientos.forEach(m => {
-            // Normalizamos el tipo para que el color coincida (Ingreso/Egreso)
-            let claseMonto = m.tipo.toUpperCase().includes("INGRESO") ? 'text-success' : 'text-danger';
-
-            filasHtml += `
-                <tr>
-                    <td>${m.fecha}</td>
-                    <td style="font-weight: bold; color: #64748b;">${m.tipo.toUpperCase()}</td>
-                    <td class="${claseMonto}">${m.monto}</td>
-                    <td>${m.cuenta}</td>
-                    <td style="text-transform: uppercase;">${m.detalle}</td>
-                </tr>`;
-        });
-
+       movimientos.forEach(m => {
+    // Usamos m.color que definimos en el Python para el estilo directo
+    filasHtml += `
+        <tr>
+            <td>${m.fecha}</td>
+            <td style="font-weight: bold; color: #64748b;">${m.tipo.toUpperCase()}</td>
+            <td style="color: ${m.color}; font-weight: bold;">${m.monto}</td>
+            <td>${m.cuenta}</td>
+            <td style="text-transform: uppercase;">${m.detalle}</td>
+        </tr>`;
+});
         // 3. Generamos el contenedor del reporte
         const ventanaReporte = document.createElement('div');
         ventanaReporte.id = 'reporte-impresion-formal'; 
