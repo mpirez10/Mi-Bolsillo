@@ -453,30 +453,25 @@ details[open] .toggle-icon { transform: rotate(180deg); }
     }
 
     /* Cada fila se vuelve una tarjeta perfecta */
+    /* 3. ESTRUCTURA DE TARJETA VERTICAL */
     tbody tr, .movimientos-table tbody tr {
-        display: grid !important;
-        grid-template-areas: 
-            "fecha acciones"
-            "monto monto"
-            "tipo cuenta"
-            "detalle detalle";
-        grid-template-columns: 1fr auto !important;
+        display: flex !important;
+        flex-direction: column !important; /* Todo uno debajo del otro */
         background: white !important;
         border-radius: 16px !important;
-        margin: 0 0 14px 0 !important;
-        padding: 16px !important;
+        margin-bottom: 16px !important;
+        padding: 20px !important;
         border: 1px solid #e2e8f0 !important;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.04) !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
+        position: relative !important;
     }
 
-    /* Reseteo de las celdas para que no tomen estilos de tabla vieja */
     tbody td, .movimientos-table td {
         display: block !important;
+        width: 100% !important;
         padding: 0 !important;
+        margin-bottom: 8px !important;
         border: none !important;
-        text-align: left;
     }
 
     /* 7. MAPEO DE LOS DATOS DE LA TARJETA */
