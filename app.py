@@ -186,14 +186,25 @@ def api_movimientos():
         
         # Formateamos los datos para que el JavaScript los entienda
         resultado = []
-        for m in movs:
-            resultado.append({
-                'fecha': m['fecha'].strftime('%d/%m/%Y') if hasattr(m['fecha'], 'strftime') else str(m['fecha']),
-                'tipo': m['tipo'],
-                'monto': f"$ {float(m['monto']):,.2f}",
-                'cuenta': m['cuenta_origen'],
-                'detalle': m['motivo']
-            })
+       for m in movs:
+    tipo_norm = m['tipo'].upper()
+    
+    # Lógica de colores: Verde para ingresos, Rojo para egresos, Azul para transferencias
+    if "INGRESO" in tipo_norm:
+        color_pdf = '#16a34a' # Verde
+    elif "EGRESO" in tipo_norm:
+        color_pdf = '#dc2626' # Rojo
+    else:
+        color_pdf = '#2563eb' # Azul (Transferencias y otros)
+
+    resultado.append({
+        'fecha': m['fecha'].strftime('%d/%m/%Y') if hasattr(m['fecha'], 'strftime') else str(m['fecha']),
+        'tipo': m['tipo'],
+        'monto': f"$ {float(m['monto']):,.2f}",
+        'cuenta': m['cuenta_origen'],
+        'detalle': m['motivo'],
+        'color': color_pdf  # 👈 Mandamos el código de color directo
+    })
             
         return jsonify(resultado)
 
