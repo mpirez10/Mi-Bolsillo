@@ -12,23 +12,6 @@
     --bg-main: #f4f7f6;
     --text-dark: #212529;
 }
-/* Agregamos un estilo para el botón de historial */
-    .btn-historial-completo {
-        display: block;
-        width: 100%;
-        text-align: center;
-        padding: 12px;
-        background: #f8fafc;
-        color: var(--pocket-blue);
-        text-decoration: none;
-        font-weight: 700;
-        font-size: 0.85rem;
-        border-top: 1px solid #f1f5f9;
-        transition: background 0.2s;
-    }
-    .btn-historial-completo:hover {
-        background: var(--pocket-light-blue);
-    }
 /* --- AJUSTES AL LAYOUT EXISTENTE --- */
 .dashboard-layout {
     display: flex;
@@ -71,30 +54,6 @@
     font-weight: 800;
 }
 
-/* Caja de filtros más sobria */
-.filtros-container {
-    padding: 20px;
-    background: white;
-    border-bottom: 1px solid #f1f5f9;
-}
-
-.total-filtrado-box {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-    padding: 12px;
-    background: #f1f5f9;
-    border-radius: 8px;
-    width: fit-content;
-}
-
-.total-filtrado-box h2 {
-    margin: 0;
-    font-size: 1.4rem;
-    color: #1e293b;
-    font-weight: 800;
-}
 
 /* Tabla Formal con Zócalo Azul */
 .table-formal {
@@ -273,28 +232,9 @@ details[open] .toggle-icon { transform: rotate(180deg); }
     text-transform: uppercase;
 }
     
-    .card { 
-        background: white; 
-        border-radius: 16px; 
-        border: 1px solid var(--border); 
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        overflow: hidden;
-        margin-bottom: 20px;
-    }
+   
 
-    /* 2. SIDEBAR Y SALDO - Lo que ves a la izquierda */
-    .saldo-card { 
-        background: linear-gradient(135deg, var(--pocket-blue), #1d4ed8); 
-        color: white; padding: 24px; text-align: center; border: none;
-    }
-    .saldo-monto { font-size: 2.2rem; font-weight: 800; margin-top: 5px; letter-spacing: -1px; }
 
-    .cuenta-item {
-        display: flex; justify-content: space-between; align-items: center;
-        padding: 14px 15px; border-bottom: 1px solid #f1f5f9;
-    }
-    .btn-delete-small { color: #cbd5e1; padding: 5px; cursor: pointer; transition: 0.2s; }
-    .btn-delete-small:hover { color: var(--danger); }
 
     /* 3. FORMULARIOS E INPUTS - Para que no se te deformen los filtros */
     /* 3. FILTROS DEFINITIVOS - Alineación de Ingeniería */
@@ -432,34 +372,6 @@ details[open] .toggle-icon { transform: rotate(180deg); }
     gap: 15px;
 }
 
-    .btn-export, .btn-limpiar {
-        width: 42px; /* Los hacemos cuadrados para que se vean prolijos */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 8px;
-        border: none;
-        cursor: pointer;
-        transition: 0.2s;
-        color: white;
-    }
-
-    .btn-excel { background: #10b981; }
-    .btn-pdf { background: #ef4444; }
-
-    .btn-export:hover {
-        filter: brightness(0.9);
-        transform: translateY(-1px);
-    }
-
-    .btn-export:active { transform: translateY(0); }
-
-    /* Estética de la Tabla */
-    .status-badge { padding: 5px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; }
-    
-    table { width: 100%; border-collapse: collapse; }
-    th { background: #f8fafc; padding: 12px 15px; text-align: left; font-size: 0.75rem; color: var(--text-muted); border-bottom: 2px solid var(--border); }
-    td { padding: 12px 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
 
     /* 5. MODO RESPONSIVE - Para cuando lo mires en el celular */
     @media screen and (max-width: 768px) {
