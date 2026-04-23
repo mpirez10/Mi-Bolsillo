@@ -373,68 +373,103 @@ details[open] .toggle-icon { transform: rotate(180deg); }
 }
 
 
-/* 5. MODO RESPONSIVE - Optimización total para Celulares */
+/* 5. MODO RESPONSIVE - Simetría y Estética Pro para Celulares */
 @media screen and (max-width: 768px) {
     
-    /* Evitamos el scroll horizontal que se veía en tu captura */
+    /* Reset general para evitar desbordes y asegurar simetría */
+    * {
+        box-sizing: border-box;
+    }
+
     body, html {
         overflow-x: hidden;
         width: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: #f1f5f9; /* Fondo grisáceo para que resalten las cards */
     }
 
-    /* 1. LAYOUT PRINCIPAL: Todo uno abajo del otro */
+    /* 1. LAYOUT PRINCIPAL: Centrado total */
     .dashboard-layout { 
         display: flex !important;
         flex-direction: column !important;
-        gap: 15px; 
-        padding: 10px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 12px !important; /* Margen simétrico en los bordes de la pantalla */
+        margin: 0 auto !important;
+        gap: 12px;
     }
 
-    /* Si usás grid en los balances, lo pasamos a 1 sola columna */
-    .dashboard-grid, .resumen-container {
+    /* 2. CARDS DE RESUMEN (Mis Cuentas, Deudas, etc.) */
+    .resumen-container, .dashboard-grid {
         display: flex !important;
         flex-direction: column !important;
         width: 100% !important;
-        grid-template-columns: 1fr !important;
+        gap: 12px;
+        margin: 0 !important;
+        padding: 0 !important;
     }
-    .header-movimientos {
-    background: transparent !important;
-    color: #0f172a !important;
-    padding: 10px 0 !important;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
 
-.btn-nuevo {
-    border-radius: 10px !important;
-    padding: 8px 16px !important;
-    font-weight: 600 !important;
-    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3); /* Sombra del color del botón */
-}
+    /* Ajuste para que las cards retraíbles sean simétricas */
+    .card {
+        width: 100% !important;
+        margin: 0 !important;
+        border: none !important;
+        border-radius: 16px !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+    }
 
+    /* 3. SECCIÓN DE MOVIMIENTOS */
     .movimientos-container {
         width: 100% !important;
-        margin-top: 10px;
-    }
-    .badge-egreso {
-    background-color: #fee2e2 !important; /* Rojo pastel */
-    color: #dc2626 !important; /* Rojo fuerte */
-    font-size: 0.7rem !important;
-    padding: 4px 10px !important;
-    border-radius: 20px !important;
-    font-weight: 700;
-}
-
-    /* 2. TABLA: Transformación a Cards */
-    thead { 
-        display: none; /* Chau encabezados de tabla */
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
-    table, tbody {
-        display: block !important;
-        width: 100% !important;
+    /* Header de movimientos: Texto a la izquierda, botón a la derecha */
+    .header-movimientos {
+        background: transparent !important;
+        color: #0f172a !important;
+        padding: 8px 4px !important;
+        display: flex !important;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
     }
+
+    .btn-nuevo {
+        border-radius: 10px !important;
+        padding: 8px 14px !important;
+        font-size: 0.85rem !important;
+        font-weight: 600 !important;
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25) !important;
+    }
+
+    /* Barra de controles (Historial, Excel, PDF) centradita */
+    .controles-reporte {
+        background: white;
+        border-radius: 12px;
+        padding: 10px;
+        display: flex !important;
+        justify-content: center; /* Centra los botones en el medio */
+        gap: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .btn-export {
+        flex: 1; /* Hace que los botones de exportar crezcan parejos */
+        max-width: 50px;
+        display: flex;
+        justify-content: center;
+        background: #f8fafc !important;
+        border-radius: 8px !important;
+        padding: 8px !important;
+    }
+
+    /* 4. TRANSFORMACIÓN DE TABLA A CARDS SIMÉTRICAS */
+    thead { display: none; }
+    table, tbody { display: block !important; width: 100% !important; }
 
     tbody tr {
         display: grid !important;
@@ -445,96 +480,78 @@ details[open] .toggle-icon { transform: rotate(180deg); }
             "detalle detalle";
         grid-template-columns: 1fr auto;
         background: white; 
-        border: 1px solid #e2e8f0 !important;
         border-radius: 16px; 
-        margin-bottom: 16px; 
+        margin-bottom: 12px; 
         padding: 16px !important; 
-        gap: 8px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        gap: 10px;
+        border: none !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04) !important;
     }
 
     tbody td { 
         display: block; 
         padding: 0 !important; 
         border: none !important; 
+        text-align: left; /* Asegura que nada se pegue a la derecha sin querer */
     }
 
-    /* FECHA */
-    td:nth-child(1) { 
-        grid-area: fecha; 
-        font-size: 0.85rem;
-        color: #64748b;
-        font-weight: 500;
-    }
+    /* Fecha arriba a la izquierda */
+    td:nth-child(1) { grid-area: fecha; font-size: 0.8rem; color: #94a3b8; }
 
-    /* TIPO */
-    td:nth-child(2) { 
-        grid-area: tipo; 
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        font-weight: 700;
-        color: #64748b;
-    }
-
-    /* MONTO (El más grande) */
+    /* Monto central y destacado */
     td:nth-child(3) { 
         grid-area: monto; 
-        font-size: 1.6rem !important; 
+        font-size: 1.7rem !important; 
         font-weight: 800; 
-        margin: 5px 0;
+        margin: 6px 0;
+        display: flex;
+        align-items: center;
     }
 
-    /* CUENTA (A la derecha del tipo) */
+    /* Tipo (Egreso/Ingreso) */
+    td:nth-child(2) { 
+        grid-area: tipo; 
+        display: inline-block;
+        width: fit-content;
+    }
+
+    /* Cuenta (Itaú/Efectivo) alineado a la derecha del tipo */
     td:nth-child(4) { 
         grid-area: cuenta; 
         text-align: right;
         font-size: 0.8rem;
-        color: #94a3b8;
-        font-style: italic;
+        color: #64748b;
+        font-weight: 500;
+        align-self: center;
     }
 
-    /* DETALLE (Con línea divisoria) */
+    /* Detalle con línea superior sutil */
     td:nth-child(5) { 
         grid-area: detalle; 
         border-top: 1px solid #f1f5f9 !important; 
         padding-top: 10px !important; 
-        margin-top: 5px;
+        margin-top: 4px;
         font-size: 0.9rem;
-        color: #475569;
+        color: #334155;
     }
 
-    /* ACCIONES (Botones de editar/borrar) */
+    /* Botones de acción (Trash/Edit) arriba a la derecha */
     td:nth-child(6) { 
         grid-area: acciones; 
         display: flex; 
+        gap: 8px;
         justify-content: flex-end;
     }
 
-    td:nth-child(6) .btn {
-        padding: 5px 10px !important;
-        font-size: 0.8rem !important;
-    }
-    .card, tbody tr {
-    border: none !important; /* Sacale el borde sólido */
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 
-                0 4px 6px -2px rgba(0, 0, 0, 0.02) !important;
-    background: #ffffff;
-    }
-    .controles-reporte {
-    background: #f8fafc;
-    border-radius: 12px;
-    padding: 8px;
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
-/* Botones de exportación más discretos */
-.btn-export {
-    background: white !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 8px !important;
-    padding: 6px 10px !important;
+    /* Badge de Egreso/Ingreso Pro */
+    .badge-egreso, .text-danger {
+        background-color: #fee2e2 !important;
+        color: #dc2626 !important;
+        padding: 3px 10px !important;
+        border-radius: 12px !important;
+        font-size: 0.7rem !important;
+        font-weight: 700;
+        text-transform: uppercase;
     }
 }
  /* 6. MODO IMPRESIÓN - Estilo Ingeniería Pro */
