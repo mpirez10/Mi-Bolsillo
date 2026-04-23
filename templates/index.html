@@ -562,28 +562,36 @@ details[open] .toggle-icon { transform: rotate(180deg); }
 </details>
 
         <details class="sidebar-card debts-card">
-            <summary>
-                <div class="summary-header">
-                    <i class="fas fa-hand-holding-dollar"></i>
-                    <span>Deudas</span>
-                </div>
-                <i class="fas fa-chevron-down toggle-icon"></i>
-            </summary>
-            
-            <div class="card-content">
-                {% if deudas %}
-                    {% for d in deudas[:3] %} 
-                    <div class="deuda-item">
-                        <span class="deuda-label">{{ d.deudor if d.deudor != 'YO' else 'A ' + d.acreedor }}</span>
-                        <span class="deuda-monto">${{ "{:,.2f}".format(d.monto) }}</span>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <p class="empty-msg">Sin deudas ✅</p>
-                {% endif %}
+    <summary>
+        <div class="summary-header">
+            <i class="fas fa-hand-holding-dollar"></i>
+            <span>Deudas</span>
+            <button type="button" onclick="togglePrivacidadDeudas(event)" style="background: none; border: none; color: #d97706; cursor: pointer; padding: 0 5px;">
+                <i id="ojo-deudas-icono" class="fas fa-eye" style="font-size: 0.8rem;"></i>
+            </button>
+            <span id="total-deudas-header" style="margin-right: 5px; font-size: 0.85rem; color: #d97706;" 
+                  data-valor="${{ "{:,.2f}".format(deudas|sum(attribute='monto')) }}">
+                ${{ "{:,.2f}".format(deudas|sum(attribute='monto')) }}
+            </span>
+        </div>
+        <i class="fas fa-chevron-down toggle-icon"></i>
+    </summary>
+    
+    <div class="card-content">
+        {% if deudas %}
+            {% for d in deudas[:3] %} 
+            <div class="deuda-item">
+                <span class="deuda-label">{{ d.deudor if d.deudor != 'YO' else 'A ' + d.acreedor }}</span>
+                <span class="deuda-monto monto-deuda-ocultable" data-valor="${{ "{:,.2f}".format(d.monto) }}">
+                    ${{ "{:,.2f}".format(d.monto) }}
+                </span>
             </div>
-        </details>
-
+            {% endfor %}
+        {% else %}
+            <p class="empty-msg">Sin deudas ✅</p>
+        {% endif %}
+    </div>
+</details>
         <div class="sidebar-card chart-card">
             <div class="card-header-static">
                 <i class="fas fa-chart-pie"></i>
@@ -915,6 +923,26 @@ function exportarAExcel() {
         icono.classList.replace('fa-eye-slash', 'fa-eye');
         saldoHeader.innerText = saldoHeader.getAttribute('data-valor');
         saldosLista.forEach(s => s.innerText = s.getAttribute('data-valor'));
+    }
+}
+    function togglePrivacidadDeudas(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const icono = document.getElementById('ojo-deudas-icono');
+    const totalHeader = document.getElementById('total-deudas-header');
+    const montosLista = document.querySelectorAll('.monto-deuda-ocultable');
+    
+    const ocultar = icono.classList.contains('fa-eye');
+
+    if (ocultar) {
+        icono.classList.replace('fa-eye', 'fa-eye-slash');
+        totalHeader.innerText = '****';
+        montosLista.forEach(m => m.innerText = '****');
+    } else {
+        icono.classList.replace('fa-eye-slash', 'fa-eye');
+        totalHeader.innerText = totalHeader.getAttribute('data-valor');
+        montosLista.forEach(m => m.innerText = m.getAttribute('data-valor'));
     }
 }
 </script>
