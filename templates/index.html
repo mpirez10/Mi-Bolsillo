@@ -397,11 +397,34 @@ details[open] .toggle-icon { transform: rotate(180deg); }
         width: 100% !important;
         grid-template-columns: 1fr !important;
     }
+    .header-movimientos {
+    background: transparent !important;
+    color: #0f172a !important;
+    padding: 10px 0 !important;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-nuevo {
+    border-radius: 10px !important;
+    padding: 8px 16px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3); /* Sombra del color del botón */
+}
 
     .movimientos-container {
         width: 100% !important;
         margin-top: 10px;
     }
+    .badge-egreso {
+    background-color: #fee2e2 !important; /* Rojo pastel */
+    color: #dc2626 !important; /* Rojo fuerte */
+    font-size: 0.7rem !important;
+    padding: 4px 10px !important;
+    border-radius: 20px !important;
+    font-weight: 700;
+}
 
     /* 2. TABLA: Transformación a Cards */
     thead { 
@@ -490,6 +513,28 @@ details[open] .toggle-icon { transform: rotate(180deg); }
     td:nth-child(6) .btn {
         padding: 5px 10px !important;
         font-size: 0.8rem !important;
+    }
+    .card, tbody tr {
+    border: none !important; /* Sacale el borde sólido */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 
+                0 4px 6px -2px rgba(0, 0, 0, 0.02) !important;
+    background: #ffffff;
+    }
+    .controles-reporte {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 8px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Botones de exportación más discretos */
+.btn-export {
+    background: white !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    padding: 6px 10px !important;
     }
 }
  /* 6. MODO IMPRESIÓN - Estilo Ingeniería Pro */
