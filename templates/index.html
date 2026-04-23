@@ -377,82 +377,18 @@ details[open] .toggle-icon { transform: rotate(180deg); }
 /* 🔥 MOBILE ULTRA PRO FINTECH */
 /* ============================= */
 @media screen and (max-width: 768px) {
-    /* 1. RESET Y ANTI-DESBORDE (Fundamental para que nada se escape) */
-    * {
-        box-sizing: border-box !important;
-    }
-
-    body, html {
-        overflow-x: hidden !important;
-        padding-bottom: 85px !important; /* Espacio para que la navbar no tape el final */
-        width: 100vw !important;
-    }
-
-    /* 2. CONTENEDOR PRINCIPAL: Simétrico y con aire */
+    /* 1. RESET DE SEGURIDAD */
+    * { box-sizing: border-box !important; }
+    
     .container {
         width: 100% !important;
-        max-width: 100% !important;
-        padding: 0 16px !important; /* Margen perfecto a los lados */
+        padding: 0 16px !important;
         margin: 0 auto !important;
     }
 
-    /* 3. HEADER Y LOGO: Bien al medio */
-    .header-full {
-        padding: 10px 0 !important;
-        margin-bottom: 15px !important;
-        width: 100% !important;
-    }
+    /* 2. OCULTAR ENCABEZADOS DE TABLA */
+    thead, .movimientos-table thead { display: none !important; }
 
-    .nav-bar {
-        justify-content: center !important;
-        padding: 0 !important;
-        width: 100% !important;
-    }
-
-    .nav-links, .user-menu-container {
-        display: none !important; /* Escondemos lo de la PC */
-    }
-
-    /* 4. TARJETAS (Cuentas, Deudas, Balance): Todas del mismo ancho */
-    .card, .resumen-container {
-        width: 100% !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-        box-sizing: border-box !important;
-    }
-
-    /* 5. SECCIÓN MOVIMIENTOS: Encabezado azul bien centrado */
-    .header-movimientos, .header-section {
-        width: 100% !important;
-        box-sizing: border-box !important;
-        border-radius: 16px 16px 0 0 !important;
-        margin: 0 !important;
-        padding: 16px !important;
-        display: flex !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-    }
-
-    .controles-reporte {
-        width: 100% !important;
-        box-sizing: border-box !important;
-        border-radius: 0 0 16px 16px !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
-
-    /* 6. LA TABLA: Matamos el thead que se veía colado en la captura 2 */
-    table thead, .movimientos-table thead, thead {
-        display: none !important;
-    }
-
-    table, tbody {
-        display: block !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-    }
-
-    /* Cada fila se vuelve una tarjeta perfecta */
     /* 3. ESTRUCTURA DE TARJETA VERTICAL */
     tbody tr, .movimientos-table tbody tr {
         display: flex !important;
@@ -474,45 +410,52 @@ details[open] .toggle-icon { transform: rotate(180deg); }
         border: none !important;
     }
 
-    /* 7. MAPEO DE LOS DATOS DE LA TARJETA */
-    td:nth-child(1), .td-fecha { grid-area: fecha; font-size: 0.8rem !important; color: #64748b !important; }
+    /* 4. ESTILOS ESPECÍFICOS POR DATO */
     
-    td:nth-child(3), .td-monto { 
-        grid-area: monto; 
-        font-size: 1.8rem !important; 
-        font-weight: 800 !important; 
-        margin: 8px 0 !important; 
-        color: #0f172a !important; 
-    }
-    
-    td:nth-child(2), .td-tipo { grid-area: tipo; align-self: center; }
-    
-    td:nth-child(4), .td-cuenta { 
-        grid-area: cuenta; 
-        text-align: right !important; 
-        font-size: 0.8rem !important; 
-        font-weight: 600 !important; 
+    /* Fecha arriba y chiquita */
+    td:nth-child(1) { 
+        font-size: 0.75rem !important; 
         color: #64748b !important; 
-        align-self: center; 
-    }
-    
-    td:nth-child(5), .td-detalle { 
-        grid-area: detalle; 
-        border-top: 1px solid #f1f5f9 !important; 
-        padding-top: 12px !important; 
-        margin-top: 8px !important; 
-        font-size: 0.95rem !important; 
-        color: #0f172a !important;
-    }
-    
-    td:nth-child(6), .td-accion { 
-        grid-area: acciones; 
-        text-align: right !important; 
+        order: 1; 
     }
 
-    /* 8. NAVBAR INFERIOR */
-    .mobile-tab-bar {
-        display: grid !important;
+    /* Monto grande en el medio */
+    td:nth-child(3) { 
+        font-size: 1.8rem !important; 
+        font-weight: 800 !important; 
+        color: #0f172a !important; 
+        margin: 4px 0 !important;
+        order: 2; 
+    }
+
+    /* El badge de Tipo (Ingreso/Egreso) */
+    td:nth-child(2) { order: 3; margin-bottom: 12px !important; }
+
+    /* La Cuenta (Itaú, etc.) */
+    td:nth-child(4) { 
+        font-size: 0.85rem !important; 
+        color: #64748b !important; 
+        font-weight: 600 !important;
+        order: 4; 
+    }
+
+    /* Detalle con línea separadora */
+    td:nth-child(5) { 
+        order: 5;
+        border-top: 1px solid #f1f5f9 !important; 
+        padding-top: 12px !important; 
+        margin-top: 5px !important;
+        margin-bottom: 0 !important;
+        font-size: 0.9rem !important;
+    }
+
+    /* Acciones (Tachito de basura) - Lo mandamos a la esquina superior */
+    td:nth-child(6) { 
+        position: absolute !important;
+        top: 20px !important;
+        right: 20px !important;
+        width: auto !important;
+        order: 0;
     }
 }
 /* 6. MODO IMPRESIÓN - Estilo Ingeniería Pro (FIX DEFINITIVO) */
