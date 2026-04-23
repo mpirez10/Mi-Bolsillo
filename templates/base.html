@@ -83,6 +83,66 @@
     .btn { padding: 9px 16px; border-radius: 10px; text-decoration: none; font-weight: 600; transition: all 0.2s; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; }
     .btn-blue { background: var(--pocket-blue); color: white; }
     .btn-outline { border: 1px solid var(--border); color: var(--text); background: white; }
+    /* --- ESTILOS DESKTOP (Botón y Dropdown) --- */
+.user-menu-container { 
+    position: relative; 
+}
+
+.user-btn { 
+    background: white; 
+    border: 1px solid var(--border); 
+    padding: 8px 16px; 
+    border-radius: 10px; 
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    font-weight: 600;
+    color: var(--text);
+    transition: 0.2s;
+}
+
+.user-btn:hover {
+    background: #f8fafc;
+    border-color: var(--pocket-blue);
+}
+
+.dropdown-menu {
+    display: none; /* Se activa con JS */
+    position: absolute;
+    right: 0;
+    top: calc(100% + 10px);
+    background: white;
+    min-width: 200px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    z-index: 1100;
+    overflow: hidden;
+}
+
+.dropdown-menu a {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    text-decoration: none;
+    color: var(--text);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.dropdown-menu a:hover {
+    background: #f1f5f9;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: #e2e8f0;
+    margin: 4px 0;
+}
+
+.me-2 { margin-right: 8px; }
     
     /* 3. MENÚ PERFIL MÓVIL (EL QUE "SUBE") */
     .mobile-profile-menu {
@@ -245,27 +305,39 @@
         <a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> CERRAR SESIÓN</a>
     </div>
     <script>
-        function toggleMobileMenu() {
-    const menu = document.getElementById('mobileProfileMenu');
-    menu.classList.toggle('show');
-}
-
+      // Menú de escritorio (Dropdown arriba)
 function toggleMenu(event) {
     event.stopPropagation();
     const menu = document.getElementById("dropdownMenu");
     menu.style.display = menu.style.display === "block" ? "none" : "block";
+    
+    // Si abrimos este, cerramos el del celu por las dudas
+    const mobileMenu = document.getElementById('mobileProfileMenu');
+    if (mobileMenu) mobileMenu.classList.remove('show');
 }
 
-// Un solo manejador para cerrar todo si clickeas afuera
-window.onclick = function(event) {
-    // Cerrar menú escritorio
+// Menú de celular (Dropup abajo)
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobileProfileMenu');
+    menu.classList.toggle('show');
+    
+    // Si abrimos este, cerramos el de escritorio
     const dropMenu = document.getElementById("dropdownMenu");
+    if (dropMenu) dropMenu.style.display = "none";
+}
+
+// Cerrar TODO si clickeamos en cualquier parte de la pantalla
+window.onclick = function(event) {
+    const dropMenu = document.getElementById("dropdownMenu");
+    const mobileMenu = document.getElementById('mobileProfileMenu');
+    const userBtn = document.querySelector('.user-btn');
+
+    // Cerrar escritorio si no clickeamos el botón o el menú mismo
     if (dropMenu && !event.target.closest('.user-menu-container')) {
         dropMenu.style.display = "none";
     }
     
-    // Cerrar menú móvil
-    const mobileMenu = document.getElementById('mobileProfileMenu');
+    // Cerrar celular si no clickeamos la pestaña de perfil
     if (mobileMenu && !event.target.closest('.tab-item') && !event.target.closest('.mobile-profile-menu')) {
         mobileMenu.classList.remove('show');
     }
