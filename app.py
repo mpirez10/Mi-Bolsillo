@@ -170,10 +170,7 @@ def guardar_turno():
 def api_movimientos():
     conn = get_db()
     cursor = conn.cursor()
-    
     try:
-        # Hacemos la consulta SQL pura para traer los últimos 30
-        # Usamos COALESCE para que si cuenta_destino es NULL (en egresos) no rompa nada
         cursor.execute("""
             SELECT fecha, tipo, monto, cuenta_origen, motivo 
             FROM movimientos 
@@ -184,33 +181,32 @@ def api_movimientos():
         
         movs = cursor.fetchall()
         
-        # Formateamos los datos para que el JavaScript los entienda
         resultado = []
-       for m in movs:
-    tipo_norm = m['tipo'].upper()
-    
-    # Lógica de colores: Verde para ingresos, Rojo para egresos, Azul para transferencias
-    if "INGRESO" in tipo_norm:
-        color_pdf = '#16a34a' # Verde
-    elif "EGRESO" in tipo_norm:
-        color_pdf = '#dc2626' # Rojo
-    else:
-        color_pdf = '#2563eb' # Azul (Transferencias y otros)
+        for m in movs:
+            tipo_norm = m['tipo'].upper()
+            
+            # Lógica de colores (Verde, Rojo, Azul)
+            if "INGRESO" in tipo_norm:
+                color_pdf = '#16a34a'
+            elif "EGRESO" in tipo_norm:
+                color_pdf = '#dc2626'
+            else:
+                color_pdf = '#2563eb' # Azul para Transferencias
 
-    resultado.append({
-        'fecha': m['fecha'].strftime('%d/%m/%Y') if hasattr(m['fecha'], 'strftime') else str(m['fecha']),
-        'tipo': m['tipo'],
-        'monto': f"$ {float(m['monto']):,.2f}",
-        'cuenta': m['cuenta_origen'],
-        'detalle': m['motivo'],
-        'color': color_pdf  # 👈 Mandamos el código de color directo
-    })
+            resultado.append({
+                'fecha': m['fecha'].strftime('%d/%m/%Y') if hasattr(m['fecha'], 'strftime') else str(m['fecha']),
+                'tipo': m['tipo'],
+                'monto': f"$ {float(m['monto']):,.2f}",
+                'cuenta': m['cuenta_origen'],
+                'detalle': m['motivo'],
+                'color': color_pdf
+            })
             
         return jsonify(resultado)
 
     except Exception as e:
         print(f"Error en API: {e}")
-        return jsonify({"error": "No se pudieron cargar los movimientos"}), 500
+        return jsonify({"error": str(e)}), 500
     finally:
         cursor.close()
         conn.close()
