@@ -96,21 +96,28 @@
     font-weight: 800;
 }
 
-/* Tabla Formal */
+/* Tabla Formal con Zócalo Azul */
 .table-formal {
     width: 100%;
     border-collapse: collapse;
 }
 
 .table-formal thead th {
-    background:white;
-    color: var(--pocket-blue--);
-    font-size: 0.7rem;
+    background: var(--pocket-blue); /* Fondo azul pocket */
+    color: white;                   /* Letras blancas */
+    font-size: 0.75rem;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding: 12px 15px;
-    border-bottom: 2px solid white;
+    letter-spacing: 1px;
+    padding: 15px;
+    border-bottom: 2px solid white; /* Borde blanco debajo */
+    border-right: 1px solid rgba(255, 255, 255, 0.1); /* Separación sutil entre columnas */
     text-align: left;
+}
+
+/* Quitamos el borde derecho del último encabezado */
+.table-formal thead th:last-child {
+    border-right: none;
 }
 
 .table-formal tbody td {
@@ -118,6 +125,11 @@
     border-bottom: 1px solid #f1f5f9;
     font-size: 0.85rem;
     color: #334155;
+}
+
+/* Efecto opcional: una fila gris muy clarita para que se lea mejor */
+.table-formal tbody tr:nth-child(even) {
+    background-color: #f8fafc;
 }
 
 /* Badges más profesionales (menos color de fondo, más borde/texto) */
@@ -639,18 +651,18 @@ details[open] .toggle-icon { transform: rotate(180deg); }
                 {% endif %}
             </div>
 
-            <div style="overflow-x: auto;">
-                <table class="table-formal">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Tipo</th>
-                            <th>Monto</th>
-                            <th>Cuenta</th>
-                            <th>Detalle</th>
-                            <th style="text-align: center;">Acción</th>
-                        </tr>
-                    </thead>
+            <div style="overflow-x: auto; border-radius: 12px; border: 1px solid var(--border);">
+    <table class="table-formal">
+        <thead>
+            <tr>
+                <th><i class="fas fa-calendar-alt"></i> Fecha</th>
+                <th><i class="fas fa-exchange-alt"></i> Tipo</th>
+                <th><i class="fas fa-dollar-sign"></i> Monto</th>
+                <th><i class="fas fa-wallet"></i> Cuenta</th>
+                <th><i class="fas fa-info-circle"></i> Detalle</th>
+                <th style="text-align: center;"><i class="fas fa-tools"></i> Acción</th>
+            </tr>
+        </thead>
                     <tbody>
                         {% for m in movimientos %}
                         <tr>
