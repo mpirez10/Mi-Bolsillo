@@ -165,6 +165,22 @@ def guardar_turno():
     # 2. REDIRECCIÓN CORRECTA: Usamos 'eid' que es la variable que definimos arriba
     return redirect(url_for('ver_agenda', id=eid))
 
+@app.route('/api/ultimos_movimientos')
+@login_required
+def api_movimientos():
+    # Traemos los últimos 30 sin importar la paginación
+    movs = Movimiento.query.filter_by(user_id=current_user.id)\
+                           .order_by(Movimiento.fecha.desc())\
+                           .limit(30).all()
+    
+    return jsonify([{
+        'fecha': m.fecha.strftime('%d/%m/%Y'),
+        'tipo': m.tipo,
+        'monto': f"$ {m.monto:,.2f}",
+        'cuenta': m.cuenta.nombre,
+        'detalle': m.detalle
+    } for m in movs])
+
 @app.route('/actualizar_estado/<int:id>', methods=['POST'])
 @login_required
 def actualizar_estado(id):
