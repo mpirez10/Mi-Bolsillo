@@ -782,55 +782,44 @@ function exportarAExcel() {
 }
 
 function exportarAPDF() {
-    const urlParams = new URLSearchParams(window.location.search);
-    
     const nombreUsuario = "{{ current_user.nombre_completo }}" || "Usuario";
-    const totalNeto = document.getElementById('sumaTotalFiltrada')?.innerText.trim() || '$ 0.00';
     const fechaHora = new Date().toLocaleString('es-UY');
 
+    // 1. Cargamos los últimos 30 movimientos directamente desde el servidor usando Jinja
+    // Esto crea una lista real en JavaScript con los datos de tu base de datos
+    const ultimosMovimientos = [
+        {% for m in movimientos_totales[:30] %}
+        {
+            fecha: "{{ m.fecha.strftime('%d/%m/%Y') }}",
+            tipo: "{{ m.tipo.upper() }}",
+            monto: "${{ "{:,.2f}".format(m.monto) }}",
+            cuenta: "{{ m.cuenta.nombre }}",
+            detalle: "{{ m.detalle.upper() }}"
+        },
+        {% endfor %}
+    ];
+
     let filasHtml = '';
-    // Seleccionamos solo las filas del cuerpo de la tabla para no marearnos con el thead
-    const filas = document.querySelectorAll("table.table-formal tbody tr"); 
     
-    let contador = 0; // El centinela para el límite de 30
+    // 2. Generamos las filas del PDF usando esa lista (no la tabla de la pantalla)
+    ultimosMovimientos.forEach(m => {
+        let claseMonto = m.tipo.includes("INGRESO") ? 'text-success' : 'text-danger';
 
-    filas.forEach((fila) => {
-        // Solo procesamos si no está oculta por filtros y si no pasamos los 30
-        if (fila.style.display !== 'none' && contador < 30) {
-            const cols = fila.querySelectorAll("td");
-            if (cols.length >= 5) {
-                const fecha   = cols[0].innerText.trim();
-                const tTipo   = cols[1].innerText.trim();
-                const monto   = cols[2].innerText.trim();
-                const cuenta  = cols[3].innerText.trim();
-                const detalle = cols[4].innerText.trim();
-
-                let claseMonto = tTipo.toUpperCase().includes("INGRESO") 
-                    ? 'text-success' 
-                    : (tTipo.toUpperCase().includes("EGRESO") ? 'text-danger' : '');
-
-                filasHtml += `
-                    <tr>
-                        <td>${fecha}</td>
-                        <td style="font-weight: bold; color: #64748b;">${tTipo.toUpperCase()}</td>
-                        <td class="${claseMonto}">${monto}</td>
-                        <td>${cuenta}</td>
-                        <td style="text-transform: uppercase;">${detalle}</td>
-                    </tr>`;
-                
-                contador++; // Sumamos uno al reporte
-            }
-        }
+        filasHtml += `
+            <tr>
+                <td>${m.fecha}</td>
+                <td style="font-weight: bold; color: #64748b;">${m.tipo}</td>
+                <td class="${claseMonto}">${m.monto}</td>
+                <td>${m.cuenta}</td>
+                <td style="text-transform: uppercase;">${m.detalle}</td>
+            </tr>`;
     });
-
-    filasHtml = filasHtml.trim();
 
     const ventanaReporte = document.createElement('div');
     ventanaReporte.id = 'reporte-impresion-formal'; 
 
     ventanaReporte.innerHTML = `
 <section style="padding: 10px; background: white; font-family: 'Segoe UI', Arial, sans-serif; color: #1e293b;">
-    
     <div class="pdf-header" style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #0f172a; padding-bottom: 8px; margin-bottom: 10px;">
         <div style="display: flex; align-items: center; gap: 10px;">
             <img src="{{ url_for('static', filename='img/loguito.png') }}" style="height: 50px; object-fit: contain;">
@@ -839,16 +828,15 @@ function exportarAPDF() {
                 <p style="margin: 0; font-size: 8pt; color: #64748b; font-weight: 600;">Software de Gestión de Finanzas y Negocios</p>
             </div>
         </div>
-
         <div style="text-align: right;">
-            <h2 style="margin: 0; font-size: 10pt; font-weight: 700;">REPORTE DE ÚLTIMOS 30 MOVIMIENTOS</h2>
+            <h2 style="margin: 0; font-size: 10pt; font-weight: 700;">REPORTE DE MOVIMIENTOS</h2>
             <p style="margin: 0; font-size: 8pt; color: #64748b;">Emitido: <strong>${fechaHora}</strong></p>
             <p style="margin: 0; font-size: 8pt; color: #64748b;">Usuario: ${nombreUsuario}</p>
         </div>
     </div>
 
     <h3 style="margin: 4px 0 12px 0; font-size: 14pt; text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 5px;">
-        Detalle Cronológico (Máx. 30 registros)
+        Detalle de últimos 30 movimientos
     </h3>
 
     <table style="width: 100%; border-collapse: collapse;">
@@ -868,8 +856,7 @@ function exportarAPDF() {
     <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 10px; text-align: center; font-size: 8pt; color: #94a3b8;">
         Este reporte fue generado automáticamente por el sistema Mi Bolsillo - TutuCode ®.
     </div>
-</section>
-`;
+</section>`;
 
     document.body.appendChild(ventanaReporte);
 
