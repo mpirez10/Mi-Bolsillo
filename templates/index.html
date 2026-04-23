@@ -373,185 +373,206 @@ details[open] .toggle-icon { transform: rotate(180deg); }
 }
 
 
-/* 5. MODO RESPONSIVE - Simetría y Estética Pro para Celulares */
+/* 5. MODO RESPONSIVE - Versión PRO REAL */
 @media screen and (max-width: 768px) {
     
-    /* Reset general para evitar desbordes y asegurar simetría */
     * {
         box-sizing: border-box;
     }
 
-    body, html {
+    html, body {
         overflow-x: hidden;
+        margin: 0;
+        padding: 0;
+        background-color: #f1f5f9;
+    }
+
+    /* LAYOUT PRINCIPAL */
+    .dashboard-layout { 
+        display: flex;
+        flex-direction: column;
+        max-width: 500px; /* 🔥 clave para look premium */
+        margin: 0 auto;
+        padding: 12px;
+        gap: 14px;
+    }
+
+    /* CONTENEDORES */
+    .resumen-container, 
+    .dashboard-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* CARDS */
+    .card {
+        width: 100%;
+        margin: 0;
+        border: none;
+        border-radius: 18px;
+        background: white;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+        padding: 14px;
+    }
+
+    /* MOVIMIENTOS */
+    .movimientos-container {
         width: 100%;
         margin: 0;
         padding: 0;
-        background-color: #f1f5f9; /* Fondo grisáceo para que resalten las cards */
     }
 
-    /* 1. LAYOUT PRINCIPAL: Centrado total */
-    .dashboard-layout { 
-        display: flex !important;
-        flex-direction: column !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        padding: 12px !important; /* Margen simétrico en los bordes de la pantalla */
-        margin: 0 auto !important;
-        gap: 12px;
-    }
-
-    /* 2. CARDS DE RESUMEN (Mis Cuentas, Deudas, etc.) */
-    .resumen-container, .dashboard-grid {
-        display: flex !important;
-        flex-direction: column !important;
-        width: 100% !important;
-        gap: 12px;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    /* Ajuste para que las cards retraíbles sean simétricas */
-    .card {
-        width: 100% !important;
-        margin: 0 !important;
-        border: none !important;
-        border-radius: 16px !important;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
-    }
-
-    /* 3. SECCIÓN DE MOVIMIENTOS */
-    .movimientos-container {
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    /* Header de movimientos: Texto a la izquierda, botón a la derecha */
+    /* HEADER */
     .header-movimientos {
-        background: transparent !important;
-        color: #0f172a !important;
-        padding: 8px 4px !important;
-        display: flex !important;
+        background: #0f4c81; /* 🔥 más sólido */
+        color: white;
+        padding: 12px 14px;
+        border-radius: 16px 16px 0 0;
+        display: flex;
         justify-content: space-between;
         align-items: center;
-        width: 100%;
     }
 
     .btn-nuevo {
-        border-radius: 10px !important;
-        padding: 8px 14px !important;
-        font-size: 0.85rem !important;
-        font-weight: 600 !important;
-        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25) !important;
+        background: #22c55e;
+        color: white;
+        border-radius: 10px;
+        padding: 8px 14px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        box-shadow: 0 6px 14px rgba(34, 197, 94, 0.3);
     }
 
-    /* Barra de controles (Historial, Excel, PDF) centradita */
+    /* CONTROLES */
     .controles-reporte {
         background: white;
-        border-radius: 12px;
+        border-radius: 14px;
         padding: 10px;
-        display: flex !important;
-        justify-content: center; /* Centra los botones en el medio */
+        display: flex;
+        justify-content: space-between;
         gap: 10px;
-        margin-bottom: 15px;
+        margin: 10px 0;
         border: 1px solid #e2e8f0;
     }
 
     .btn-export {
-        flex: 1; /* Hace que los botones de exportar crezcan parejos */
-        max-width: 50px;
+        flex: 1;
         display: flex;
         justify-content: center;
-        background: #f8fafc !important;
-        border-radius: 8px !important;
-        padding: 8px !important;
+        align-items: center;
+        background: #f8fafc;
+        border-radius: 10px;
+        padding: 10px;
     }
 
-    /* 4. TRANSFORMACIÓN DE TABLA A CARDS SIMÉTRICAS */
-    thead { display: none; }
-    table, tbody { display: block !important; width: 100% !important; }
+    /* TABLA → CARDS */
+    thead {
+        display: none;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    tbody {
+        display: block;
+        width: 100%;
+    }
 
     tbody tr {
-        display: grid !important;
+        display: grid;
         grid-template-areas: 
             "fecha acciones"
             "monto monto"
             "tipo cuenta"
             "detalle detalle";
         grid-template-columns: 1fr auto;
-        background: white; 
-        border-radius: 16px; 
-        margin-bottom: 12px; 
-        padding: 16px !important; 
+        background: white;
+        border-radius: 18px;
+        margin-bottom: 14px;
+        padding: 16px;
         gap: 10px;
-        border: none !important;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04) !important;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
     }
 
-    tbody td { 
-        display: block; 
-        padding: 0 !important; 
-        border: none !important; 
-        text-align: left; /* Asegura que nada se pegue a la derecha sin querer */
+    tbody td {
+        display: block;
+        padding: 0;
+        border: none;
     }
 
-    /* Fecha arriba a la izquierda */
-    td:nth-child(1) { grid-area: fecha; font-size: 0.8rem; color: #94a3b8; }
-
-    /* Monto central y destacado */
-    td:nth-child(3) { 
-        grid-area: monto; 
-        font-size: 1.7rem !important; 
-        font-weight: 800; 
-        margin: 6px 0;
-        display: flex;
-        align-items: center;
+    /* FECHA */
+    td:nth-child(1) {
+        grid-area: fecha;
+        font-size: 0.75rem;
+        color: #94a3b8;
     }
 
-    /* Tipo (Egreso/Ingreso) */
-    td:nth-child(2) { 
-        grid-area: tipo; 
-        display: inline-block;
-        width: fit-content;
+    /* MONTO */
+    td:nth-child(3) {
+        grid-area: monto;
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 4px 0;
     }
 
-    /* Cuenta (Itaú/Efectivo) alineado a la derecha del tipo */
-    td:nth-child(4) { 
-        grid-area: cuenta; 
+    /* TIPO */
+    td:nth-child(2) {
+        grid-area: tipo;
+    }
+
+    /* CUENTA */
+    td:nth-child(4) {
+        grid-area: cuenta;
         text-align: right;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         color: #64748b;
-        font-weight: 500;
-        align-self: center;
+        font-weight: 600;
     }
 
-    /* Detalle con línea superior sutil */
-    td:nth-child(5) { 
-        grid-area: detalle; 
-        border-top: 1px solid #f1f5f9 !important; 
-        padding-top: 10px !important; 
+    /* DETALLE */
+    td:nth-child(5) {
+        grid-area: detalle;
+        border-top: 1px solid #f1f5f9;
+        padding-top: 10px;
         margin-top: 4px;
         font-size: 0.9rem;
         color: #334155;
     }
 
-    /* Botones de acción (Trash/Edit) arriba a la derecha */
-    td:nth-child(6) { 
-        grid-area: acciones; 
-        display: flex; 
+    /* ACCIONES */
+    td:nth-child(6) {
+        grid-area: acciones;
+        display: flex;
         gap: 8px;
         justify-content: flex-end;
     }
 
-    /* Badge de Egreso/Ingreso Pro */
-    .badge-egreso, .text-danger {
-        background-color: #fee2e2 !important;
-        color: #dc2626 !important;
-        padding: 3px 10px !important;
-        border-radius: 12px !important;
-        font-size: 0.7rem !important;
-        font-weight: 700;
-        text-transform: uppercase;
+    /* BADGES */
+    .badge-egreso, 
+    .text-danger {
+        background-color: #fee2e2;
+        color: #dc2626;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+    }
+
+    .badge-ingreso {
+        background-color: #dcfce7;
+        color: #16a34a;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 0.5px;
     }
 }
  /* 6. MODO IMPRESIÓN - Estilo Ingeniería Pro */
