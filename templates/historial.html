@@ -291,125 +291,105 @@
 
 <div class="historial-container">
     <div class="page-header">
-        <h2><i class="fas fa-history"></i> Historial de movimientos</h2>
+        <h2><i class="fas fa-history"></i> Historial</h2>
         <div class="total-badge">
-            <small style="opacity: 0.8; font-size: 0.65rem; display: block; text-transform: uppercase; margin-bottom: 2px;">Balance Neto</small>
-            <span id="sumaTotalFiltrada" style="font-size: 1.2rem;">$ {{ "{:,.2f}".format(suma_total_filtrada) }}</span>
+            <small style="opacity: 0.8; font-size: 0.65rem; display: block; text-transform: uppercase;">Balance Neto Filtrado</small>
+            <span id="sumaTotalFiltrada">$ {{ "{:,.2f}".format(suma_total_filtrada) }}</span>
         </div>
     </div>
 
-   <div class="filtros-card">
-    <div class="filtros-grid">
-        
-        <div class="filtros-fila">
-            <div class="form-group flex-grow">
-                <label><i class="fas fa-search"></i> BÚSQUEDA</label>
-                <input type="text" id="busquedaMovimiento" value="{{ filtros.q }}" placeholder="Detalle o cuenta..." class="form-control">
-            </div>
-
-            <div class="form-group flex-small">
-                <label><i class="fas fa-th-list"></i> OPERACIÓN</label>
-                <select id="filtroTipo" class="form-control">
-                    <option value="TODOS" {% if filtros.tipo == 'TODOS' %}selected{% endif %}>TODOS</option>
-                    <option value="Ingreso" {% if filtros.tipo == 'Ingreso' %}selected{% endif %}>INGRESO</option>
-                    <option value="Egreso" {% if filtros.tipo == 'Egreso' %}selected{% endif %}>EGRESO</option>
-                    <option value="Transferencia" {% if filtros.tipo == 'Transferencia' %}selected{% endif %}>TRANSFERENCIA</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="filtros-fila" style="margin-top: 10px;">
-            <div class="form-group flex-grow">
-                <label><i class="fas fa-calendar-alt"></i> RANGO DE FECHAS</label>
-                <div class="fecha-inputs-wrapper" style="display: flex; gap: 10px;">
-                    <input type="date" id="fechaDesde" class="form-control" value="{{ filtros.desde }}">
-                    <input type="date" id="fechaHasta" class="form-control" value="{{ filtros.hasta }}">
+    <div class="filtros-card">
+        <div class="filtros-grid">
+            <div class="filtros-fila">
+                <div class="form-group flex-grow">
+                    <label><i class="fas fa-search"></i> BÚSQUEDA</label>
+                    <input type="text" id="busquedaMovimiento" value="{{ filtros.q }}" placeholder="Detalle o cuenta..." class="form-control">
+                </div>
+                <div class="form-group flex-small">
+                    <label><i class="fas fa-th-list"></i> OPERACIÓN</label>
+                    <select id="filtroTipo" class="form-control">
+                        <option value="TODOS" {% if filtros.tipo == 'TODOS' %}selected{% endif %}>TODOS</option>
+                        <option value="Ingreso" {% if filtros.tipo == 'Ingreso' %}selected{% endif %}>INGRESO</option>
+                        <option value="Egreso" {% if filtros.tipo == 'Egreso' %}selected{% endif %}>EGRESO</option>
+                        <option value="Transferencia" {% if filtros.tipo == 'Transferencia' %}selected{% endif %}>TRANSFERENCIA</option>
+                    </select>
                 </div>
             </div>
 
-            <div class="form-group">
-                <div class="acciones-filtros">
-                    <button id="btnFiltrar" class="btn-filtrar-pocket">APLICAR</button>
-                    
-                    <button onclick="window.location.href='/historial'" class="btn-icon btn-reset-custom" title="Limpiar Filtros">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                    
-                    <button onclick="exportarAExcel()" class="btn-icon btn-excel-custom" title="Exportar Excel">
-                        <i class="fas fa-file-excel"></i>
-                    </button>
-                    
-                    <button onclick="exportarAPDF()" class="btn-icon btn-pdf-custom" title="Exportar PDF">
-                        <i class="fas fa-file-pdf"></i>
-                    </button>
+            <div class="filtros-fila">
+                <div class="form-group flex-grow">
+                    <label><i class="fas fa-calendar-alt"></i> RANGO</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="date" id="fechaDesde" class="form-control" value="{{ filtros.desde }}" style="flex:1">
+                        <input type="date" id="fechaHasta" class="form-control" value="{{ filtros.hasta }}" style="flex:1">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="acciones-filtros">
+                        <button id="btnFiltrar" class="btn-filtrar-pocket">APLICAR</button>
+                        <button onclick="window.location.href='/historial'" class="btn-icon btn-reset-custom"><i class="fas fa-sync-alt"></i></button>
+                        <button onclick="exportarAExcel()" class="btn-icon btn-excel-custom"><i class="fas fa-file-excel"></i></button>
+                        <button onclick="exportarAPDF()" class="btn-icon btn-pdf-custom"><i class="fas fa-file-pdf"></i></button>
+                    </div>
                 </div>
             </div>
         </div>
-
     </div>
-</div>
-         <div class="pagination-bar">
-            {% if page > 1 %}
-                <a href="{{ url_for('historial.ver_historial', page=page-1, q=filtros.q, tipo=filtros.tipo, desde=filtros.desde, hasta=filtros.hasta) }}" style="text-decoration: none; color: var(--pocket-blue); font-weight: 700;">← ANTERIORES</a>
-            {% else %}
-                <span style="color: #cbd5e1;">← ANTERIORES</span>
-            {% endif %}
 
-            <span style="font-size: 0.8rem; font-weight: 700; color: #64748b;">PÁGINA {{ page }}</span>
-
-            {% if hay_mas_viejos %}
-                <a href="{{ url_for('historial.ver_historial', page=page+1, q=filtros.q, tipo=filtros.tipo, desde=filtros.desde, hasta=filtros.hasta) }}" style="text-decoration: none; color: var(--pocket-blue); font-weight: 700;">SIGUIENTES →</a>
-            {% else %}
-                <span style="color: #cbd5e1;">SIGUIENTES →</span>
-            {% endif %}
-        </div>
+    <div class="pagination-bar">
+        {% if page > 1 %}
+            <a href="{{ url_for('historial.ver_historial', page=page-1, q=filtros.q, tipo=filtros.tipo, desde=filtros.desde, hasta=filtros.hasta) }}" style="text-decoration: none; color: var(--pocket-blue); font-weight: 700;">← ANTERIORES</a>
+        {% else %}
+            <span style="color: #cbd5e1;">← ANTERIORES</span>
+        {% endif %}
+        <span style="font-size: 0.8rem; font-weight: 700; color: #64748b;">PÁGINA {{ page }}</span>
+        {% if hay_mas_viejos %}
+            <a href="{{ url_for('historial.ver_historial', page=page+1, q=filtros.q, tipo=filtros.tipo, desde=filtros.desde, hasta=filtros.hasta) }}" style="text-decoration: none; color: var(--pocket-blue); font-weight: 700;">SIGUIENTES →</a>
+        {% else %}
+            <span style="color: #cbd5e1;">SIGUIENTES →</span>
+        {% endif %}
+    </div>
 
     <div class="resultados-card">
-        <div style="overflow-x: auto;">
-            <table class="table-formal">
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Tipo</th>
-                        <th>Monto</th>
-                        <th>Cuenta</th>
-                        <th>Detalle</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for m in movimientos %}
-                    <tr>
-                        {% set fecha = m.fecha if m is mapping else m[5] %}
-                        {% set tipo = m.tipo if m is mapping else m[1] %}
-                        {% set monto = m.monto if m is mapping else m[2] %}
-                        {% set cuenta = m.cuenta_origen if m is mapping else m[3] %}
-                        {% set motivo = m.motivo if m is mapping else m[4] %}
-
-                        <td style="color: #64748b; font-family: monospace;">{{ fecha }}</td>
-                        <td>
-                            {% if tipo.lower() == 'ingreso' %}
-                                <span class="badge-formal badge-ingreso"><i class="fas fa-arrow-up"></i> INGRESO</span>
-                            {% elif tipo.lower() == 'egreso' %}
-                                <span class="badge-formal badge-egreso"><i class="fas fa-arrow-down"></i> EGRESO</span>
-                            {% else %}
-                                <span class="badge-formal badge-transferencia"><i class="fas fa-exchange-alt"></i> TRANSF.</span>
-                            {% endif %}
-                        </td>
-                        <td style="font-weight: 800; color: #1e293b;">$ {{ "{:,.2f}".format(monto) }}</td>
-                        <td style="color: #64748b;">{{ cuenta }}</td>
-                        <td>
-                            <div style="font-weight: 600; text-transform: uppercase; font-size: 0.8rem;">{{ motivo }}</div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        </div>
-</div>
+        <table class="table-formal">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th>Monto</th>
+                    <th>Cuenta</th>
+                    <th>Detalle</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in movimientos %}
+                {% set fecha = m.fecha if m is mapping else m[5] %}
+                {% set tipo = m.tipo if m is mapping else m[1] %}
+                {% set monto = m.monto if m is mapping else m[2] %}
+                {% set cuenta = m.cuenta_origen if m is mapping else m[3] %}
+                {% set motivo = m.motivo if m is mapping else m[4] %}
+                <tr>
+                    <td class="td-fecha">{{ fecha }}</td>
+                    <td class="td-tipo">
+                        {% if tipo.lower() == 'ingreso' %}
+                            <span class="badge-formal badge-ingreso"><i class="fas fa-arrow-up"></i> INGRESO</span>
+                        {% elif tipo.lower() == 'egreso' %}
+                            <span class="badge-formal badge-egreso"><i class="fas fa-arrow-down"></i> EGRESO</span>
+                        {% else %}
+                            <span class="badge-formal badge-transferencia"><i class="fas fa-exchange-alt"></i> TRANSF.</span>
+                        {% endif %}
+                    </td>
+                    <td class="td-monto">$ {{ "{:,.2f}".format(monto) }}</td>
+                    <td class="td-cuenta">{{ cuenta }}</td>
+                    <td class="td-detalle">
+                        <div style="font-weight: 600; text-transform: uppercase;">{{ motivo }}</div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
-
 <script>
     function filtrarMovimientos() {
         const q = document.getElementById("busquedaMovimiento").value;
