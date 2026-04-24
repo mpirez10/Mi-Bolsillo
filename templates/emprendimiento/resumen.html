@@ -1,6 +1,60 @@
 {% extends "base.html" %}
 {% block content %}
 <style>
+   :root {
+        --pocket-blue: #0056b3;
+        --pocket-green: #28a745;
+        --pocket-dark: #1e293b;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --success: #10b981;
+        --bg-main: #f4f7f6;
+        --border: #dee2e6;
+        --text-muted: #64748b;
+        --white: #ffffff;
+        --btn-stock: #8B4513;
+    }
+
+    /* Botonera Compacta - Unificada */
+    .action-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 25px;
+    }
+
+    .btn-action { /* Cambiado de btn-action-mini a btn-action para matchear el HTML */
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-decoration: none;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .btn-action:hover { transform: translateY(-2px); opacity: 0.9; }
+
+    /* Uso de variables en colores específicos */
+    .btn-stock { background: var(--btn-stock); color: var(--white); }
+    .btn-agenda { background: var(--danger); color: var(--white); }
+    .btn-nuevo { background: var(--pocket-green); color: var(--white); }
+    .btn-volver { background: var(--pocket-blue); color: var(--white); }
+
+    /* Stats con montos específicos */
+    .stat-ventas { border-top: 4px solid var(--pocket-green) !important; }
+    .stat-ventas .stat-value { color: var(--pocket-green); } /* Monto verde como pediste */
+    
+    .stat-saldo { border-top: 4px solid var(--pocket-blue); }
+    .stat-saldo .stat-value { color: var(--pocket-blue); }
+
+    .stat-gastos { border-top: 4px solid var(--danger); }
+    .stat-gastos .stat-value { color: var(--danger); }
     /* Header con Input Editable */
     .header-section { 
         margin-bottom: 25px; 
@@ -23,43 +77,38 @@
         border-bottom: 2px solid var(--pocket-green); 
     }
 
-    /* Botonera de Acciones Rápidas */
+   /* Botonera Compacta e Individual */
     .action-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: 12px;
-        margin-bottom: 30px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 25px;
+        justify-content: flex-start;
     }
 
-    .btn-action {
-        display: flex; 
-        flex-direction: column; 
-        align-items: center; 
-        justify-content: center;
-        padding: 18px 10px; 
-        border-radius: 12px; 
-        font-weight: 800; 
+    .btn-action-mini {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 700;
         font-size: 0.75rem;
-        text-align: center; 
-        gap: 10px; 
-        transition: all 0.2s; 
-        border: 1px solid rgba(0,0,0,0.05); 
         text-decoration: none;
-        background: white;
-        color: var(--pocket-blue);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
-    .btn-action i { 
-        font-size: 1.4rem; 
-    }
+    .btn-action-mini i { font-size: 0.9rem; }
+    .btn-action-mini:hover { transform: translateY(-2px); opacity: 0.9; }
 
-    .btn-action:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        background: var(--pocket-blue);
-        color: white !important;
-    }
+    /* Colores Específicos */
+    .btn-stock { background: #8B4513; color: white; } /* Marrón caja */
+    .btn-agenda { background: #ef4444; color: white; } /* Rojo */
+    .btn-nuevo { background: var(--pocket-green); color: white; } /* Verde */
+    .btn-volver { background: var(--pocket-blue); color: white; } /* Azul */
 
     /* Tarjetas de Estadísticas (Stats) */
     .stats-container {
@@ -197,7 +246,7 @@
 
 <div class="header-section">
     <form action="{{ url_for('emprendimiento.editar_nombre', eid=eid) }}" method="post">
-        <input type="text" name="nuevo_nombre" value="{{ nombre }}" class="title-input" placeholder="Nombre del Negocio">
+        <input type="text" name="nuevo_nombre" value="{{ nombre }}" class="title-input">
     </form>
     <p style="color: var(--pocket-green); font-weight: 700; margin: 0; font-size: 0.9rem;">
         <i class="fas fa-chart-line"></i> PANEL DE NEGOCIO
@@ -205,40 +254,34 @@
 </div>
 
 <div class="action-grid">
-    <a href="/emprendimiento/stock/{{ eid }}" class="btn-action">
+    <a href="/emprendimiento/stock/{{ eid }}" class="btn-action btn-stock">
         <i class="fas fa-boxes"></i> STOCK
     </a>
-    <a href="{{ url_for('ver_agenda', id=eid) }}" class="btn-action">
+    <a href="{{ url_for('ver_agenda', id=eid) }}" class="btn-action btn-agenda">
         <i class="fas fa-calendar-alt"></i> AGENDA
     </a>
-    <button onclick="document.getElementById('formMovimiento').style.display='block'" class="btn-action" style="color: var(--pocket-green);">
+    <button onclick="document.getElementById('formMovimiento').style.display='block'" class="btn-action btn-nuevo">
         <i class="fas fa-plus-circle"></i> NUEVO
-    </a>
-    <a href="/emprendimiento" class="btn-action" style="color: #64748b;">
+    </button>
+    <a href="/emprendimiento" class="btn-action btn-volver">
         <i class="fas fa-chevron-left"></i> VOLVER
     </a>
 </div>
 
 <div class="stats-container">
     <div class="stat-mini-card stat-saldo">
-        <small style="color: #64748b;">Saldo Total</small>
-        <div class="stat-value" style="color: var(--pocket-blue);">
-            ${{ "{:,.2f}".format(saldo) }}
-        </div>
+        <small>Saldo Total</small>
+        <div class="stat-value">${{ "{:,.2f}".format(saldo) }}</div>
     </div>
 
     <div class="stat-mini-card stat-ventas">
-        <small style="color: var(--pocket-green);">Ventas</small>
-        <div class="stat-value" style="color: var(--pocket-green);">
-            +${{ "{:,.2f}".format(ingresos) }}
-        </div>
+        <small>Ventas</small>
+        <div class="stat-value">+${{ "{:,.2f}".format(ingresos) }}</div>
     </div>
 
     <div class="stat-mini-card stat-gastos">
-        <small style="color: #ef4444;">Gastos</small>
-        <div class="stat-value" style="color: #ef4444;">
-            -${{ "{:,.2f}".format(gastos) }}
-        </div>
+        <small>Gastos</small>
+        <div class="stat-value">-${{ "{:,.2f}".format(gastos) }}</div>
     </div>
 </div>
 
