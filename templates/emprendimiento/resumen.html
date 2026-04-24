@@ -166,27 +166,78 @@
         font-size: 1rem;
     }
 
-    /* Barra de Filtros Compacta (El contenedor azul) */
+   /* Contenedor Principal de Filtros */
     .filter-bar-container {
         background: var(--pocket-blue);
-        padding: 12px;
+        padding: 10px 20px;
         border-radius: 12px;
         display: flex;
-        gap: 10px;
-        justify-content: center;
+        flex-wrap: wrap; /* Para que en celular se acomode solo */
+        gap: 15px;
+        justify-content: space-between; /* Separa filtros de exportación */
         align-items: center;
         margin-bottom: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Grupo de Inputs (Fecha Desde/Hasta) */
+    .filter-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: white;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
     }
 
     .filter-bar-container input[type="date"] {
-        height: 38px;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        background: rgba(255, 255, 255, 0.1);
+        height: 36px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.15);
         color: white;
         border-radius: 6px;
-        padding: 0 10px;
-        font-size: 0.85rem;
+        padding: 0 8px;
+        font-size: 0.8rem;
+        font-family: 'Poppins', sans-serif;
+        outline: none;
+        transition: 0.3s;
     }
+
+    .filter-bar-container input[type="date"]:focus {
+        background: rgba(255, 255, 255, 0.25);
+        border-color: white;
+    }
+
+    /* Grupo de Botones de Acción (Derecha) */
+    .filter-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-filter-action {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: 0.2s;
+        text-decoration: none;
+        background: white; /* Fondo blanco para que los iconos resalten */
+    }
+
+    .btn-filter-action:hover {
+        transform: translateY(-2px);
+        filter: brightness(0.9);
+    }
+
+    /* Colores de iconos específicos */
+    .icon-excel { color: #1d6f42; }
+    .icon-pdf { color: #e11d48; }
+    .icon-reset { color: #64748b; }
 
     /* Tabla de Movimientos */
     .movimientos-card {
@@ -333,20 +384,30 @@
 </div>
 
 <div class="filter-bar-container">
-    <input type="date" id="fechaDesde" onchange="filtrarMovimientos()">
-    <input type="date" id="fechaHasta" onchange="filtrarMovimientos()">
+    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+        <div class="filter-group">
+            <span>Desde</span>
+            <input type="date" id="fechaDesde" onchange="filtrarMovimientos()">
+        </div>
+        <div class="filter-group">
+            <span>Hasta</span>
+            <input type="date" id="fechaHasta" onchange="filtrarMovimientos()">
+        </div>
+    </div>
 
-    <button type="button" onclick="limpiarFiltros()" class="btn-icon btn-reset-custom">
-        <i class="fas fa-eraser" style="color: #ef4444;"></i>
-    </button>
+    <div class="filter-actions">
+        <button type="button" onclick="limpiarFiltros()" class="btn-filter-action" title="Limpiar Filtros">
+            <i class="fas fa-eraser icon-reset"></i>
+        </button>
 
-    <a href="{{ url_for('emprendimiento.exportar_movimientos_excel', eid=eid) }}" class="btn-icon btn-excel-custom">
-        <i class="fas fa-file-excel"></i>
-    </a>
+        <a href="{{ url_for('emprendimiento.exportar_movimientos_excel', eid=eid) }}" class="btn-filter-action" title="Exportar Excel">
+            <i class="fas fa-file-excel icon-excel"></i>
+        </a>
 
-    <button type="button" onclick="exportarAPDF()" class="btn-icon btn-pdf-custom">
-        <i class="fas fa-file-pdf"></i>
-    </button>
+        <button type="button" onclick="exportarAPDF()" class="btn-filter-action" title="Exportar PDF">
+            <i class="fas fa-file-pdf icon-pdf"></i>
+        </button>
+    </div>
 </div>
 
 <div class="movimientos-card">
