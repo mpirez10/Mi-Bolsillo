@@ -1,6 +1,103 @@
 {% extends "base.html" %}
 {% block content %}
 <style>
+    /* Header con Input Editable */
+    .header-section { 
+        margin-bottom: 25px; 
+    }
+
+    .title-input {
+        font-size: 1.8rem; 
+        font-weight: 800; 
+        border: none; 
+        background: transparent; 
+        color: var(--pocket-blue); 
+        width: 100%; 
+        outline: none; 
+        border-bottom: 2px solid transparent;
+        transition: 0.3s;
+        padding: 5px 0;
+    }
+
+    .title-input:focus { 
+        border-bottom: 2px solid var(--pocket-green); 
+    }
+
+    /* Botonera de Acciones Rápidas */
+    .action-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 12px;
+        margin-bottom: 30px;
+    }
+
+    .btn-action {
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        justify-content: center;
+        padding: 18px 10px; 
+        border-radius: 12px; 
+        font-weight: 800; 
+        font-size: 0.75rem;
+        text-align: center; 
+        gap: 10px; 
+        transition: all 0.2s; 
+        border: 1px solid rgba(0,0,0,0.05); 
+        text-decoration: none;
+        background: white;
+        color: var(--pocket-blue);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .btn-action i { 
+        font-size: 1.4rem; 
+    }
+
+    .btn-action:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        background: var(--pocket-blue);
+        color: white !important;
+    }
+
+    /* Tarjetas de Estadísticas (Stats) */
+    .stats-container {
+        display: grid; 
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px; 
+        margin-bottom: 30px;
+    }
+
+    .stat-mini-card {
+        background: white; 
+        padding: 20px; 
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
+        border: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .stat-mini-card small {
+        font-weight: 800;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        letter-spacing: 1px;
+    }
+
+    .stat-value {
+        font-size: 1.6rem; 
+        font-weight: 800;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    /* Variantes de Color para Stats */
+    .stat-saldo { border-top: 4px solid var(--pocket-blue); }
+    .stat-ventas { border-top: 4px solid var(--pocket-green); }
+    .stat-gastos { border-top: 4px solid #ef4444; }
 /* Estilo para el Formulario de Registro (Limpiando el anterior) */
     #formMovimiento {
         background: white; 
@@ -99,49 +196,49 @@
 </style>
 
 <div class="header-section">
-    <form action="{{ url_for('emprendimiento.editar_nombre', eid=eid) }}" method="post" style="display: flex; align-items: center; gap: 10px;">
-        <input type="text" name="nuevo_nombre" value="{{ nombre }}" class="title-input">
+    <form action="{{ url_for('emprendimiento.editar_nombre', eid=eid) }}" method="post">
+        <input type="text" name="nuevo_nombre" value="{{ nombre }}" class="title-input" placeholder="Nombre del Negocio">
     </form>
-    <p style="color: var(--money-green); margin: 5px 0 0 0;"><i class="fas fa-chart-pie"></i> Panel de Negocio</p>
+    <p style="color: var(--pocket-green); font-weight: 700; margin: 0; font-size: 0.9rem;">
+        <i class="fas fa-chart-line"></i> PANEL DE NEGOCIO
+    </p>
 </div>
 
 <div class="action-grid">
-    <a href="/emprendimiento/stock/{{ eid }}" class="btn-action" style="background: var(--pocket-blue); color:#d2b48c;">
+    <a href="/emprendimiento/stock/{{ eid }}" class="btn-action">
         <i class="fas fa-boxes"></i> STOCK
     </a>
-    <a href="{{ url_for('ver_agenda', id=eid) }}" class="btn-action" style="background: var(--pocket-blue); color: white;">
+    <a href="{{ url_for('ver_agenda', id=eid) }}" class="btn-action">
         <i class="fas fa-calendar-alt"></i> AGENDA
     </a>
-    <button onclick="document.getElementById('formMovimiento').style.display='block'" class="btn-action" style="background:var(--pocket-blue); color:var(--money-green) ;">
+    <button onclick="document.getElementById('formMovimiento').style.display='block'" class="btn-action" style="color: var(--pocket-green);">
         <i class="fas fa-plus-circle"></i> NUEVO
-    </button>
-    <a href="/emprendimiento" class="btn-action" style="background:var(--pocket-blue); color:white;">
+    </a>
+    <a href="/emprendimiento" class="btn-action" style="color: #64748b;">
         <i class="fas fa-chevron-left"></i> VOLVER
     </a>
 </div>
 
 <div class="stats-container">
-    <div class="stat-mini-card" style="border-top: 4px solid var(--pocket-blue); background-color: var(--money-green); padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-    <small style="color: white; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-family: 'Poppins', sans-serif;">
-        SALDO
-    </small>
-    
-    <div style="font-size: 1.6rem; font-weight: 800; color: white; margin-top: 5px; font-family: 'Poppins', sans-serif;">
-        ${{ "{:,.2f}".format(saldo) }}
+    <div class="stat-mini-card stat-saldo">
+        <small style="color: #64748b;">Saldo Total</small>
+        <div class="stat-value" style="color: var(--pocket-blue);">
+            ${{ "{:,.2f}".format(saldo) }}
+        </div>
     </div>
-</div>
-    <div class="stat-mini-card" style="border-top: 4px solid var(--money-green); background-color: var(--pocket-blue); padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-    <small style="color: var(--money-green); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; font-family: 'Poppins', sans-serif;">
-        VENTAS
-    </small>
-    
-    <div style="font-size: 1.6rem; font-weight: 800; color: var(--money-green); margin-top: 5px; font-family: 'Poppins', sans-serif;">
-        +${{ "{:,.2f}".format(ingresos) }}
+
+    <div class="stat-mini-card stat-ventas">
+        <small style="color: var(--pocket-green);">Ventas</small>
+        <div class="stat-value" style="color: var(--pocket-green);">
+            +${{ "{:,.2f}".format(ingresos) }}
+        </div>
     </div>
-</div>
-    <div class="stat-mini-card" style="border-color: var(--danger);">
-        <small style="color: var(--danger); font-weight: 700;">GASTOS</small>
-        <div style="font-size: 1.4rem; font-weight: 800; color: var(--danger);">-${{ "{:,.2f}".format(gastos) }}</div>
+
+    <div class="stat-mini-card stat-gastos">
+        <small style="color: #ef4444;">Gastos</small>
+        <div class="stat-value" style="color: #ef4444;">
+            -${{ "{:,.2f}".format(gastos) }}
+        </div>
     </div>
 </div>
 
