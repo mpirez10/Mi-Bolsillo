@@ -1,6 +1,31 @@
 {% extends "base.html" %}
 {% block content %}
 <style>
+    /* Estilo para el input de fecha nativo */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    background: transparent;
+    bottom: 0;
+    color: transparent;
+    cursor: pointer;
+    height: auto;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
+}
+
+/* Ajuste para que el texto no se pise con el icono de la izquierda */
+input[type="date"] {
+    position: relative;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+/* Cambiar el color del texto cuando no hay fecha elegida (opcional) */
+input[type="date"]:invalid::-webkit-datetime-edit {
+    color: #94a3b8;
+}
     .auth-container {
         min-height: 80vh;
         display: flex;
@@ -161,8 +186,7 @@
             
             <div class="form-group">
                 <label class="form-label">Fecha de Nacimiento</label>
-                <input type="text" name="fecha_nacimiento" required class="form-input-pro" 
-                       pattern="\d{2}/\d{2}/\d{4}" title="Formato DD/MM/YYYY" placeholder="DD/MM/YYYY">
+                <input type="date" name="fecha_nacimiento" required class="form-input-pro">
                 <i class="fas fa-calendar-alt"></i>
             </div>
             
