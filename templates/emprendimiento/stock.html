@@ -208,15 +208,18 @@
                             {% endif %}
                         </div>
                     </td>
-                    <td class="td-acciones">
-                        <button type="submit" class="btn-filter-action" style="background: var(--pocket-blue); border: none;" title="Guardar">
-                            <i class="fas fa-save" style="color: white;"></i>
+                    <td class="td-acciones" style="padding: 12px; text-align: center; width: 15%;">
+                    <div style="display: flex; gap: 8px; justify-content: center;">
+                        <button type="submit" class="btn-accion-circular btn-guardar-pro" title="Guardar Cambios">
+                            <i class="fas fa-check"></i>
                         </button>
                         <a href="{{ url_for('emprendimiento.eliminar_producto', pid=p.id, eid=eid) }}" 
-                           class="btn-filter-action" style="background: #fff1f2; border: none;" 
+                           class="btn-accion-circular btn-eliminar-pro" 
+                           title="Eliminar"
                            onclick="return confirm('¿Borrar {{ p.nombre }}?')">
-                            <i class="fas fa-trash" style="color: #e11d48;"></i>
+                           <i class="fas fa-trash-alt"></i>
                         </a>
+                    </div>
                     </td>
                 </form>
             </tr>
