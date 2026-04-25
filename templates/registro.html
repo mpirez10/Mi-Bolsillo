@@ -1,45 +1,188 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="card" style="max-width: 400px; margin: 50px auto;">
-    <h2 style="text-align: center;"><i class="fas fa-user-plus"></i> Crear Cuenta</h2>
-    
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        {% for message in messages %}
-          <div style="background: #fee2e2; color: #991b1b; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center;">
-            {{ message }}
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+<style>
+    .auth-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
 
-    <form method="POST">
-        <div style="margin-bottom: 15px;">
-            <label>Nombre Completo:</label>
-            <input type="text" name="nombre_completo" required class="form-control" placeholder="Ej: Maikol Pirez">
+    .auth-card {
+        width: 100%;
+        max-width: 450px;
+        background: white;
+        padding: 40px;
+        border-radius: 24px;
+        box-shadow: 0 15px 35px rgba(30, 64, 175, 0.1);
+        border: 1px solid #f1f5f9;
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .auth-logo {
+        width: 60px;
+        height: 60px;
+        background: var(--pocket-blue);
+        color: white;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        margin: 0 auto 15px;
+        box-shadow: 0 8px 16px rgba(30, 64, 175, 0.2);
+    }
+
+    .auth-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--pocket-blue);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Estilo de los campos del formulario */
+    .form-group {
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+    .form-group i {
+        position: absolute;
+        left: 15px;
+        top: 42px;
+        color: #94a3b8;
+        transition: 0.3s;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-bottom: 8px;
+        margin-left: 4px;
+    }
+
+    .form-input-pro {
+        width: 100%;
+        padding: 12px 15px 12px 42px; /* Espacio para el icono */
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        outline: none;
+    }
+
+    .form-input-pro:focus {
+        border-color: var(--pocket-blue);
+        box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.1);
+    }
+
+    .form-input-pro:focus + i {
+        color: var(--pocket-blue);
+    }
+
+    /* Alertas Flashed */
+    .alert-pro {
+        background: #fef2f2;
+        color: #b91c1c;
+        border-left: 4px solid #ef4444;
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-auth {
+        background: var(--pocket-blue);
+        color: white;
+        border: none;
+        width: 100%;
+        padding: 14px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: 0.3s;
+        margin-top: 10px;
+        box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
+    }
+
+    .btn-auth:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(30, 64, 175, 0.3);
+        filter: brightness(1.1);
+    }
+</style>
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-logo">
+                <i class="fas fa-wallet"></i>
+            </div>
+            <h2 class="auth-title">Crear Cuenta</h2>
+            <p style="color: #64748b; font-size: 0.9rem; margin-top: 5px;">Unite a Mi Bolsillo hoy mismo</p>
         </div>
         
-        <div style="margin-bottom: 15px;">
-            <label>Correo Electrónico:</label>
-            <input type="email" name="correo" required class="form-control" placeholder="tu@correo.com">
-        </div>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert-pro">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <div class="form-group">
+                <label class="form-label">Nombre Completo</label>
+                <input type="text" name="nombre_completo" required class="form-input-pro" placeholder="Ej: Maikol Pirez">
+                <i class="fas fa-user"></i>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Correo Electrónico</label>
+                <input type="email" name="correo" required class="form-input-pro" placeholder="tu@correo.com">
+                <i class="fas fa-envelope"></i>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Fecha de Nacimiento</label>
+                <input type="text" name="fecha_nacimiento" required class="form-input-pro" 
+                       pattern="\d{2}/\d{2}/\d{4}" title="Formato DD/MM/YYYY" placeholder="DD/MM/YYYY">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Contraseña</label>
+                <input type="password" name="password" required class="form-input-pro" placeholder="Mínimo 6 caracteres">
+                <i class="fas fa-lock"></i>
+            </div>
+            
+            <button type="submit" class="btn-auth">
+                COMENZAR AHORA <i class="fas fa-arrow-right" style="margin-left: 8px; font-size: 0.8rem;"></i>
+            </button>
+        </form>
         
-        <div style="margin-bottom: 15px;">
-            <label>Fecha de Nacimiento (DD/MM/YYYY):</label>
-            <input type="text" name="fecha_nacimiento" required class="form-control" 
-                   pattern="\d{2}/\d{2}/\d{4}" title="Debe tener el formato DD/MM/YYYY" placeholder="Ej: 15/08/1998">
+        <div style="text-align: center; margin-top: 25px; padding-top: 20px; border-top: 1px solid #f1f5f9;">
+            <p style="color: #64748b; font-size: 0.9rem;">
+                ¿Ya tenés cuenta? 
+                <a href="{{ url_for('auth.login') }}" style="color: var(--pocket-blue); font-weight: 700; text-decoration: none;">Iniciá sesión acá</a>
+            </p>
         </div>
-        
-        <div style="margin-bottom: 20px;">
-            <label>Contraseña:</label>
-            <input type="password" name="password" required class="form-control" placeholder="******">
-        </div>
-        
-        <button type="submit" class="btn btn-blue" style="width: 100%;">Registrarme</button>
-    </form>
-    
-    <div style="text-align: center; margin-top: 15px;">
-        <small>¿Ya tenés cuenta? <a href="{{ url_for('auth.login') }}">Iniciá sesión acá</a></small>
     </div>
 </div>
 {% endblock %}
