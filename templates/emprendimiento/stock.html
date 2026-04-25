@@ -112,83 +112,83 @@
     .stock-row td:last-child { border-right: 1px solid #f1f5f9; border-radius: 0 12px 12px 0; }
 
     /* Mobile First - Vista de Cards Potenciada */
-   @media (max-width: 768px) {
-    /* 1. Ajuste del Header y Botón Nuevo */
-    .stock-header {
-        flex-direction: column;
-        align-items: stretch !important;
-        gap: 15px;
-    }
+  @media (max-width: 768px) {
+    /* 1. Reset de la Tabla a Bloques */
+    .stock-table thead { display: none; }
     
-    .btn-nuevo-stock {
-        width: 100%; /* Botón a lo ancho para que sea fácil de cliquear */
-        justify-content: center;
-        margin-top: 10px;
-    }
-
-    /* 2. Formulario de Nuevo Artículo (Estilo Historial) */
-    #formStock {
-        margin-top: 20px;
-        padding: 20px !important;
-        border: none !important;
-        background: var(--pocket-blue) !important; /* Usamos el azul del historial */
-        color: white !important;
-    }
-    
-    #formStock h4 { color: white !important; margin-bottom: 15px; }
-    #formStock .form-control {
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: white;
-    }
-    #formStock .form-control::placeholder { color: rgba(255, 255, 255, 0.6); }
-
-    /* 3. Reorganización de la Card de Producto */
     .stock-row {
-        display: grid !important;
-        grid-template-areas: 
-            "cantidad estado"
-            "nombre nombre"
-            "precio precio"
-            "acciones acciones" !important;
-        grid-template-columns: 1fr 1fr;
-        padding: 20px !important;
-        gap: 12px !important;
+        display: block !important;
+        background: white;
+        margin-bottom: 20px;
+        padding: 15px !important;
+        border-radius: 16px !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     }
 
-    /* Cantidad y Badge arriba para referencia rápida */
-    .stock-row td:nth-child(4) { 
-        grid-area: cantidad; 
-        display: flex; 
-        flex-direction: row !important;
-        align-items: center;
-        gap: 10px;
+    .stock-row td {
+        display: block !important;
+        width: 100% !important;
+        padding: 5px 0 !important;
+        border: none !important;
+        text-align: left !important;
     }
-    
-    /* Nombre y Talle */
-    .stock-row td:nth-child(1) { 
-        grid-area: nombre; 
-        border-top: 1px solid #f1f5f9;
+
+    /* 2. Nombre y Talle Destacados */
+    .stock-row td:nth-child(1) {
+        border-bottom: 1px solid #f1f5f9 !important;
+        margin-bottom: 10px;
+        padding-bottom: 10px !important;
+    }
+    .stock-row td:nth-child(1) input[name="nombre"] {
+        font-size: 1.1rem !important;
+        color: var(--pocket-blue);
+    }
+
+    /* 3. Precio y Detalle en la misma línea */
+    .stock-row td:nth-child(2), 
+    .stock-row td:nth-child(3) {
+        display: inline-block !important;
+        width: 48% !important;
+        vertical-align: top;
+    }
+
+    /* 4. Sección de Stock (Cantidad y Badge) */
+    .stock-row td:nth-child(4) {
+        background: #f8fafc;
+        padding: 10px !important;
+        border-radius: 12px;
+        margin: 10px 0;
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    /* 5. Acciones al fondo */
+    .td-acciones {
+        display: flex !important;
+        justify-content: flex-end;
+        gap: 15px;
+        border-top: 1px dashed #e2e8f0 !important;
         padding-top: 12px !important;
     }
 
-    /* Precio y Detalle en una línea */
-    .stock-row td:nth-child(3), .stock-row td:nth-child(2) {
-        grid-area: precio;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: #f8fafc;
-        padding: 10px !important;
-        border-radius: 8px;
+    /* 6. Fix del Formulario "Nuevo Artículo" */
+    #formStock {
+        position: relative;
+        width: 100% !important;
+        box-sizing: border-box;
+        margin: 10px 0 25px 0 !important;
+        background: #1e40af !important; /* El azul del historial */
+        padding: 20px !important;
+        border-radius: 16px !important;
+        overflow: hidden;
     }
-
-    /* Acciones */
-    .td-acciones {
-        grid-area: acciones;
-        margin-top: 5px;
-        padding-top: 15px !important;
-        border-top: 1px solid #f1f5f9 !important;
+    
+    #formStock .form-control {
+        background: rgba(255, 255, 255, 0.9) !important;
+        color: #1e293b !important;
+        border: none !important;
     }
 }
 </style>
