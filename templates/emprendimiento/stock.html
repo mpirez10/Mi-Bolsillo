@@ -260,6 +260,15 @@
             {{ nombre }} - Gestión de artículos
         </p>
     </div>
+     <div style="display: flex; gap: 8px;">
+        <a href="/emprendimiento/resumen/{{ eid }}" class="btn-filter-action" title="Volver">
+            <i class="fas fa-chevron-left" style="color: var(--pocket-blue);"></i>
+        </a>
+        <button class="btn-nuevo-stock" onclick="document.getElementById('formStock').style.display='block'">
+        <i class="fas fa-plus-circle"></i> NUEVO ARTÍCULO
+        </button>
+    </div>
+</div>
 
     <div id="formStock" class="form-stock-container card">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
