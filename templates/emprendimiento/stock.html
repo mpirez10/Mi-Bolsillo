@@ -111,12 +111,90 @@
     .stock-row td:first-child { border-left: 1px solid #f1f5f9; border-radius: 12px 0 0 12px; }
     .stock-row td:last-child { border-right: 1px solid #f1f5f9; border-radius: 0 12px 12px 0; }
 
-    /* Mobile First */
+    /* Mobile First - Vista de Cards Potenciada */
     @media (max-width: 768px) {
         .stock-table thead { display: none; }
-        .stock-row { display: block; margin-bottom: 15px; border-radius: 15px !important; padding: 15px; border: 1px solid #e2e8f0; }
-        .stock-row td { display: block; width: 100% !important; padding: 8px 0 !important; border: none !important; text-align: left !important; }
-        .td-acciones { border-top: 1px solid #f1f5f9 !important; padding-top: 15px !important; margin-top: 10px; display: flex; justify-content: space-between; }
+
+        .stock-row {
+            display: grid;
+            grid-template-areas: 
+                "info info"
+                "detalle detalle"
+                "precio cant"
+                "acciones acciones";
+            grid-template-columns: 1fr 1fr;
+            background: white;
+            margin-bottom: 16px;
+            padding: 16px;
+            border-radius: 16px !important;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            gap: 8px;
+        }
+
+        .stock-row td {
+            display: block;
+            width: 100% !important;
+            padding: 0 !important;
+            border: none !important;
+        }
+
+        /* Área de Información Principal (Nombre y Talle) */
+        .stock-row td:nth-child(1) {
+            grid-area: info;
+            border-bottom: 1px solid #f1f5f9 !important;
+            padding-bottom: 8px !important;
+        }
+
+        /* Detalle */
+        .stock-row td:nth-child(2) {
+            grid-area: detalle;
+            font-size: 0.85rem;
+        }
+
+        /* Precio con etiqueta */
+        .stock-row td:nth-child(3) {
+            grid-area: precio;
+            display: flex;
+            align-items: center;
+        }
+        .stock-row td:nth-child(3)::before {
+            content: "PRECIO:";
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: #94a3b8;
+            margin-right: 5px;
+        }
+
+        /* Cantidad y Badge */
+        .stock-row td:nth-child(4) {
+            grid-area: cant;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        /* Acciones al pie de la Card */
+        .td-acciones {
+            grid-area: acciones;
+            display: flex !important;
+            justify-content: flex-end !important;
+            gap: 12px;
+            margin-top: 10px;
+            padding-top: 12px !important;
+            border-top: 1px dashed #e2e8f0 !important;
+        }
+
+        /* Ajuste de los inputs en mobile para que no queden gigantes */
+        .form-control-minimal {
+            font-size: 1rem !important;
+        }
+        
+        .stock-row input[type="number"] {
+            max-width: 70px;
+            height: 35px;
+        }
     }
 </style>
 
