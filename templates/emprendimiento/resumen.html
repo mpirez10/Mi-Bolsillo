@@ -317,6 +317,132 @@
         .td-monto { font-size: 1.2rem; margin-top: 5px; }
         .td-accion { border-top: 1px solid #f1f5f9 !important; margin-top: 10px; padding-top: 10px !important; text-align: right; }
     }
+@media print {
+    /* Configuración Base */
+    @page { size: A4 portrait; margin: 1cm 1.5cm; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+    body { background: white !important; }
+    body > *:not(#reporte-formal-pdf) { display: none !important; }
+    
+    #reporte-formal-pdf { 
+        display: block !important; 
+        width: 100%; 
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+    }
+
+    /* Encabezado Estilo Factura */
+    .pdf-header { 
+        display: flex; 
+        justify-content: space-between; 
+        border-bottom: 2px solid var(--pocket-blue); 
+        padding-bottom: 10px; 
+        margin-bottom: 30px; 
+    }
+    
+    .pdf-header h1 { font-size: 24px; color: var(--pocket-blue); margin: 0; }
+    .pdf-header .fecha-reporte { font-size: 10px; color: var(--text-muted); text-align: right; }
+
+    /* Cards de Balance en PDF */
+    .pdf-balances { 
+        display: flex;
+        gap: 15px;
+        margin-bottom: 40px;
+    }
+    
+    .pdf-card { 
+        flex: 1;
+        border: 1px solid #e2e8f0; 
+        padding: 12px; 
+        border-radius: 8px;
+        background-color: #f8fafc !important; 
+    }
+
+    /* Tabla de Movimientos Profesional */
+    .pdf-table { width: 100%; border-collapse: collapse; }
+    .pdf-table th { 
+        background: var(--pocket-blue) !important; 
+        color: white !important; 
+        padding: 10px; 
+        font-size: 9pt;
+        text-align: left;
+    }
+    .pdf-table td { 
+        padding: 8px 10px; 
+        border-bottom: 0.5px solid #e2e8f0; 
+        font-size: 9pt; 
+    }
+
+    /* Pie de página (Solo impresión) */
+    .pdf-footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        font-size: 8pt;
+        color: #94a3b8;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 5px;
+        text-align: center;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Transformamos la tabla en una lista de Cards modernas */
+    .movimientos-table thead { display: none; } /* Ocultamos cabezal en mobile */
+
+    .movimientos-table tbody { display: block; width: 100%; }
+
+    .movimientos-table tr {
+        display: grid;
+        grid-template-areas: 
+            "fecha tipo"
+            "detalle detalle"
+            "monto acciones";
+        grid-template-columns: 1fr auto;
+        background: white;
+        margin-bottom: 12px;
+        padding: 15px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    }
+
+    .movimientos-table td { 
+        display: block; 
+        padding: 4px 0 !important; 
+        border: none !important; 
+    }
+
+    /* Área de Fecha y Tipo */
+    .movimientos-table td:nth-child(1) { grid-area: fecha; font-size: 0.75rem; color: var(--text-muted); }
+    .movimientos-table td:nth-child(2) { grid-area: tipo; display: flex; justify-content: flex-end; }
+
+    /* Área de Detalle (Ocupa todo el ancho central) */
+    .movimientos-table td:nth-child(3) { 
+        grid-area: detalle; 
+        font-weight: 700; 
+        font-size: 1rem; 
+        padding: 8px 0 !important;
+        border-bottom: 1px solid #f1f5f9 !important;
+        margin-bottom: 8px;
+    }
+
+    /* Monto resaltado a la izquierda abajo */
+    .movimientos-table td:nth-child(4) { 
+        grid-area: monto; 
+        font-size: 1.2rem !important; 
+        font-weight: 800;
+        text-align: left !important;
+    }
+
+    /* Acciones a la derecha abajo */
+    .movimientos-table td:nth-child(5) { 
+        grid-area: acciones; 
+        display: flex; 
+        justify-content: flex-end; 
+        align-items: center; 
+    }
+}
 </style>
 
 <div class="header-section">
@@ -497,154 +623,6 @@
 </div>
 
 </div>
-
-<style>
-@media print {
-    /* Configuración de Hoja A4 */
-    @page { size: A4 portrait; margin: 1.5cm; }
-    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-
-    /* Ocultamos toda la interfaz de la app para que no ensucie */
-    body > *:not(#reporte-formal-pdf) { display: none !important; }
-    
-    /* Contenedor del Reporte */
-    #reporte-formal-pdf { 
-        display: block !important; 
-        width: 100%; 
-        font-family: 'Segoe UI', Helvetica, Arial, sans-serif; 
-        color: #1e293b;
-    }
-
-    /* Encabezado Nivel Ingeniería */
-    .pdf-header { 
-        display: flex; 
-        justify-content: space-between; 
-        border-bottom: 3px solid #0f172a; 
-        padding-bottom: 15px; 
-        margin-bottom: 25px; 
-        align-items: flex-end; 
-    }
-    .pdf-header .logo-box h1 { margin: 0; font-size: 28px; color: #0f172a; font-weight: 800; }
-    .pdf-header h2 { margin: 0; font-size: 14pt; color: #1e293b; text-transform: uppercase; letter-spacing: 1px; }
-
-    /* Fila de Balances: Saldo, Ventas, Gastos */
-    .pdf-balances { 
-        display: grid; 
-        grid-template-columns: repeat(3, 1fr); 
-        gap: 20px; 
-        margin-bottom: 30px; 
-    }
-    .pdf-card { 
-        border: 1px solid #e2e8f0; 
-        padding: 15px; 
-        text-align: center; 
-        border-radius: 10px; 
-        background-color: #f8fafc !important; 
-    }
-    .pdf-card span { display: block; font-size: 9pt; font-weight: 700; color: #64748b; margin-bottom: 5px; text-transform: uppercase; }
-    .pdf-card strong { font-size: 15pt; color: #0f172a; }
-
-    /* Sección Movimientos y Total Filtrado */
-    .pdf-section-title { 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        border-bottom: 1px solid #eee; 
-        padding-bottom: 8px; 
-        margin-bottom: 15px; 
-    }
-    .pdf-section-title h3 { margin: 0; font-size: 12pt; color: #0f172a; font-weight: 700; }
-    .total-badge-pdf { 
-        background: #0f172a !important; 
-        color: white !important; 
-        padding: 5px 15px; 
-        border-radius: 5px; 
-        font-weight: bold; 
-        font-size: 10pt; 
-    }
-
-    /* Tabla Pro: Fecha | Tipo | Detalle | Monto */
-    .pdf-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-    .pdf-table th { 
-        background: #f1f5f9 !important; 
-        color: #0f172a !important; 
-        text-align: left; 
-        padding: 12px 10px; 
-        font-size: 9pt; 
-        border-bottom: 2px solid #0f172a; 
-        text-transform: uppercase; 
-    }
-    .pdf-table td { padding: 10px; border-bottom: 1px solid #e2e8f0; font-size: 9.5pt; }
-
-    /* Anchos de columna */
-    .pdf-table th:nth-child(1), .pdf-table td:nth-child(1) { width: 15%; } /* Fecha */
-    .pdf-table th:nth-child(2), .pdf-table td:nth-child(2) { width: 15%; } /* Tipo */
-    .pdf-table th:nth-child(3), .pdf-table td:nth-child(3) { width: 50%; } /* Detalle */
-    .pdf-table th:nth-child(4), .pdf-table td:nth-child(4) { width: 20%; text-align: right !important; font-weight: bold; }
-
-    .ingreso-text { color: #10b981 !important; }
-    .egreso-text { color: #ef4444 !important; }
-}
-@media (max-width: 768px) {
-    /* 1. La Card: Ajustamos el padding lateral a 24px para alinear con el cabezal */
-    .movimientos-table tr {
-        background: #ffffff;
-        margin-bottom: 16px;
-        border-radius: 16px;
-        border: 1px solid #e2e8f0;
-        padding: 16px 24px; /* 24px a los lados igual que el cabezal */
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        display: grid;
-        grid-template-areas: 
-            "fecha fecha"
-            "tipo tipo"
-            "detalle monto"
-            "acciones acciones";
-        grid-template-columns: 1fr auto;
-        gap: 10px;
-    }
-
-    /* 2. Quitamos paddings de los TD para que no sumen espacio extra */
-    .movimientos-table td {
-        padding: 0 !important;
-        border: none !important;
-    }
-
-    /* 3. El Monto: Forzamos que se pegue bien a la derecha */
-    .movimientos-table td[data-label="Monto"] {
-        grid-area: monto;
-        display: flex;
-        justify-content: flex-end; /* Lo empuja contra el borde derecho */
-        align-items: center;
-        text-align: right;
-    }
-
-    /* 4. Estilo de los textos para que no se pisen */
-    .movimientos-table td[data-label="Monto"]::before {
-        content: "MONTO: ";
-        font-size: 0.65rem;
-        color: #94a3b8;
-        font-weight: 800;
-        margin-right: 6px;
-    }
-
-    .movimientos-table td[data-label="Monto"] span {
-        font-weight: 800;
-        font-size: 1.1rem;
-        color: inherit; /* Mantiene el verde o rojo que ya tenías */
-    }
-
-    /* 5. Acciones: El tacho de basura también alineado a la derecha */
-    .movimientos-table td[data-label="Acciones"] {
-        grid-area: acciones;
-        display: flex;
-        justify-content: flex-end;
-        padding-top: 10px !important;
-        margin-top: 5px;
-        border-top: 1px solid #f1f5f9 !important;
-    }
-}
-</style>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
