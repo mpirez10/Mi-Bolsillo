@@ -773,14 +773,15 @@ function limpiarFiltros() {
     }
 }
 function exportarAPDF() {
-    // 1. Scrapping de balances (Saldo, Ventas, Gastos) por posición
-    const cards = document.querySelectorAll('.stat-mini-card div[style*="font-size"]');
-    const saldo = cards[0]?.innerText || '$ 0.00';
-    const ventas = cards[1]?.innerText || '$ 0.00';
-    const gastos = cards[2]?.innerText || '$ 0.00';
+    // 1. Capturamos los balances usando las clases que definimos antes
+    // Buscamos el texto dentro de .stat-value de cada card
+    const values = document.querySelectorAll('.stat-mini-card .stat-value');
+    const saldo = values[0]?.innerText || '$ 0.00';
+    const ventas = values[1]?.innerText || '$ 0.00';
+    const gastos = values[2]?.innerText || '$ 0.00';
     const totalFiltrado = document.getElementById('sumaTotalFiltrada')?.innerText || '$ 0.00';
     
-    // 2. Procesar filas de la tabla (solo las visibles y solo 4 columnas)
+    // 2. Procesar filas de la tabla (solo las visibles)
     let filasHtml = '';
     document.querySelectorAll(".movimientos-table tbody tr").forEach(fila => {
         if (fila.style.display !== "none") {
@@ -790,14 +791,16 @@ function exportarAPDF() {
                 const tipo = celdas[1].innerText.trim();
                 const detalle = celdas[2].innerText.trim();
                 const monto = celdas[3].innerText.trim();
+                
+                // Detectamos si es ingreso por el texto o por la clase del badge
                 const esIngreso = tipo.toUpperCase().includes("INGRESO");
 
                 filasHtml += `
                     <tr>
                         <td>${fecha}</td>
-                        <td>${tipo}</td>
+                        <td class="${esIngreso ? 'ingreso-text' : 'egreso-text'}">${tipo}</td>
                         <td>${detalle}</td>
-                        <td class="${esIngreso ? 'ingreso-text' : 'egreso-text'}">${monto}</td>
+                        <td style="text-align: right;" class="${esIngreso ? 'ingreso-text' : 'egreso-text'}">${monto}</td>
                     </tr>
                 `;
             }
@@ -807,33 +810,32 @@ function exportarAPDF() {
     const hoy = new Date();
     const fechaEmision = hoy.toLocaleString('es-UY');
 
-    // 3. Crear el contenedor temporal del reporte
+    // 3. Crear el contenedor temporal
     const reporte = document.createElement('div');
     reporte.id = 'reporte-formal-pdf';
-    reporte.style.display = 'none'; // Solo el @media print lo mostrará
     
+    // El HTML que definimos para el PDF va acá adentro
     reporte.innerHTML = `
         <div class="pdf-header">
             <div class="logo-box">
-                <img src="/static/img/loguito.png" alt="Logo" style="height: 50px; display: block; margin-bottom: 5px;">
                 <h1>MI BOLSILLO</h1>
-                <p style="margin:0; font-size: 11px; color: #64748b; font-weight: 600;">Software de Gestión de Finanzas y negocios</p>
+                <p style="margin:0; font-size: 11px; color: #64748b; font-weight: 600;">Software de Gestión de Finanzas</p>
             </div>
-            <div class="info-box">
-                <h2>RESUMEN FORMAL DE CUENTAS</h2>
+            <div class="info-box" style="text-align: right;">
+                <h2 style="margin:0; font-size: 16px;">RESUMEN DE CUENTAS</h2>
                 <p style="margin:5px 0 0 0; font-size: 10px; color: #64748b;">Emitido: ${fechaEmision}</p>
-                <p style="margin:0; font-size: 9px; color: #94a3b8;">Estado: Documento Digital Oficial</p>
+                <p style="margin:0; font-size: 9px; color: #94a3b8;">Negocio: {{ nombre }}</p>
             </div>
         </div>
 
         <div class="pdf-balances">
-            <div class="pdf-card"><span>SALDO</span><strong>${saldo}</strong></div>
-            <div class="pdf-card"><span>VENTAS</span><strong>${ventas}</strong></div>
-            <div class="pdf-card"><span>GASTOS</span><strong>${gastos}</strong></div>
+            <div class="pdf-card"><span>SALDO ACTUAL</span><strong>${saldo}</strong></div>
+            <div class="pdf-card"><span>TOTAL VENTAS</span><strong class="ingreso-text">${ventas}</strong></div>
+            <div class="pdf-card"><span>TOTAL GASTOS</span><strong class="egreso-text">${gastos}</strong></div>
         </div>
 
-        <div class="pdf-section-title">
-            <h3>MOVIMIENTOS DETALLADOS</h3>
+        <div class="pdf-section-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-size: 14px;">MOVIMIENTOS DETALLADOS</h3>
             <div class="total-badge-pdf">TOTAL FILTRADO: ${totalFiltrado}</div>
         </div>
 
@@ -850,15 +852,16 @@ function exportarAPDF() {
                 ${filasHtml}
             </tbody>
         </table>
-        <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 10px; text-align: center; font-size: 8pt; color: #94a3b8;">
-            Este reporte fue generado automáticamente por el sistema Mi Bolsillo.
+        
+        <div style="margin-top: 40px; border-top: 1px solid #eee; padding-top: 10px; text-align: center; font-size: 8pt; color: #94a3b8;">
+            Documento generado por Mi Bolsillo - Gestión Profesional.
         </div>
     `;
 
     // 4. Inyectar, imprimir y remover
     document.body.appendChild(reporte);
     window.print();
-    reporte.remove();
+    document.body.removeChild(reporte); // Usamos removeChild para asegurar compatibilidad
 }
 function exportarAExcel() {
     const datosParaExcel = [];
