@@ -1,34 +1,55 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="card" style="max-width: 400px; margin: 50px auto;">
-    <h2 style="text-align: center;"><i class="fas fa-sign-in-alt"></i> Entrar al Sistema</h2>
-    
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        {% for message in messages %}
-          <div style="background: #fee2e2; color: #991b1b; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center;">
-            {{ message }}
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
 
-    <form method="POST">
-        <div style="margin-bottom: 15px;">
-            <label>Correo Electrónico:</label>
-            <input type="email" name="correo" required class="form-control" placeholder="tu@correo.com">
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-logo">
+                <i class="fas fa-sign-in-alt"></i>
+            </div>
+            <h2 class="auth-title">Bienvenido</h2>
+            <p style="color: #64748b; font-size: 0.9rem; margin-top: 5px;">Ingresá a tu cuenta de Mi Bolsillo</p>
         </div>
         
-        <div style="margin-bottom: 20px;">
-            <label>Contraseña:</label>
-            <input type="password" name="password" required class="form-control" placeholder="******">
-        </div>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert-pro">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <div class="form-group">
+                <label class="form-label">Correo Electrónico</label>
+                <input type="email" name="correo" required class="form-input-pro" placeholder="tu@correo.com">
+                <i class="fas fa-envelope"></i>
+            </div>
+            
+            <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label class="form-label">Contraseña</label>
+                    <a href="#" style="font-size: 0.7rem; color: var(--pocket-blue); font-weight: 700; text-decoration: none; margin-bottom: 8px;">¿La olvidaste?</a>
+                </div>
+                <input type="password" name="password" required class="form-input-pro" placeholder="******">
+                <i class="fas fa-lock"></i>
+            </div>
+            
+            <button type="submit" class="btn-auth" style="background: #10b981; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
+                INGRESAR <i class="fas fa-rocket" style="margin-left: 8px; font-size: 0.8rem;"></i>
+            </button>
+        </form>
         
-        <button type="submit" class="btn btn-blue" style="width: 100%; background: #10b981;">Ingresar</button>
-    </form>
-    
-    <div style="text-align: center; margin-top: 15px;">
-        <small>¿No tenés cuenta todavía? <a href="{{ url_for('auth.registro') }}">Registrate acá</a></small>
+        <div style="text-align: center; margin-top: 25px; padding-top: 20px; border-top: 1px solid #f1f5f9;">
+            <p style="color: #64748b; font-size: 0.9rem;">
+                ¿No tenés cuenta todavía? 
+                <a href="{{ url_for('auth.registro') }}" style="color: var(--pocket-blue); font-weight: 700; text-decoration: none;">Registrate acá</a>
+            </p>
+        </div>
     </div>
 </div>
+
 {% endblock %}
