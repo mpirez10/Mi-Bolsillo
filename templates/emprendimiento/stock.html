@@ -1,182 +1,174 @@
 {% extends "base.html" %}
 {% block content %}
-
 <style>
-    /* Estilos para Mobile First */
-    .stock-header {
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        margin-bottom: 20px; 
-        flex-wrap: wrap; 
-        gap: 10px;
+    :root {
+        --danger-light: #fef2f2;
+        --warning-light: #fffbeb;
+        --success-light: #f0fdf4;
     }
 
+    /* Contenedor de Stock */
+    .stock-container { margin-top: 10px; }
+
+    /* Inputs Minimalistas */
     .form-control-minimal {
         border: none;
-        border-bottom: 1px solid #e2e8f0;
-        width: 100%;
-        padding: 4px 0;
+        border-bottom: 2px solid #e2e8f0;
         background: transparent;
-        outline: none;
+        padding: 5px 0;
+        font-family: 'Poppins', sans-serif;
         transition: 0.3s;
+        width: 100%;
     }
-
     .form-control-minimal:focus {
-        border-bottom: 2px solid var(--primary);
+        outline: none;
+        border-bottom-color: var(--pocket-blue);
     }
 
-    /* Ajustes de Tabla para Celular */
-    @media (max-width: 768px) {
-        .stock-table thead { display: none; }
-        .stock-table tbody tr {
-            display: block;
-            background: white;
-            margin-bottom: 15px;
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            border: 1px solid #e2e8f0;
-        }
-        .stock-table td {
-            display: block;
-            width: 100% !important;
-            padding: 8px 0 !important;
-            text-align: left !important;
-            border: none !important;
-        }
-        .td-acciones {
-            border-top: 1px solid #f1f5f9 !important;
-            margin-top: 10px;
-            padding-top: 15px !important;
-            display: flex;
-            justify-content: space-between;
-        }
-    }
-
+    /* Badges de Stock Estilo Mi Bolsillo */
     .badge-stock {
         font-size: 0.7rem;
         font-weight: 800;
-        padding: 3px 8px;
-        border-radius: 20px;
+        padding: 4px 10px;
+        border-radius: 6px;
         text-transform: uppercase;
+    }
+    .badge-agotado { background: var(--danger-light); color: #ef4444; }
+    .badge-bajo { background: var(--warning-light); color: #d97706; }
+    .badge-ok { background: var(--success-light); color: #16a34a; }
+
+    /* Tabla de Stock */
+    .stock-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+    .stock-table thead th {
+        padding: 12px;
+        color: var(--pocket-blue);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .stock-row {
+        background: white;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        transition: 0.2s;
+    }
+    .stock-row:hover { transform: scale(1.005); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .stock-row td { padding: 15px 10px; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; }
+    .stock-row td:first-child { border-left: 1px solid #f1f5f9; border-radius: 12px 0 0 12px; }
+    .stock-row td:last-child { border-right: 1px solid #f1f5f9; border-radius: 0 12px 12px 0; }
+
+    /* Mobile First */
+    @media (max-width: 768px) {
+        .stock-table thead { display: none; }
+        .stock-row { display: block; margin-bottom: 15px; border-radius: 15px !important; padding: 15px; border: 1px solid #e2e8f0; }
+        .stock-row td { display: block; width: 100% !important; padding: 8px 0 !important; border: none !important; text-align: left !important; }
+        .td-acciones { border-top: 1px solid #f1f5f9 !important; padding-top: 15px !important; margin-top: 10px; display: flex; justify-content: space-between; }
     }
 </style>
 
-<div class="stock-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;">
+<div class="stock-header">
     <div>
-        <h2 style="margin: 0; font-size: 1.6rem; color: var(--pocket-blue); font-weight: 800; font-family: 'Poppins', sans-serif; text-transform: uppercase;">
-            <i class="fas fa-boxes" style="color: #d2b48c; margin-right: 10px;"></i> 
-            STOCK
+        <h2 style="margin: 0; font-size: 1.6rem; color: var(--pocket-blue); font-weight: 800; text-transform: uppercase;">
+            <i class="fas fa-boxes" style="color: #d2b48c; margin-right: 10px;"></i> STOCK
         </h2>
-        <p style="color: var(--money-green); font-size: 0.95rem; font-weight: 600; margin-top: 5px; font-family: 'Poppins', sans-serif; margin-bottom: 0;">
+        <p style="color: var(--money-green); font-size: 0.95rem; font-weight: 600; margin-top: 5px;">
             {{ nombre }} - Gestión de artículos
         </p>
     </div>
 
-    <div style="display: flex; gap: 8px; align-items: center;">
-        <a href="/emprendimiento/resumen/{{ eid }}" class="btn btn-outline" style="padding: 10px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px;">
-            <i class="fas fa-chevron-left"></i>
+    <div style="display: flex; gap: 8px;">
+        <a href="/emprendimiento/resumen/{{ eid }}" class="btn-filter-action" title="Volver">
+            <i class="fas fa-chevron-left" style="color: var(--pocket-blue);"></i>
         </a>
-        <button class="btn btn-blue" onclick="document.getElementById('formStock').style.display='block'" style="font-weight: 700; font-family: 'Poppins', sans-serif; height: 42px; padding: 0 20px;">
+        <button class="btn btn-blue" onclick="document.getElementById('formStock').style.display='block'" style="font-weight: 700; height: 42px;">
             <i class="fas fa-plus"></i> NUEVO
         </button>
     </div>
 </div>
 
-<div id="formStock" class="card" style="display:none; background: #f0f7ff; border: 1px solid var(--primary); margin-bottom: 20px;">
+<div id="formStock" class="card" style="display:none; background: #f0f7ff; border: 2px solid var(--pocket-blue); margin-bottom: 25px; border-radius: 15px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <h4 style="margin:0;">Nuevo Artículo</h4>
-        <button type="button" onclick="document.getElementById('formStock').style.display='none'" style="background:none; border:none; color:#64748b;">
+        <h4 style="margin:0; color: var(--pocket-blue);">Nuevo Artículo</h4>
+        <button type="button" onclick="document.getElementById('formStock').style.display='none'" style="background:none; border:none; color:#64748b; font-size: 1.2rem;">
             <i class="fas fa-times"></i>
         </button>
     </div>
-    <form method="post" style="display: grid; gap: 12px;">
+    <form method="post" style="display: grid; gap: 15px;">
         <input type="text" name="nombre_prod" placeholder="Nombre (Ej: Camiseta Peñarol)" required class="form-control">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <input type="text" name="talle_prod" placeholder="Talle (L, XL, M)" class="form-control">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <input type="text" name="talle_prod" placeholder="Talle" class="form-control">
             <input type="text" name="detalle_prod" placeholder="Color/Detalle" class="form-control">
         </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
             <input type="number" step="0.01" name="precio_prod" placeholder="Precio $" class="form-control">
-            <input type="number" name="stock_prod" placeholder="Cant. Inicial" required class="form-control">
+            <input type="number" name="stock_prod" placeholder="Stock Inicial" required class="form-control">
         </div>
-        <button type="submit" class="btn btn-blue" style="width: 100%; margin-top: 5px;">GUARDAR PRODUCTO</button>
+        <button type="submit" class="btn btn-blue" style="width: 100%;">GUARDAR PRODUCTO EN STOCK</button>
     </form>
 </div>
 
-<div style="margin-bottom: 15px; position: relative;">
-    <i class="fas fa-search" style="position: absolute; left: 15px; top: 12px; color: #94a3b8;"></i>
+<div style="margin-bottom: 20px; position: relative;">
+    <i class="fas fa-search" style="position: absolute; left: 15px; top: 14px; color: #94a3b8;"></i>
     <input type="text" id="busquedaStock" onkeyup="filtrarStock()" 
-           placeholder="Buscar producto, talle..." 
-           style="width: 100%; padding: 10px 10px 10px 40px; border-radius: 12px; border: 1px solid  var(--pocket-blue); outline: none;">
+           placeholder="Buscar por nombre, talle o detalle..." 
+           style="width: 100%; padding: 12px 12px 12px 45px; border-radius: 12px; border: 1px solid var(--pocket-blue); outline: none; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
 </div>
 
-<div class="card" style="padding: 0; border: none; background: transparent;">
-    <table class="stock-table" style="width: 100%; border-collapse: collapse;">
-        <thead style="background: white; border-bottom: 2px solid var(--pocket-blue);">
-    <tr style="text-transform: uppercase; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 0.8rem; color: var(--pocket-blue);">
-        <th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--pocket-blue);">PRODUCTO</th>
-        <th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--pocket-blue);">DETALLE</th>
-        <th style="padding: 12px; text-align: center; border-bottom: 1px solid var(--pocket-blue);">PRECIO</th>
-        <th style="padding: 12px; text-align: center; border-bottom: 1px solid var(--pocket-blue);">CANT.</th>
-        <th style="padding: 12px; text-align: center; border-bottom: 1px solid var(--pocket-blue);"></th>
-    </tr>
-</thead>
+<div class="stock-container">
+    <table class="stock-table">
+        <thead>
+            <tr>
+                <th style="width: 30%;">Producto</th>
+                <th style="width: 25%;">Detalle</th>
+                <th style="width: 15%; text-align: center;">Precio</th>
+                <th style="width: 15%; text-align: center;">Cant.</th>
+                <th style="width: 15%; text-align: center;"></th>
+            </tr>
+        </thead>
         <tbody>
             {% for p in productos %}
-<tr>
-    <td colspan="5" style="padding: 0;">
-        <form method="POST" action="{{ url_for('emprendimiento.editar_producto', pid=p.id, eid=eid) }}" style="display: contents;">
-            <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
-                <tr>
-                    <td style="padding: 12px; width: 25%;">
-                        <input name="nombre" value="{{ p.nombre }}" class="form-control-minimal" style="font-weight: 700; width: 100%;">
-                        <input name="talle" value="{{ p.talle }}" placeholder="Talle" class="form-control-minimal" style="font-size: 0.8rem; color: #64748b; width: 100%;">
+            <tr class="stock-row">
+                <form method="POST" action="{{ url_for('emprendimiento.editar_producto', pid=p.id, eid=eid) }}">
+                    <td>
+                        <input name="nombre" value="{{ p.nombre }}" class="form-control-minimal" style="font-weight: 800; color: var(--pocket-blue);">
+                        <input name="talle" value="{{ p.talle }}" placeholder="Talle" class="form-control-minimal" style="font-size: 0.8rem; color: #64748b;">
                     </td>
-                    <td style="padding: 12px; width: 25%;">
-                        <input name="detalle" value="{{ p.detalle }}" placeholder="Detalle" class="form-control-minimal" style="width: 100%;">
+                    <td>
+                        <input name="detalle" value="{{ p.detalle }}" placeholder="Sin detalle" class="form-control-minimal">
                     </td>
-                    <td style="padding: 12px; text-align: center; width: 15%;">
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 3px;">
-                            <span style="font-size: 0.8rem; color: #64748b;">$</span>
-                            <input name="precio" type="number" step="0.01" value="{{ p.precio }}" style="width: 70px; border: 1px solid #e2e8f0; border-radius: 6px; padding: 2px 4px;">
+                    <td style="text-align: center;">
+                        <div style="display: flex; align-items: center; justify-content: center; color: #64748b;">
+                            <span style="font-size: 0.9rem; margin-right: 2px;">$</span>
+                            <input name="precio" type="number" step="0.01" value="{{ p.precio }}" style="width: 80px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 5px; text-align: center;">
                         </div>
                     </td>
-                    <td style="padding: 12px; text-align: center; width: 15%;">
-                        <input name="stock" type="number" value="{{ p.stock }}" style="width: 50px; text-align: center; border: 1px solid #e2e8f0; border-radius: 6px; padding: 2px 4px; font-weight: 700;">
-                        <div style="margin-top: 5px;">
+                    <td style="text-align: center;">
+                        <input name="stock" type="number" value="{{ p.stock }}" style="width: 60px; text-align: center; border: 1px solid #e2e8f0; border-radius: 8px; padding: 5px; font-weight: 800;">
+                        <div style="margin-top: 8px;">
                             {% if p.stock == 0 %}
-                                <span class="badge-stock" style="color: #ef4444; background: #fef2f2; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">Agotado</span>
+                                <span class="badge-stock badge-agotado">Agotado</span>
                             {% elif p.stock <= 2 %}
-                                <span class="badge-stock" style="color: #d97706; background: #fffbeb; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">Bajo</span>
+                                <span class="badge-stock badge-bajo">Bajo</span>
                             {% else %}
-                                <span class="badge-stock" style="color: #16a34a; background: #f0fdf4; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">OK</span>
+                                <span class="badge-stock badge-ok">OK</span>
                             {% endif %}
                         </div>
                     </td>
-                    <td class="td-acciones" style="padding: 12px; text-align: center; width: 20%;">
-                        <div style="display: flex; gap: 10px; justify-content: center;">
-                            <button type="submit" style="background: #2563eb; color: white; border: none; width: 38px; height: 38px; border-radius: 10px; cursor: pointer;">
-                                <i class="fas fa-save"></i>
-                            </button>
-                            <a href="{{ url_for('emprendimiento.eliminar_producto', pid=p.id, eid=eid) }}" 
-                               style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px; background: #fff1f2; color: #e11d48; text-decoration: none;"
-                               onclick="return confirm('¿Borrar {{ p.nombre }}?')">
-                                <i class="fas fa-trash"></i>
-                            </a>
-                        </div>
+                    <td class="td-acciones">
+                        <button type="submit" class="btn-filter-action" style="background: var(--pocket-blue); border: none;" title="Guardar">
+                            <i class="fas fa-save" style="color: white;"></i>
+                        </button>
+                        <a href="{{ url_for('emprendimiento.eliminar_producto', pid=p.id, eid=eid) }}" 
+                           class="btn-filter-action" style="background: #fff1f2; border: none;" 
+                           onclick="return confirm('¿Borrar {{ p.nombre }}?')">
+                            <i class="fas fa-trash" style="color: #e11d48;"></i>
+                        </a>
                     </td>
-                </tr>
-            </table>
-        </form>
-    </td>
-</tr>
-{% endfor %}
+                </form>
+            </tr>
+            {% endfor %}
         </tbody>
     </table>
 </div>
-
 <script>
 function filtrarStock() {
     let input = document.getElementById("busquedaStock");
