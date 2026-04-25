@@ -157,7 +157,7 @@ input[type="date"]:invalid::-webkit-datetime-edit {
                 <i class="fas fa-wallet"></i>
             </div>
             <h2 class="auth-title">Crear Cuenta</h2>
-            <p style="color: #64748b; font-size: 0.9rem; margin-top: 5px;">Unite a Mi Bolsillo hoy mismo</p>
+            <p style="color: #64748b; font-size: 0.9rem; margin-top: 5px;">Únete a Mi Bolsillo</p>
         </div>
         
         {% with messages = get_flashed_messages() %}
@@ -191,11 +191,20 @@ input[type="date"]:invalid::-webkit-datetime-edit {
             </div>
             
             <div class="form-group">
-                <label class="form-label">Contraseña</label>
-                <input type="password" name="password" required class="form-input-pro" placeholder="Mínimo 6 caracteres">
-                <i class="fas fa-lock"></i>
-            </div>
-            
+    <label class="form-label">Contraseña</label>
+    <input type="password" id="password" name="password" required class="form-input-pro" placeholder="Mínimo 6 caracteres">
+    <i class="fas fa-lock"></i>
+</div>
+
+<div class="form-group">
+    <label class="form-label">Repetir Contraseña</label>
+    <input type="password" id="confirm_password" name="confirm_password" required class="form-input-pro" placeholder="Repetí tu contraseña">
+    <i class="fas fa-check-double"></i>
+    
+    <div id="password-message" style="font-size: 0.8rem; font-weight: 700; margin-top: 8px; transition: 0.3s; display: none;">
+        </div>
+</div>
+            <form method="POST" onsubmit="return document.getElementById('password').value === document.getElementById('confirm_password').value;">
             <button type="submit" class="btn-auth">
                 COMENZAR AHORA <i class="fas fa-arrow-right" style="margin-left: 8px; font-size: 0.8rem;"></i>
             </button>
@@ -209,4 +218,33 @@ input[type="date"]:invalid::-webkit-datetime-edit {
         </div>
     </div>
 </div>
+<script>
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirm_password');
+    const message = document.getElementById('password-message');
+
+    function validatePasswords() {
+        // Solo mostramos el mensaje si el segundo campo tiene algo escrito
+        if (confirmPassword.value.length > 0) {
+            message.style.display = 'block';
+            
+            if (password.value === confirmPassword.value) {
+                message.innerHTML = '<i class="fas fa-check-circle"></i> Las contraseñas coinciden';
+                message.style.color = '#16a34a'; // Verde pro
+                confirmPassword.style.borderColor = '#16a34a';
+            } else {
+                message.innerHTML = '<i class="fas fa-times-circle"></i> Las contraseñas no coinciden';
+                message.style.color = '#dc2626'; // Rojo pro
+                confirmPassword.style.borderColor = '#dc2626';
+            }
+        } else {
+            message.style.display = 'none';
+            confirmPassword.style.borderColor = '#e2e8f0';
+        }
+    }
+
+    // Escuchamos los cambios en ambos campos
+    password.addEventListener('input', validatePasswords);
+    confirmPassword.addEventListener('input', validatePasswords);
+</script>
 {% endblock %}
